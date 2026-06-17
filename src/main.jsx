@@ -2,10 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   AlertTriangle,
+  CalendarClock,
+  Columns3,
   Database,
+  FileCode2,
+  GitBranch,
   Lock,
   Search,
   ShieldAlert,
+  TableProperties,
 } from 'lucide-react';
 import { appConfig } from './config.js';
 import { buildSchemaProduct, compareVersions, validateSchemaSnapshot } from './data/schemaDictionary.js';
@@ -98,6 +103,75 @@ function comparisonToCsv(comparison) {
     );
   });
   return `${rows.map((row) => row.map(csvEscape).join(',')).join('\n')}\n`;
+}
+
+function formatSnapshotDate(value) {
+  if (!value) {
+    return 'Unknown';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+}
+
+function getSnapshotStats(version) {
+  return [
+    {
+      label: 'Exported',
+      value: formatSnapshotDate(version.exportedAtUtc),
+      icon: <CalendarClock size={17} />,
+    },
+    {
+      label: 'Tables',
+      value: version.tables.length.toLocaleString(),
+      icon: <TableProperties size={17} />,
+    },
+    {
+      label: 'Columns',
+      value: version.tables.reduce((total, table) => total + table.columns.length, 0).toLocaleString(),
+      icon: <Columns3 size={17} />,
+    },
+    {
+      label: 'Foreign keys',
+      value: (version.source?.foreignKeys?.length ?? 0).toLocaleString(),
+      icon: <GitBranch size={17} />,
+    },
+    {
+      label: 'Routines',
+      value: (version.source?.routines?.length ?? 0).toLocaleString(),
+      icon: <FileCode2 size={17} />,
+    },
+  ];
+}
+
+function SnapshotFreshnessPanel({ productName, version }) {
+  const stats = getSnapshotStats(version);
+
+  return (
+    <section className="snapshot-panel" aria-label="Schema snapshot freshness">
+      <div>
+        <p className="snapshot-kicker">Snapshot</p>
+        <h2>{productName} {version.version}</h2>
+        <p>{version.snapshotLabel || 'Generated schema metadata export'}</p>
+      </div>
+      <div className="snapshot-stats">
+        {stats.map((stat) => (
+          <div className="snapshot-stat" key={stat.label}>
+            {stat.icon}
+            <span>{stat.label}</span>
+            <strong>{stat.value}</strong>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function App() {
@@ -539,6 +613,8 @@ function App() {
             your Laserfiche Support plan.
           </p>
         </div>
+
+        <SnapshotFreshnessPanel productName={productName} version={version} />
 
         <ComparisonSummary
           comparison={comparison}
