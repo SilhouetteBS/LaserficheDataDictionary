@@ -11,19 +11,19 @@
       "productKey": "lfds",
       "productName": "LFDS",
       "manifestUrl": "/data/lfds/versions.json",
-      "status": "planned"
+      "status": "available"
     },
     {
       "productKey": "repository",
       "productName": "Repository",
       "manifestUrl": "/data/repository/versions.json",
-      "status": "planned"
+      "status": "available"
     },
     {
       "productKey": "workflow",
       "productName": "Workflow",
       "manifestUrl": "/data/workflow/versions.json",
-      "status": "planned"
+      "status": "available"
     }
   ]
 }

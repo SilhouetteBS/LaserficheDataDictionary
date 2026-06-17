@@ -23,6 +23,14 @@ function readJsonResultSet(filePath) {
   return JSON.parse(raw);
 }
 
+function readOptionalJsonResultSet(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return [];
+  }
+
+  return readJsonResultSet(filePath);
+}
+
 function readJsonOrTabRows(filePath, columns) {
   const raw = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '').trim();
   if (!raw) {
@@ -260,9 +268,9 @@ export function runImport() {
   ]);
   const foreignKeys = readJsonResultSet(inputs.foreignKeys);
   const indexes = readJsonResultSet(inputs.indexes);
-  const views = readJsonResultSet(inputs.views);
+  const views = readOptionalJsonResultSet(inputs.views);
   const routines = readJsonResultSet(inputs.routines);
-  const triggers = readJsonResultSet(inputs.triggers);
+  const triggers = readOptionalJsonResultSet(inputs.triggers);
   const dependencies = readJsonResultSet(inputs.dependencies);
   const normalizedManifest = {
     ...manifest,

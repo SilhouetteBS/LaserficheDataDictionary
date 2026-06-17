@@ -1319,13 +1319,23 @@ button {
 
 .table-row {
   display: grid;
-  grid-template-columns: minmax(150px, 0.9fr) 110px 80px minmax(210px, 1.4fr) 104px;
+  grid-template-columns: minmax(150px, 0.9fr) minmax(150px, 0.35fr) 80px minmax(210px, 1.4fr) 104px;
   gap: 12px;
   align-items: center;
   min-height: 48px;
   padding: 9px 12px;
   border-top: 1px solid var(--line);
   font-size: 14px;
+}
+
+.table-row > * {
+  min-width: 0;
+}
+
+.table-row code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .table-row:first-child {

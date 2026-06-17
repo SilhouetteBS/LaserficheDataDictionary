@@ -1,0 +1,13 @@
+{
+  "productKey": "workflow",
+  "productName": "Workflow",
+  "defaultVersion": "12.0.2508.3111",
+  "versions": [
+    {
+      "version": "12.0.2508.3111",
+      "label": "Workflow 12.0.2508.3111",
+      "schemaUrl": "/data/workflow/12.0.2508.3111/schema.json",
+      "notesUrl": "/data/workflow/12.0.2508.3111/notes.json"
+    }
+  ]
+}
