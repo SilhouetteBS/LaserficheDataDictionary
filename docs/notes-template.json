@@ -1,0 +1,22 @@
+{
+  "productKey": "forms",
+  "productVersion": "12.0.2503.10378",
+  "tables": {
+    "dbo.example_table": {
+      "confidence": "unknown",
+      "summary": "Short manual description of the table purpose.",
+      "safeReportingNotes": [
+        "Read-only reporting guidance."
+      ],
+      "warnings": [
+        "Unsupported write or dependency warning."
+      ],
+      "columns": {
+        "example_column": {
+          "confidence": "unknown",
+          "purpose": "Manual description of column purpose."
+        }
+      }
+    }
+  }
+}

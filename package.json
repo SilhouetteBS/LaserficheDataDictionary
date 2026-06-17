@@ -8,7 +8,14 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "render:check": "node tools/render-check.mjs",
-    "lint": "eslint ."
+    "import:forms": "node tools/import-forms-metadata.mjs",
+    "import:schema": "node tools/import-forms-metadata.mjs",
+    "lint": "eslint .",
+    "test": "node tools/run-tests.mjs",
+    "test:unit": "node tools/run-tests.mjs",
+    "test:e2e": "node tools/e2e-smoke.mjs",
+    "validate": "npm run lint && npm run test:unit && npm run build && npm run render:check",
+    "validate:full": "npm run validate && npm run test:e2e"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

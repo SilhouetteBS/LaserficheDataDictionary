@@ -1,5 +1,5 @@
 /*
-  Laserfiche Forms SQL Server metadata export
+  Laserfiche product SQL Server metadata export
 
   Purpose:
     Export schema metadata for the static Laserfiche Data Dictionary site.
@@ -14,8 +14,9 @@
     or version identifiers. Set @ProductKey and @ProductVersion explicitly.
 
   Usage:
-    1. Connect to the target Laserfiche Forms database.
-    2. Set @ProductVersion and @SnapshotLabel below.
+    1. Connect to the target Laserfiche product database.
+    2. Set @ProductKey, @ProductName, @ProductVersion, @DatabaseRole, and
+       @SnapshotLabel below.
     3. Run the script.
     4. Save each JSON result set for import.
 */
@@ -23,10 +24,10 @@
 SET NOCOUNT ON;
 
 DECLARE @ExportFormatVersion nvarchar(20) = N'1.0';
-DECLARE @ProductKey nvarchar(50) = N'forms';
-DECLARE @ProductName nvarchar(100) = N'Forms';
-DECLARE @ProductVersion nvarchar(50) = N'REPLACE_WITH_FORMS_VERSION';
-DECLARE @DatabaseRole nvarchar(50) = N'forms';
+DECLARE @ProductKey nvarchar(50) = N'REPLACE_WITH_PRODUCT_KEY';
+DECLARE @ProductName nvarchar(100) = N'REPLACE_WITH_PRODUCT_NAME';
+DECLARE @ProductVersion nvarchar(50) = N'REPLACE_WITH_PRODUCT_VERSION';
+DECLARE @DatabaseRole nvarchar(50) = N'REPLACE_WITH_DATABASE_ROLE';
 DECLARE @SnapshotLabel nvarchar(200) = N'REPLACE_WITH_SNAPSHOT_LABEL';
 DECLARE @ExportedAtUtc datetime2(0) = SYSUTCDATETIME();
 DECLARE @ExportedBy nvarchar(256) = SUSER_SNAME();

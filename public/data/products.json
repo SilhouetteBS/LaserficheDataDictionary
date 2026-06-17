@@ -1,0 +1,29 @@
+{
+  "defaultProduct": "forms",
+  "products": [
+    {
+      "productKey": "forms",
+      "productName": "Forms",
+      "manifestUrl": "/data/forms/versions.json",
+      "status": "available"
+    },
+    {
+      "productKey": "lfds",
+      "productName": "LFDS",
+      "manifestUrl": "/data/lfds/versions.json",
+      "status": "planned"
+    },
+    {
+      "productKey": "repository",
+      "productName": "Repository",
+      "manifestUrl": "/data/repository/versions.json",
+      "status": "planned"
+    },
+    {
+      "productKey": "workflow",
+      "productName": "Workflow",
+      "manifestUrl": "/data/workflow/versions.json",
+      "status": "planned"
+    }
+  ]
+}

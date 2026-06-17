@@ -1,0 +1,88 @@
+{
+  "productKey": "forms",
+  "productVersion": "12.0.2503.10378",
+  "tables": {
+    "dbo.cf_business_processes": {
+      "confidence": "inferred",
+      "summary": "Business process definition records for Forms process models.",
+      "safeReportingNotes": [
+        "Use for read-only process inventory and definition-level reporting.",
+        "Join to instance and form mapping tables only after validating the target Forms version."
+      ],
+      "warnings": [
+        "Do not modify process definition records directly.",
+        "Process definition internals are version-sensitive."
+      ],
+      "columns": {
+        "bp_id": {
+          "confidence": "inferred",
+          "purpose": "Likely primary identifier for a business process definition."
+        }
+      }
+    },
+    "dbo.cf_bp_main_instances": {
+      "confidence": "inferred",
+      "summary": "Runtime business process instance records.",
+      "safeReportingNotes": [
+        "Use for read-only process instance status and lifecycle reporting.",
+        "Prefer SQL foreign keys and exported metadata when joining to related runtime tables."
+      ],
+      "warnings": [
+        "Do not update runtime instance records directly.",
+        "Status and state fields require observed value mapping before public documentation."
+      ],
+      "columns": {
+        "bp_instance_id": {
+          "confidence": "inferred",
+          "purpose": "Likely primary identifier for a process instance."
+        },
+        "bp_id": {
+          "confidence": "inferred",
+          "purpose": "Likely references the process definition."
+        }
+      }
+    },
+    "dbo.cf_submissions": {
+      "confidence": "inferred",
+      "summary": "Form submission records captured by Forms.",
+      "safeReportingNotes": [
+        "Use for read-only submission counts, timestamps, and status reporting.",
+        "Validate joins to form, process, and field data tables per Forms version."
+      ],
+      "warnings": [
+        "Do not insert, update, or delete submission records directly."
+      ]
+    },
+    "dbo.cf_forms": {
+      "confidence": "inferred",
+      "summary": "Forms design or form definition records.",
+      "safeReportingNotes": [
+        "Use for read-only inventory of forms and definition-level metadata."
+      ],
+      "warnings": [
+        "Do not modify form definition records directly."
+      ]
+    },
+    "dbo.cf_fields": {
+      "confidence": "inferred",
+      "summary": "Form field metadata records.",
+      "safeReportingNotes": [
+        "Use with form and submission metadata to understand field-level reporting structure."
+      ],
+      "warnings": [
+        "Field configuration can be version-sensitive and should be validated before relying on it."
+      ]
+    },
+    "dbo.cf_bp_data": {
+      "confidence": "inferred",
+      "summary": "Business process field or dataset values associated with process submissions.",
+      "safeReportingNotes": [
+        "Use for read-only reporting only after validating field mappings and process context."
+      ],
+      "warnings": [
+        "Do not modify stored process data directly.",
+        "Column meaning should be documented with observed evidence before publication."
+      ]
+    }
+  }
+}

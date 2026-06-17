@@ -1,0 +1,101 @@
+{
+  "manifest": {
+    "exportFormatVersion": "1.0",
+    "productKey": "fixture",
+    "productName": "Fixture",
+    "productVersion": "1.0",
+    "databaseRole": "fixture",
+    "snapshotLabel": "Fixture snapshot",
+    "exportedAtUtc": "2026-01-01T00:00:00Z"
+  },
+  "schemas": [
+    { "schemaName": "dbo" }
+  ],
+  "tables": [
+    { "tableKey": "dbo.parent", "schemaName": "dbo", "tableName": "parent" },
+    { "tableKey": "dbo.child", "schemaName": "dbo", "tableName": "child" }
+  ],
+  "columns": [
+    {
+      "tableKey": "dbo.parent",
+      "columnName": "id",
+      "ordinal": 1,
+      "dataType": "int",
+      "typeDefinition": "int",
+      "isNullable": false,
+      "isIdentity": true,
+      "isComputed": false
+    },
+    {
+      "tableKey": "dbo.child",
+      "columnName": "parent_id",
+      "ordinal": 1,
+      "dataType": "int",
+      "typeDefinition": "int",
+      "isNullable": false,
+      "isIdentity": false,
+      "isComputed": false
+    }
+  ],
+  "keys": [
+    {
+      "tableKey": "dbo.parent",
+      "constraintName": "PK_parent",
+      "constraintType": "PK",
+      "constraintTypeDescription": "PRIMARY_KEY_CONSTRAINT",
+      "backingIndexName": "PK_parent",
+      "columns": [{ "columnName": "id", "keyOrdinal": 1 }]
+    }
+  ],
+  "foreignKeys": [
+    {
+      "foreignKeyName": "FK_child_parent",
+      "sourceTableKey": "dbo.child",
+      "referencedTableKey": "dbo.parent",
+      "deleteAction": "NO_ACTION",
+      "updateAction": "NO_ACTION",
+      "isDisabled": false,
+      "isNotTrusted": false,
+      "columns": [{ "sourceColumnName": "parent_id", "referencedColumnName": "id" }]
+    }
+  ],
+  "indexes": [
+    {
+      "tableKey": "dbo.child",
+      "indexName": "IX_child_parent",
+      "indexTypeDescription": "NONCLUSTERED",
+      "isUnique": false,
+      "isPrimaryKey": false,
+      "isUniqueConstraint": false,
+      "hasFilter": false,
+      "columns": [{ "columnName": "parent_id", "keyOrdinal": 1 }]
+    }
+  ],
+  "views": [
+    { "viewKey": "dbo.v_child", "schemaName": "dbo", "viewName": "v_child", "definitionSha256": "abc" }
+  ],
+  "routines": [],
+  "triggers": [
+    {
+      "triggerName": "tr_child",
+      "parentObjectKey": "dbo.child",
+      "parentObjectTypeDescription": "USER_TABLE",
+      "isDisabled": false,
+      "isInsteadOfTrigger": false,
+      "definitionSha256": "def"
+    }
+  ],
+  "dependencies": [
+    {
+      "referencingObjectKey": "dbo.v_child",
+      "referencingObjectTypeDescription": "VIEW",
+      "referencedObjectKey": "dbo.child",
+      "referencedSchemaName": "dbo",
+      "referencedEntityName": "child",
+      "referencedObjectTypeDescription": "USER_TABLE",
+      "isSchemaBoundReference": false,
+      "isCallerDependent": false,
+      "isAmbiguous": false
+    }
+  ]
+}

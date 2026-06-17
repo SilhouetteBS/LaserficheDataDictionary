@@ -2,6 +2,9 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
+  {
+    ignores: ['dist/**', 'node_modules/**'],
+  },
   js.configs.recommended,
   {
     files: ['**/*.{js,jsx}'],
@@ -18,5 +21,11 @@ export default [
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    files: ['tools/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2024,
+      globals: globals.node,
+    },
+  },
 ];
-
