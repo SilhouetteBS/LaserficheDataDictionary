@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "dev:editing": "node tools/dev-editing.mjs",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "render:check": "node tools/render-check.mjs",
@@ -14,6 +15,7 @@
     "test": "node tools/run-tests.mjs",
     "test:unit": "node tools/run-tests.mjs",
     "test:e2e": "node tools/e2e-smoke.mjs",
+    "verify:public-build": "node tools/verify-public-build.mjs",
     "validate": "npm run lint && npm run test:unit && npm run build && npm run render:check",
     "validate:full": "npm run validate && npm run test:e2e"
   },

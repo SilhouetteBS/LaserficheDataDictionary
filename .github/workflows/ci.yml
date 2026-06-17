@@ -44,8 +44,23 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify public build
+        run: npm run verify:public-build
+
+      - name: Start app
+        run: npm run dev -- --port 5173 > /tmp/lfdd-vite.log 2>&1 &
+
+      - name: Wait for app
+        run: |
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:5173 >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/lfdd-vite.log
+          exit 1
 
       - name: Render smoke check
         run: npm run render:check

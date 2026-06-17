@@ -9,7 +9,7 @@ Interactive static web app for documenting Laserfiche product databases for read
 - Table, column, key, index, trigger, dependency, and relationship views
 - Focused database diagram with full-database mode
 - Version comparison with selectable source/target versions
-- Local manual notes workflow with import/export
+- Public read-only mode by default, with optional local manual notes workflow for internal builds
 - Schema health, impact, and reporting guide views
 - Static JSON/CSV export artifacts
 
@@ -26,6 +26,12 @@ npm run dev
 
 The dev server binds to `127.0.0.1`.
 
+For local/internal manual notes editing:
+
+```powershell
+npm run dev:editing
+```
+
 ## Validation
 
 ```powershell
@@ -33,6 +39,7 @@ npm run lint
 npm run test:unit
 npm run build
 npm run render:check
+npm run verify:public-build
 ```
 
 Or run the bundled non-browser validation:
@@ -56,6 +63,20 @@ npm run build
 ```
 
 The built static site is emitted to `dist/` and can be hosted by any static web server.
+
+Public builds are read-only by default. Manual notes editing, notes import, and notes export controls are removed unless editing is explicitly enabled at build/dev time:
+
+```powershell
+npm run dev:editing
+```
+
+Use editing-enabled builds only for local or internal review. The public static site should be deployed without `VITE_ENABLE_EDITING=true`.
+
+`npm run verify:public-build` builds with editing disabled and fails if editing-only UI strings are emitted into `dist/`.
+
+## Deployment
+
+`.github/workflows/deploy-pages.yml` publishes the static `dist/` folder to GitHub Pages on pushes to `main` and on manual dispatch. The workflow runs `npm run verify:public-build` before upload so the deployed artifact remains read-only.
 
 ## Data Layout
 
@@ -131,7 +152,7 @@ The importer updates product/version manifests in `public/data/` and creates emp
 
 ## Manual Notes Workflow
 
-Manual notes are edited locally in the browser first. Use the table detail page to:
+Manual notes are available only when `VITE_ENABLE_EDITING=true`. In editing-enabled local/internal builds, use the table detail page to:
 
 - save a local note draft
 - import a notes JSON file

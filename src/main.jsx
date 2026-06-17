@@ -3,9 +3,11 @@ import { createRoot } from 'react-dom/client';
 import {
   AlertTriangle,
   Database,
+  Lock,
   Search,
   ShieldAlert,
 } from 'lucide-react';
+import { appConfig } from './config.js';
 import { buildSchemaProduct, compareVersions, validateSchemaSnapshot } from './data/schemaDictionary.js';
 import { isLocalNoteDifferent, localNotesToVersionNotes } from './data/notes.js';
 import { getReviewItems, getSchemaHealthItems, getTableImpactItems } from './data/schemaAnalysis.js';
@@ -99,6 +101,7 @@ function comparisonToCsv(comparison) {
 }
 
 function App() {
+  const editingEnabled = appConfig.editingEnabled;
   const [initialUrlState] = useState(() => readUrlState());
   const [product, setProduct] = useState(null);
   const [productsManifest, setProductsManifest] = useState(null);
@@ -205,6 +208,7 @@ function App() {
   const version = product?.versions.find((item) => item.version === selectedVersion) ?? product?.versions[0];
   const productName = product?.name ?? 'Product';
   const localNotesKey = `${selectedProductKey}:${selectedVersion}`;
+  const localNotesForVersion = editingEnabled ? localNotes[localNotesKey] ?? {} : {};
   const tables = version?.tables ?? [];
 
   useEffect(() => {
@@ -319,6 +323,10 @@ function App() {
   }
 
   function saveLocalTableNote(tableKey, note) {
+    if (!editingEnabled) {
+      return;
+    }
+
     const nextNotes = {
       ...localNotes,
       [localNotesKey]: {
@@ -334,6 +342,10 @@ function App() {
   }
 
   function clearLocalTableNote(tableKey) {
+    if (!editingEnabled) {
+      return;
+    }
+
     const versionNotes = { ...(localNotes[localNotesKey] ?? {}) };
     delete versionNotes[tableKey];
     const nextNotes = { ...localNotes, [localNotesKey]: versionNotes };
@@ -342,6 +354,10 @@ function App() {
   }
 
   function importLocalNotes(event) {
+    if (!editingEnabled) {
+      return;
+    }
+
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) {
@@ -370,6 +386,10 @@ function App() {
   }
 
   function exportVersionNotes() {
+    if (!editingEnabled) {
+      return;
+    }
+
     downloadJson(
       `${selectedProductKey}-${selectedVersion}-notes-ready.json`,
       localNotesToVersionNotes(localNotes, localNotesKey, selectedProductKey, selectedVersion),
@@ -481,6 +501,13 @@ function App() {
               ))}
             </select>
           </label>
+
+          {editingEnabled && (
+            <div className="editing-mode-badge" role="status">
+              <Lock size={15} />
+              Editing enabled
+            </div>
+          )}
         </header>
 
         <nav className="view-tabs" aria-label="Dictionary views">
@@ -576,7 +603,7 @@ function App() {
           ) : activeView === 'impact' ? (
             <ImpactView
               version={version}
-              localNotesForVersion={localNotes[localNotesKey] ?? {}}
+              localNotesForVersion={localNotesForVersion}
               onDownloadJson={() =>
                 downloadJson(`${selectedProductKey}-${version.version}-table-impact.json`, getTableImpactItems(version))
               }
@@ -597,10 +624,15 @@ function App() {
               selectedTable={selectedTable}
               selectedVersion={selectedVersion}
               productName={productName}
-              localNote={localNotes[localNotesKey]?.[selectedTable.id]}
+              editingEnabled={editingEnabled}
+              localNote={localNotesForVersion[selectedTable.id]}
               localNotesKey={localNotesKey}
-              localNoteChanged={isLocalNoteDifferent(localNotes[localNotesKey]?.[selectedTable.id], selectedTable)}
-              onExportLocalNotes={() => downloadJson(`${selectedProductKey}-${selectedVersion}-local-notes.json`, localNotes)}
+              localNoteChanged={isLocalNoteDifferent(localNotesForVersion[selectedTable.id], selectedTable)}
+              onExportLocalNotes={() => {
+                if (editingEnabled) {
+                  downloadJson(`${selectedProductKey}-${selectedVersion}-local-notes.json`, localNotes);
+                }
+              }}
               onExportVersionNotes={exportVersionNotes}
               onImportLocalNotes={importLocalNotes}
               onSaveLocalNote={saveLocalTableNote}

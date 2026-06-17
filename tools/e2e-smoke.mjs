@@ -33,6 +33,8 @@ assert.equal(await page.locator('.query-example').count(), 4);
 await page.getByRole('button', { name: 'Tables', exact: true }).click();
 await page.getByRole('button', { name: 'dbo.cf_users Unknown', exact: true }).click();
 await page.waitForTimeout(100);
+assert.equal(await page.getByRole('heading', { name: 'Manual documentation notes' }).count(), 0);
+assert.equal(await page.getByText('Import notes', { exact: true }).count(), 0);
 assert.match(page.url(), /table=dbo\.cf_users/);
 await page.reload({ waitUntil: 'networkidle' });
 assert.equal(await page.locator('.table-detail h2').textContent(), 'dbo.cf_users');

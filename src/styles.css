@@ -238,9 +238,24 @@ button {
 
 .topbar {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) auto;
+  grid-template-columns: minmax(280px, 1fr) auto auto;
   gap: 14px;
   align-items: center;
+}
+
+.editing-mode-badge {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #c7d5de;
+  border-radius: 7px;
+  padding: 0 11px;
+  color: #243746;
+  background: #eef5f7;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .view-tabs,

@@ -1,7 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { chromium } from 'playwright';
 
-const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const defaultChromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const chromePath = process.env.CHROME_PATH ?? (process.platform === 'win32' ? defaultChromePath : '');
 const url = process.argv[2] ?? 'http://127.0.0.1:5173';
 const outDir = process.argv[3] ?? 'tmp/render-check';
 
@@ -9,7 +11,7 @@ await mkdir(outDir, { recursive: true });
 
 const browser = await chromium.launch({
   headless: true,
-  executablePath: chromePath,
+  ...(chromePath && existsSync(chromePath) ? { executablePath: chromePath } : {}),
 });
 
 const page = await browser.newPage({
@@ -37,4 +39,3 @@ await page.screenshot({
 await browser.close();
 await writeFile(`${outDir}/result.json`, `${JSON.stringify(result, null, 2)}\n`);
 console.log(JSON.stringify(result, null, 2));
-

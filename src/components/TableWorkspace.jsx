@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import {
   AlertTriangle,
   Download,
@@ -7,14 +8,19 @@ import {
   Network,
   TableProperties,
 } from 'lucide-react';
+import { appConfig } from '../config.js';
 import { ConfidenceBadge } from './ConfidenceBadge.jsx';
-import { ManualNotesEditor } from './ManualNotesEditor.jsx';
 import { MetadataStat } from './MetadataStat.jsx';
+
+const ManualNotesEditor = appConfig.editingEnabled
+  ? lazy(() => import('./ManualNotesEditor.jsx').then((module) => ({ default: module.ManualNotesEditor })))
+  : null;
 
 export function TableWorkspace({
   selectedTable,
   selectedVersion,
   productName,
+  editingEnabled,
   localNote,
   localNotesKey,
   localNoteChanged,
@@ -92,17 +98,21 @@ export function TableWorkspace({
           </div>
         </section>
 
-        <ManualNotesEditor
-          localNote={localNote}
-          localNotesKey={localNotesKey}
-          localNoteChanged={localNoteChanged}
-          selectedTable={selectedTable}
-          onExportLocalNotes={onExportLocalNotes}
-          onExportVersionNotes={onExportVersionNotes}
-          onImportLocalNotes={onImportLocalNotes}
-          onClear={onClearLocalNote}
-          onSave={onSaveLocalNote}
-        />
+        {editingEnabled && ManualNotesEditor && (
+          <Suspense fallback={null}>
+            <ManualNotesEditor
+              localNote={localNote}
+              localNotesKey={localNotesKey}
+              localNoteChanged={localNoteChanged}
+              selectedTable={selectedTable}
+              onExportLocalNotes={onExportLocalNotes}
+              onExportVersionNotes={onExportVersionNotes}
+              onImportLocalNotes={onImportLocalNotes}
+              onClear={onClearLocalNote}
+              onSave={onSaveLocalNote}
+            />
+          </Suspense>
+        )}
 
         <section className="metadata-panels">
           <MetadataList
