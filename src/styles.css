@@ -447,7 +447,7 @@ button {
 
 .topbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: stretch;
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
@@ -646,9 +646,9 @@ button {
 }
 
 .topbar-warning {
-  flex: 1 1 520px;
+  flex: 1 1 0;
   min-width: 320px;
-  max-width: 980px;
+  max-width: none;
   padding: 9px 12px;
 }
 
