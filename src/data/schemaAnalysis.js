@@ -2,6 +2,56 @@ function normalize(value) {
   return String(value ?? '').toLowerCase().trim();
 }
 
+function getObjectLabel(key) {
+  return key?.replace(/^dbo\./, '') ?? '';
+}
+
+function addAlias(aliasMap, alias, key) {
+  const normalizedAlias = normalize(alias);
+  if (!normalizedAlias || !key) {
+    return;
+  }
+
+  const existingKey = aliasMap.get(normalizedAlias);
+  aliasMap.set(normalizedAlias, existingKey && existingKey !== key ? null : key);
+}
+
+function buildObjectAliasMap(version) {
+  const aliases = new Map();
+  [
+    ...(version.source.tables ?? []).map((object) => ({ ...object, objectKey: object.key })),
+    ...(version.source.views ?? []).map((object) => ({ ...object, objectKey: object.key })),
+    ...(version.source.routines ?? []).map((object) => ({ ...object, objectKey: object.key })),
+    ...(version.source.triggers ?? []).map((object) => ({ ...object, objectKey: object.name })),
+  ].forEach((object) => {
+    addAlias(aliases, object.objectKey, object.objectKey);
+    addAlias(aliases, object.name, object.objectKey);
+    addAlias(aliases, object.label, object.objectKey);
+    addAlias(aliases, getObjectLabel(object.objectKey), object.objectKey);
+  });
+  return aliases;
+}
+
+function resolveDependencyKey(dependency, prefix, aliases) {
+  const objectKey = dependency[`${prefix}ObjectKey`];
+  const schemaName = dependency[`${prefix}SchemaName`];
+  const entityName = dependency[`${prefix}EntityName`] ?? dependency[`${prefix}ObjectName`];
+  const candidates = [
+    objectKey,
+    schemaName && entityName ? `${schemaName}.${entityName}` : '',
+    entityName,
+  ];
+
+  for (const candidate of candidates) {
+    const resolvedKey = aliases.get(normalize(candidate));
+    if (resolvedKey) {
+      return resolvedKey;
+    }
+  }
+
+  return '';
+}
+
 export function getColumnUsages(version, query) {
   const needle = normalize(query);
   if (!needle) {
@@ -38,6 +88,50 @@ export function getColumnUsages(version, query) {
   });
 
   return results.slice(0, 200);
+}
+
+export function getDependencyResolutionItems(version) {
+  const aliases = buildObjectAliasMap(version);
+  return (version.source.dependencies ?? []).map((dependency, index) => {
+    const referencingResolvedKey = resolveDependencyKey(dependency, 'referencing', aliases);
+    const referencedResolvedKey = resolveDependencyKey(dependency, 'referenced', aliases);
+    const missingSides = [
+      referencingResolvedKey ? '' : 'referencing',
+      referencedResolvedKey ? '' : 'referenced',
+    ].filter(Boolean);
+
+    return {
+      index,
+      id: `dependency:${index}`,
+      referencingObjectKey: dependency.referencingObjectKey,
+      referencedObjectKey: dependency.referencedObjectKey,
+      referencingResolvedKey,
+      referencedResolvedKey,
+      referencingObjectTypeDescription: dependency.referencingObjectTypeDescription,
+      referencedObjectTypeDescription: dependency.referencedObjectTypeDescription,
+      referencedEntityName: dependency.referencedEntityName,
+      isAmbiguous: Boolean(dependency.isAmbiguous),
+      isCallerDependent: Boolean(dependency.isCallerDependent),
+      isSchemaBoundReference: Boolean(dependency.isSchemaBoundReference),
+      status: missingSides.length === 0
+        ? 'Resolved'
+        : missingSides.length === 2
+          ? 'Referencing and referenced objects were not exported'
+          : missingSides[0] === 'referencing'
+            ? 'Referencing object was not exported'
+            : 'Referenced object was not exported',
+    };
+  });
+}
+
+export function getUnresolvedDependencyItems(version) {
+  return getDependencyResolutionItems(version)
+    .filter((item) => !item.referencingResolvedKey || !item.referencedResolvedKey)
+    .sort((left, right) =>
+      left.status.localeCompare(right.status) ||
+      String(left.referencingObjectKey).localeCompare(String(right.referencingObjectKey)) ||
+      String(left.referencedObjectKey).localeCompare(String(right.referencedObjectKey)),
+    );
 }
 
 export function getReviewItems(version) {

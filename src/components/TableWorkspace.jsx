@@ -1,47 +1,205 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Download,
   FileSearch,
   GitBranch,
-  KeyRound,
-  Network,
-  TableProperties,
+  Search,
+  Star,
+  X,
 } from 'lucide-react';
 import { appConfig } from '../config.js';
 import { ConfidenceBadge } from './ConfidenceBadge.jsx';
-import { MetadataStat } from './MetadataStat.jsx';
 
 const ManualNotesEditor = appConfig.editingEnabled
   ? lazy(() => import('./ManualNotesEditor.jsx').then((module) => ({ default: module.ManualNotesEditor })))
   : null;
 
+function getReviewAgeWarning(table) {
+  if (!table.lastReviewedAt) {
+    return table.hasManualNotes ? 'Manual notes have not been assigned a last-reviewed date.' : '';
+  }
+  const reviewedAt = new Date(table.lastReviewedAt);
+  if (Number.isNaN(reviewedAt.getTime())) {
+    return 'Manual notes have an invalid last-reviewed date.';
+  }
+  const ageDays = Math.floor((Date.now() - reviewedAt.getTime()) / 86400000);
+  return ageDays > 365 ? `Manual notes were last reviewed ${ageDays.toLocaleString()} days ago.` : '';
+}
+
 export function TableWorkspace({
+  documentationCoverage,
   selectedTable,
-  selectedVersion,
-  productName,
+  favoriteObjects,
+  filteredTables,
   editingEnabled,
   localNote,
   localNotesKey,
   localNoteChanged,
+  query,
+  tableConfidenceFilter,
+  tableNotesFilter,
   onExportLocalNotes,
   onExportVersionNotes,
   onImportLocalNotes,
   onSaveLocalNote,
   onClearLocalNote,
+  onClearTableSearch,
   onDownloadTableJson,
   onDownloadTableCsv,
+  onDownloadTableMarkdown,
+  onDownloadRelationshipsCsv,
+  onDownloadUnknownTablesCsv,
+  onQueryChange,
+  onSelectTable,
+  onSetTableConfidenceFilter,
+  onSetTableNotesFilter,
+  onToggleFavoriteObject,
   visibleRelationships,
   relationshipFilter,
   setRelationshipFilter,
   navigateToTable,
 }) {
+  const [activeTableTab, setActiveTableTab] = useState('columns');
+  const [columnQuery, setColumnQuery] = useState('');
+  const [tableDensity, setTableDensity] = useState('comfortable');
+  const reviewAgeWarning = getReviewAgeWarning(selectedTable);
+  const primaryKeyColumns = useMemo(
+    () => new Set(selectedTable.keys.filter((key) => key.type === 'PK').flatMap((key) => key.columns.map((column) => column.columnName))),
+    [selectedTable],
+  );
+  const indexedColumns = useMemo(
+    () => new Set(selectedTable.indexes.flatMap((index) => index.columns.map((column) => column.columnName))),
+    [selectedTable],
+  );
+  const foreignKeyColumns = useMemo(
+    () => new Set((selectedTable.source?.outgoingForeignKeys ?? []).flatMap((foreignKey) =>
+      foreignKey.columns.map((column) => column.sourceColumnName ?? column.parentColumnName),
+    )),
+    [selectedTable],
+  );
+  const filteredColumns = useMemo(() => {
+    const needle = columnQuery.toLowerCase().trim();
+    if (!needle) {
+      return selectedTable.columns;
+    }
+    return selectedTable.columns.filter((column) =>
+      `${column.name} ${column.dataType} ${column.purpose}`.toLowerCase().includes(needle),
+    );
+  }, [columnQuery, selectedTable.columns]);
+  const visibleColumns = filteredColumns.slice(0, 160);
+  const hiddenColumnCount = Math.max(0, filteredColumns.length - visibleColumns.length);
+  const tabCounts = {
+    columns: selectedTable.columns.length,
+    keys: selectedTable.keys.length,
+    indexes: selectedTable.indexes.length,
+    relationships: visibleRelationships.length,
+    notes: selectedTable.hasManualNotes || editingEnabled ? 1 : 0,
+  };
+
   return (
-    <div className="content-grid">
+    <div className="content-grid table-content-grid">
+      <aside className="table-browser-panel" aria-label="Table browser">
+        <div className="section-title-row">
+          <h2>Tables</h2>
+          <span>{filteredTables.length}</span>
+        </div>
+        <div className="table-browser-search search-box">
+          <Search size={17} />
+          <input
+            aria-label="Search tables, columns, descriptions"
+            placeholder="Search tables, columns, relationships, indexes"
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+          />
+          {query && (
+            <button aria-label="Clear table search" onClick={onClearTableSearch} type="button">
+              <X size={15} />
+            </button>
+          )}
+        </div>
+        {favoriteObjects.length > 0 && (
+          <div className="favorite-object-list" aria-label="Pinned objects">
+            {favoriteObjects.map((objectKey) => (
+              <button key={objectKey} type="button" onClick={() => onSelectTable(objectKey)}>
+                <Star size={12} />
+                {objectKey}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="documentation-coverage" aria-label="Documentation coverage">
+          <span><strong>{documentationCoverage.unknown}</strong> unknown</span>
+          <span><strong>{documentationCoverage.manual}</strong> noted</span>
+          <span><strong>{documentationCoverage.confirmed + documentationCoverage.observed}</strong> verified</span>
+        </div>
+        <div className="table-browser-filters">
+          <label>
+            <span>Confidence</span>
+            <select value={tableConfidenceFilter} onChange={(event) => onSetTableConfidenceFilter(event.target.value)}>
+              <option value="all">All confidence</option>
+              <option value="unknown">Unknown only</option>
+              <option value="inferred">Inferred</option>
+              <option value="observed">Observed</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="deprecated">Deprecated</option>
+              <option value="do_not_rely_on">Do not rely</option>
+            </select>
+          </label>
+          <label>
+            <span>Notes</span>
+            <select value={tableNotesFilter} onChange={(event) => onSetTableNotesFilter(event.target.value)}>
+              <option value="all">All notes</option>
+              <option value="manual">Has manual notes</option>
+              <option value="missing">Missing notes</option>
+            </select>
+          </label>
+          <button className="text-button" type="button" onClick={onDownloadUnknownTablesCsv}>
+            Export unknown CSV
+          </button>
+        </div>
+        <div className="table-list">
+          {filteredTables.length === 0 ? (
+            <p className="empty-state">No tables match the current filters.</p>
+          ) : filteredTables.map((table) => (
+            <button
+              className={table.id === selectedTable.id ? 'table-item selected' : 'table-item'}
+              key={table.id}
+              type="button"
+              onClick={() => onSelectTable(table.id)}
+            >
+              <span
+                aria-label={`${favoriteObjects.includes(table.id) ? 'Unpin' : 'Pin'} ${table.id}`}
+                className="favorite-toggle"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onToggleFavoriteObject(table.id);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onToggleFavoriteObject(table.id);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                title={favoriteObjects.includes(table.id) ? 'Unpin object' : 'Pin object'}
+              >
+                <Star size={12} fill={favoriteObjects.includes(table.id) ? 'currentColor' : 'none'} />
+              </span>
+              <span>{table.name}</span>
+              <span className="table-item-badges">
+                {table.hasManualNotes && <span className="notes-dot" title="Manual notes present">Notes</span>}
+                <ConfidenceBadge value={table.confidence} />
+              </span>
+            </button>
+          ))}
+        </div>
+      </aside>
       <article className="table-detail">
         <div className="detail-heading">
           <div>
-            <p className="product-label">{productName} {selectedVersion}</p>
             <h2>{selectedTable.name}</h2>
             <p>{selectedTable.summary}</p>
           </div>
@@ -61,17 +219,24 @@ export function TableWorkspace({
               type="button"
               onClick={onDownloadTableCsv}
             >
-              CSV
+              Columns CSV
+            </button>
+            <button
+              className="text-button"
+              type="button"
+              onClick={onDownloadRelationshipsCsv}
+            >
+              Relationships CSV
+            </button>
+            <button
+              className="text-button"
+              type="button"
+              onClick={onDownloadTableMarkdown}
+            >
+              Markdown
             </button>
           </div>
         </div>
-
-        <section className="stats-strip" aria-label="Table metadata counts">
-          <MetadataStat icon={<TableProperties size={17} />} label="Columns" value={selectedTable.columns.length} />
-          <MetadataStat icon={<KeyRound size={17} />} label="Keys" value={selectedTable.keys.length} />
-          <MetadataStat icon={<Network size={17} />} label="Indexes" value={selectedTable.indexes.length} />
-          <MetadataStat icon={<GitBranch size={17} />} label="Relations" value={selectedTable.relationships.length} />
-        </section>
 
         <section className="guidance-panel">
           <div>
@@ -98,7 +263,26 @@ export function TableWorkspace({
           </div>
         </section>
 
-        {editingEnabled && ManualNotesEditor && (
+        <nav className="table-detail-tabs" aria-label="Table detail sections">
+          {[
+            ['columns', 'Columns'],
+            ['keys', 'Keys'],
+            ['indexes', 'Indexes'],
+            ['relationships', 'Relationships'],
+            ['notes', 'Notes'],
+          ].map(([value, label]) => (
+            <button
+              className={activeTableTab === value ? 'selected' : ''}
+              key={value}
+              onClick={() => setActiveTableTab(value)}
+              type="button"
+            >
+              {label} <span>{tabCounts[value]}</span>
+            </button>
+          ))}
+        </nav>
+
+        {activeTableTab === 'notes' && editingEnabled && ManualNotesEditor && (
           <Suspense fallback={null}>
             <ManualNotesEditor
               localNote={localNote}
@@ -114,113 +298,170 @@ export function TableWorkspace({
           </Suspense>
         )}
 
-        <section className="metadata-panels">
-          <MetadataList
-            title="Keys"
-            items={selectedTable.keys}
-            emptyText="No primary or unique keys exported."
-            renderItem={(key) => (
-              <>
-                <strong>{key.name}</strong>
-                <span>{key.typeDescription}</span>
-                <code>{key.columns.map((column) => column.columnName).join(', ')}</code>
-              </>
-            )}
-          />
-          <MetadataList
-            title="Indexes"
-            items={selectedTable.indexes}
-            emptyText="No indexes exported."
-            renderItem={(index) => (
-              <>
-                <strong>{index.name}</strong>
-                <span>{index.typeDescription}</span>
-                <code>{index.columns.map((column) => column.columnName).join(', ')}</code>
-              </>
-            )}
-          />
-          <MetadataList
-            title="Triggers"
-            items={selectedTable.triggers}
-            emptyText="No triggers exported."
-            renderItem={(trigger) => (
-              <>
-                <strong>{trigger.name}</strong>
-                <span>{trigger.isDisabled ? 'Disabled' : 'Enabled'}</span>
-                <code>{trigger.isInsteadOfTrigger ? 'INSTEAD OF' : 'AFTER'}</code>
-              </>
-            )}
-          />
-        </section>
-
-        <section className="columns-section">
-          <div className="section-title-row">
-            <h3>Columns</h3>
-            <span>{selectedTable.columns.length} columns</span>
-          </div>
-          <div className="columns-table" role="table" aria-label="Columns">
-            <div className="table-row table-head" role="row">
-              <span>Column</span>
-              <span>Type</span>
-              <span>Nullable</span>
-              <span>Purpose</span>
-              <span>Status</span>
+        {activeTableTab === 'notes' && !editingEnabled && (
+          <section className="metadata-list table-notes-readonly">
+            <div className="section-title-row">
+              <h3>Manual notes</h3>
+              <span>{selectedTable.reviewStatus ?? (selectedTable.hasManualNotes ? 'Available' : 'Pending')}</span>
             </div>
-            {selectedTable.columns.map((column) => (
-              <div className="table-row" role="row" key={column.name}>
-                <strong>{column.name}</strong>
-                <code>{column.dataType}</code>
-                <span>{column.nullable ? 'Yes' : 'No'}</span>
-                <span>
-                  {column.purpose}
-                  {column.hasManualNotes && <em className="inline-note-label"> noted</em>}
-                </span>
-                <ConfidenceBadge value={column.confidence} />
-              </div>
-            ))}
-          </div>
-        </section>
-      </article>
+            <p>{selectedTable.summary}</p>
+            {reviewAgeWarning && <p className="notes-stale-warning">{reviewAgeWarning}</p>}
+            <dl className="notes-review-metadata">
+              <div><dt>Owner</dt><dd>{selectedTable.owner || 'Unassigned'}</dd></div>
+              <div><dt>Reviewer</dt><dd>{selectedTable.reviewer || 'Unassigned'}</dd></div>
+              <div><dt>Last reviewed</dt><dd>{selectedTable.lastReviewedAt || 'Not reviewed'}</dd></div>
+            </dl>
+          </section>
+        )}
 
-      <aside className="relationship-panel">
-        <div className="section-title-row">
-          <h3>Relationships</h3>
-          <GitBranch size={18} />
-        </div>
-        <DependencyGraph table={{ ...selectedTable, relationships: visibleRelationships }} />
-        <div className="segmented-control" aria-label="Relationship filter">
-          {[
-            ['all', 'All'],
-            ['references', 'Out'],
-            ['referenced by', 'In'],
-          ].map(([value, label]) => (
-            <button
-              className={relationshipFilter === value ? 'selected' : ''}
-              key={value}
-              type="button"
-              onClick={() => setRelationshipFilter(value)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="relationship-list">
-          {visibleRelationships.length === 0 ? (
-            <p className="empty-state">No SQL foreign keys exported for this table.</p>
-          ) : (
-            visibleRelationships.map((relationship, index) => (
-              <div className="relationship-item" key={`${relationship.type}-${relationship.table}-${index}`}>
-                <span>{relationship.type}</span>
-                <button type="button" onClick={() => navigateToTable(relationship.table)}>
-                  {relationship.table}
+        {activeTableTab === 'keys' && (
+          <section className="metadata-panels metadata-panels-single">
+            <MetadataList
+              title="Keys"
+              items={selectedTable.keys}
+              emptyText="No primary or unique keys exported."
+              renderItem={(key) => (
+                <>
+                  <strong>{key.name}</strong>
+                  <span>{key.typeDescription}</span>
+                  <code>{key.columns.map((column) => column.columnName).join(', ')}</code>
+                </>
+              )}
+            />
+          </section>
+        )}
+
+        {activeTableTab === 'indexes' && (
+          <section className="metadata-panels metadata-panels-single">
+            <MetadataList
+              title="Indexes"
+              items={selectedTable.indexes}
+              emptyText="No indexes exported."
+              renderItem={(index) => (
+                <>
+                  <strong>{index.name}</strong>
+                  <span>{index.typeDescription}</span>
+                  <code>{index.columns.map((column) => column.columnName).join(', ')}</code>
+                </>
+              )}
+            />
+            <MetadataList
+              title="Triggers"
+              items={selectedTable.triggers}
+              emptyText="No triggers exported."
+              renderItem={(trigger) => (
+                <>
+                  <strong>{trigger.name}</strong>
+                  <span>{trigger.isDisabled ? 'Disabled' : 'Enabled'}</span>
+                  <code>{trigger.isInsteadOfTrigger ? 'INSTEAD OF' : 'AFTER'}</code>
+                </>
+              )}
+            />
+          </section>
+        )}
+
+        {activeTableTab === 'relationships' && (
+          <section className="table-relationship-tab">
+            <div className="section-title-row">
+              <h3>Relationships</h3>
+              <GitBranch size={18} />
+            </div>
+            <DependencyGraph table={{ ...selectedTable, relationships: visibleRelationships }} />
+            <div className="segmented-control" aria-label="Relationship filter">
+              {[
+                ['all', 'All'],
+                ['references', 'Out'],
+                ['referenced by', 'In'],
+              ].map(([value, label]) => (
+                <button
+                  className={relationshipFilter === value ? 'selected' : ''}
+                  key={value}
+                  type="button"
+                  onClick={() => setRelationshipFilter(value)}
+                >
+                  {label}
                 </button>
-                <p>{relationship.note}</p>
-                <ConfidenceBadge value={relationship.confidence} />
+              ))}
+            </div>
+            <div className="relationship-list">
+              {visibleRelationships.length === 0 ? (
+                <p className="empty-state">No SQL foreign keys exported for this table.</p>
+              ) : visibleRelationships.map((relationship, index) => (
+                <div className="relationship-item" key={`${relationship.type}-${relationship.table}-${index}`}>
+                  <span>{relationship.type}</span>
+                  <button type="button" onClick={() => navigateToTable(relationship.table)}>
+                    {relationship.table}
+                  </button>
+                  <p>{relationship.note}</p>
+                  <ConfidenceBadge value={relationship.confidence} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {activeTableTab === 'columns' && (
+          <section className="columns-section">
+            <div className="section-title-row">
+              <h3>Columns</h3>
+              <span>{filteredColumns.length} columns</span>
+            </div>
+            <div className="table-tools-row">
+              <label>
+                <span>Find column</span>
+                <input
+                  aria-label="Search columns in selected table"
+                  placeholder="Column name, type, or purpose"
+                  value={columnQuery}
+                  onChange={(event) => setColumnQuery(event.target.value)}
+                />
+              </label>
+              <label>
+                <span>Density</span>
+                <select value={tableDensity} onChange={(event) => setTableDensity(event.target.value)}>
+                  <option value="comfortable">Comfortable</option>
+                  <option value="compact">Compact</option>
+                </select>
+              </label>
+            </div>
+            <div className={tableDensity === 'compact' ? 'columns-table columns-table-compact' : 'columns-table'} role="table" aria-label="Columns">
+              <div className="table-row table-head" role="row">
+                <span>Column</span>
+                <span>Type</span>
+                <span>Nullable</span>
+                <span>Purpose</span>
+                <span>Status</span>
               </div>
-            ))
-          )}
-        </div>
-      </aside>
+              {visibleColumns.map((column) => (
+                <div className="table-row" role="row" key={column.name}>
+                  <strong>
+                    {column.name}
+                    <span className="column-badges">
+                      {primaryKeyColumns.has(column.name) && <em>PK</em>}
+                      {foreignKeyColumns.has(column.name) && <em>FK</em>}
+                      {indexedColumns.has(column.name) && <em>IX</em>}
+                      {column.nullable && <em>NULL</em>}
+                      {column.source?.isComputed && <em>Computed</em>}
+                    </span>
+                  </strong>
+                  <code>{column.dataType}</code>
+                  <span>{column.nullable ? 'Yes' : 'No'}</span>
+                  <span>
+                    {column.purpose}
+                    {column.hasManualNotes && <em className="inline-note-label"> noted</em>}
+                  </span>
+                  <ConfidenceBadge value={column.confidence} />
+                </div>
+              ))}
+            </div>
+            {hiddenColumnCount > 0 && (
+              <p className="virtualized-note">
+                Showing the first {visibleColumns.length} matching columns. Narrow the column search to inspect the remaining {hiddenColumnCount}.
+              </p>
+            )}
+          </section>
+        )}
+      </article>
     </div>
   );
 }

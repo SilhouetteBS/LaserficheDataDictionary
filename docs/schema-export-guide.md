@@ -16,15 +16,7 @@ DECLARE @SnapshotLabel nvarchar(200) = N'Forms 11 metadata export';
 
 Run the script once against the Forms 11 database and once against the Forms 12 database. The actual SQL Server database name can differ in every environment and should not be used as a product or version identifier.
 
-## Optional Provenance
-
-The script defaults to:
-
-```sql
-DECLARE @IncludeEnvironmentProvenance bit = 0;
-```
-
-Leave this off for normal exports. If you turn it on, the manifest may include server and database names for traceability, but the importer must treat those fields as optional provenance only.
+`@DatabaseRole` should describe the Laserfiche product database being exported, such as `forms`, `lfds`, `repository`, or `workflow`. It is not the SQL Server database name.
 
 ## Optional Module Definitions
 
@@ -34,7 +26,7 @@ The script defaults to:
 DECLARE @IncludeModuleDefinitions bit = 0;
 ```
 
-Leave this off unless you intentionally want view, procedure, function, and trigger definitions in the export. The script still includes definition hashes when definitions are omitted.
+Leave this off unless you intentionally want view, procedure, function, and trigger definitions in the export. Definition text and hashes are useful for internal review, but the app does not count definition-only changes as schema changes.
 
 ## Result Sets
 
@@ -54,6 +46,8 @@ The script returns JSON result sets in this order:
 
 Save each result set as JSON. A later importer can combine them into the normalized `data/forms/<version>/schema.json` snapshot.
 
+Foreign key result sets describe exported SQL constraints between table columns. Dependency result sets describe SQL expression references from views, routines, and triggers to other objects. SQL Server can report dependency rows that reference aliases, pseudo tables, caller-dependent names, or helper objects that are not exported as standalone schema objects; those rows are warnings for diagram completeness, not proof that the database is invalid.
+
 If SQL Server Management Studio wraps long JSON values across lines, the importer will remove those line breaks before parsing. If a result set is saved as a tab-delimited grid instead of JSON, the importer currently supports that format for the primary/unique key result set.
 
 ## Importing
@@ -72,6 +66,15 @@ C:\Users\BlakeSmith\Downloads\views.json
 C:\Users\BlakeSmith\Downloads\routines.json
 C:\Users\BlakeSmith\Downloads\triggers.json
 C:\Users\BlakeSmith\Downloads\dependencies.json
+```
+
+Product-prefixed filenames are also supported and are preferred when exporting multiple products into the same folder:
+
+```text
+LFDS_manifest.json
+Repository_columns.json
+Workflow_foreignKeys.json
+Forms_dependencies.json
 ```
 
 Then run:
@@ -106,3 +109,5 @@ The importer also creates separate `notes.json` placeholders when they do not al
 ## Safety
 
 The export script reads SQL Server catalog metadata only. It does not query Laserfiche business table rows and does not modify the database.
+
+This documentation is for read-only reporting, troubleshooting, and education. Manually writing to or modifying Laserfiche product databases, tables, etc. will violate your Laserfiche Support plan and is not supported.

@@ -1,0 +1,180 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { chromium } from 'playwright';
+
+const appUrl = process.env.APP_URL ?? 'http://127.0.0.1:4177';
+const screenshotDir = process.env.ACCESSIBILITY_SCREENSHOT_DIR;
+const executablePath = process.env.CHROME_PATH || undefined;
+
+function parseRgb(value) {
+  const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+}
+
+function channelToLinear(value) {
+  const normalized = value / 255;
+  return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+}
+
+function luminance(rgb) {
+  const [r, g, b] = rgb.map(channelToLinear);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrastRatio(foreground, background) {
+  const foregroundLum = luminance(foreground);
+  const backgroundLum = luminance(background);
+  const light = Math.max(foregroundLum, backgroundLum);
+  const dark = Math.min(foregroundLum, backgroundLum);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+function isEffectivelyZeroDuration(value) {
+  return value.split(',').every((duration) => {
+    const trimmed = duration.trim();
+    if (trimmed.endsWith('ms')) {
+      return Number(trimmed.replace('ms', '')) <= 1;
+    }
+    if (trimmed.endsWith('s')) {
+      return Number(trimmed.replace('s', '')) <= 0.001;
+    }
+    return trimmed === '0';
+  });
+}
+
+async function snapshot(page, label) {
+  if (!screenshotDir) {
+    return;
+  }
+  fs.mkdirSync(screenshotDir, { recursive: true });
+  await page.screenshot({ path: path.join(screenshotDir, `${label}.png`), fullPage: true });
+}
+
+const browser = await chromium.launch({
+  headless: true,
+  ...(executablePath ? { executablePath } : {}),
+});
+
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(appUrl, { waitUntil: 'networkidle' });
+
+  const unlabeledIconButtons = await page.locator('button').evaluateAll((buttons) =>
+    buttons
+      .filter((button) => button.querySelector('svg'))
+      .filter((button) => !button.textContent.trim())
+      .filter((button) => !button.getAttribute('aria-label') && !button.getAttribute('title'))
+      .map((button) => button.outerHTML.slice(0, 180)),
+  );
+  assert.deepEqual(unlabeledIconButtons, [], 'Icon-only buttons must have an aria-label or title');
+
+  const unlabeledInputs = await page.locator('input, select, textarea').evaluateAll((controls) =>
+    controls
+      .filter((control) => {
+        const id = control.getAttribute('id');
+        const explicit = id && globalThis.document.querySelector(`label[for="${globalThis.CSS.escape(id)}"]`);
+        const implicit = control.closest('label');
+        const aria = control.getAttribute('aria-label') || control.getAttribute('aria-labelledby');
+        return !explicit && !implicit && !aria;
+      })
+      .map((control) => control.outerHTML.slice(0, 180)),
+  );
+  assert.deepEqual(unlabeledInputs, [], 'Inputs and selects must have visible, implicit, or ARIA labels');
+
+  await page.keyboard.press('Tab');
+  const focusedControl = await page.evaluate(() => {
+    const element = globalThis.document.activeElement;
+    const style = globalThis.getComputedStyle(element);
+    return {
+      tagName: element?.tagName,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: style.outlineWidth,
+      boxShadow: style.boxShadow,
+    };
+  });
+  assert.notEqual(focusedControl.tagName, 'BODY', 'Keyboard tab should focus the first interactive control');
+  assert.ok(
+    focusedControl.outlineStyle !== 'none' ||
+      focusedControl.outlineWidth !== '0px' ||
+      focusedControl.boxShadow !== 'none',
+    'Focused controls must have a visible focus style',
+  );
+
+  const contrastChecks = await page.evaluate(() => {
+    function getEffectiveBackgroundColor(element) {
+      let current = element;
+      while (current) {
+        const style = globalThis.getComputedStyle(current);
+        if (!/rgba?\(0,\s*0,\s*0,\s*0\)|transparent/i.test(style.backgroundColor)) {
+          return style.backgroundColor;
+        }
+        current = current.parentElement;
+      }
+      return 'rgb(255, 255, 255)';
+    }
+
+    const selectors = ['.brand h1', '.sidebar-view-nav button.selected', '.warning-banner p', '.table-item.selected span:nth-child(2)'];
+    return selectors.map((selector) => {
+      const element = globalThis.document.querySelector(selector);
+      if (!(element instanceof globalThis.Element)) {
+        return {
+          selector,
+          missing: true,
+        };
+      }
+      const style = globalThis.getComputedStyle(element);
+      return {
+        selector,
+        color: style.color,
+        backgroundColor: getEffectiveBackgroundColor(element),
+      };
+    });
+  });
+  for (const check of contrastChecks) {
+    assert.equal(check.missing, undefined, `${check.selector} must exist for contrast checks`);
+    const color = parseRgb(check.color);
+    const backgroundColor = parseRgb(check.backgroundColor);
+    assert.ok(color && backgroundColor, `${check.selector} must expose computable colors`);
+    assert.ok(
+      contrastRatio(color, backgroundColor) >= 4.5,
+      `${check.selector} text contrast must meet WCAG AA for normal text`,
+    );
+  }
+
+  const reducedMotionDurations = await page.locator('*').evaluateAll((elements) =>
+    elements
+      .map((element) => {
+        const style = globalThis.getComputedStyle(element);
+        return {
+          animationDuration: style.animationDuration,
+          transitionDuration: style.transitionDuration,
+        };
+      })
+      .slice(0, 10),
+  );
+  const reducedMotionViolations = reducedMotionDurations.filter((style) =>
+    !isEffectivelyZeroDuration(style.animationDuration) ||
+    !isEffectivelyZeroDuration(style.transitionDuration),
+  );
+  assert.deepEqual(reducedMotionViolations, [], 'Reduced-motion mode should disable transitions and animations');
+
+  await snapshot(page, 'desktop-accessibility');
+
+  const viewports = [
+    ['tablet', { width: 900, height: 1100 }],
+    ['mobile', { width: 390, height: 900 }],
+  ];
+  for (const [label, viewport] of viewports) {
+    await page.setViewportSize(viewport);
+    await page.reload({ waitUntil: 'networkidle' });
+    assert.ok(await page.locator('h1').isVisible(), `${label} viewport must render the app heading`);
+    assert.equal(await page.locator('body').evaluate((body) => body.scrollWidth <= globalThis.innerWidth + 1), true);
+    await snapshot(page, `${label}-accessibility`);
+  }
+} finally {
+  await browser.close();
+}
+
+console.log('Accessibility audit passed.');

@@ -22,11 +22,40 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Lockfile integrity
+        run: npm run verify:lockfile
+
+      - name: Dependency audit
+        run: npm run audit:dependencies
+
       - name: Lint
         run: npm run lint
 
       - name: Unit tests
         run: npm run test:unit
+
+      - name: Diagram regression tests
+        run: npm run test:diagram
+
+      - name: Data validation
+        run: |
+          mkdir -p artifacts/validation
+          npm run validate:data
+          npm run validate:data -- --json > artifacts/validation/data-summary.json
+
+      - name: Notes validation
+        run: npm run validate:notes
+
+      - name: Static security metadata
+        run: npm run verify:static-security
+
+      - name: Upload validation summaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-summaries
+          path: artifacts/validation/
+          if-no-files-found: ignore
 
   build:
     runs-on: ubuntu-latest
@@ -49,6 +78,15 @@ jobs:
 
       - name: Verify public build
         run: npm run verify:public-build
+
+      - name: Static build smoke test
+        run: npm run test:static-build
+
+      - name: Static performance budget
+        run: npm run audit:performance
+
+      - name: Editing route guard
+        run: npm run test:editing-guard
 
       - name: Start app
         run: npm run dev -- --port 5173 > /tmp/lfdd-vite.log 2>&1 &
@@ -84,6 +122,9 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Build static artifact
+        run: npm run build
+
       - name: Start app
         run: npm run dev -- --port 4177 > /tmp/lfdd-vite.log 2>&1 &
 
@@ -97,4 +138,37 @@ jobs:
           exit 1
 
       - name: Browser smoke test
-        run: npm run test:e2e
+        run: E2E_SCREENSHOT_DIR=artifacts/e2e npm run test:e2e
+
+      - name: Accessibility audit
+        run: ACCESSIBILITY_SCREENSHOT_DIR=artifacts/accessibility npm run audit:accessibility
+
+      - name: Runtime performance budget
+        run: APP_URL=http://127.0.0.1:4177 npm run audit:performance
+
+      - name: Diagram visual screenshots
+        run: VISUAL_SCREENSHOT_DIR=artifacts/visual-regression npm run test:visual
+
+      - name: Upload failed e2e screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure-screenshots
+          path: artifacts/e2e/
+          if-no-files-found: ignore
+
+      - name: Upload diagram visual screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagram-visual-regression-screenshots
+          path: artifacts/visual-regression/
+          if-no-files-found: ignore
+
+      - name: Upload accessibility screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-screenshots
+          path: artifacts/accessibility/
+          if-no-files-found: ignore

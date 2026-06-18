@@ -10,6 +10,13 @@ const confidenceLabels = {
   do_not_rely_on: 'Do not rely',
 };
 
+const reviewStatusLabels = {
+  draft: 'Draft',
+  in_review: 'In review',
+  approved: 'Approved',
+  stale: 'Stale',
+};
+
 export function ManualNotesEditor({
   localNote,
   localNotesKey,
@@ -24,6 +31,10 @@ export function ManualNotesEditor({
   const [draft, setDraft] = useState({
     summary: '',
     confidence: selectedTable.confidence,
+    reviewStatus: 'draft',
+    owner: '',
+    reviewer: '',
+    lastReviewedAt: '',
     safeReportingNotes: '',
     warnings: '',
   });
@@ -32,6 +43,10 @@ export function ManualNotesEditor({
     setDraft({
       summary: localNote?.summary ?? selectedTable.summary ?? '',
       confidence: localNote?.confidence ?? selectedTable.confidence,
+      reviewStatus: localNote?.reviewStatus ?? 'draft',
+      owner: localNote?.owner ?? '',
+      reviewer: localNote?.reviewer ?? '',
+      lastReviewedAt: localNote?.lastReviewedAt ?? '',
       safeReportingNotes: (localNote?.safeReportingNotes ?? []).join('\n'),
       warnings: (localNote?.warnings ?? []).join('\n'),
     });
@@ -45,6 +60,10 @@ export function ManualNotesEditor({
     onSave(selectedTable.id, {
       summary: draft.summary.trim(),
       confidence: draft.confidence,
+      reviewStatus: draft.reviewStatus,
+      owner: draft.owner.trim(),
+      reviewer: draft.reviewer.trim(),
+      lastReviewedAt: draft.lastReviewedAt,
       safeReportingNotes: draft.safeReportingNotes
         .split(/\r?\n/)
         .map((line) => line.trim())
@@ -64,7 +83,20 @@ export function ManualNotesEditor({
       </div>
       <div className="notes-editor-grid">
         <label>
-          <span>Confidence</span>
+          <span>
+            Confidence
+            <span
+              className="info-tooltip"
+              tabIndex={0}
+              aria-label="Confidence describes how strongly the table purpose and reporting guidance have been reviewed."
+            >
+              i
+              <span role="tooltip">
+                Confirmed is reviewed against reliable source knowledge. Observed and inferred need additional review.
+                Unknown means manual documentation is still pending.
+              </span>
+            </span>
+          </span>
           <select value={draft.confidence} onChange={(event) => updateDraft('confidence', event.target.value)}>
             {Object.entries(confidenceLabels).map(([value, label]) => (
               <option key={value} value={value}>
@@ -72,6 +104,40 @@ export function ManualNotesEditor({
               </option>
             ))}
           </select>
+        </label>
+        <label>
+          <span>Review status</span>
+          <select value={draft.reviewStatus} onChange={(event) => updateDraft('reviewStatus', event.target.value)}>
+            {Object.entries(reviewStatusLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Owner</span>
+          <input
+            value={draft.owner}
+            onChange={(event) => updateDraft('owner', event.target.value)}
+            placeholder="Documentation owner"
+          />
+        </label>
+        <label>
+          <span>Reviewer</span>
+          <input
+            value={draft.reviewer}
+            onChange={(event) => updateDraft('reviewer', event.target.value)}
+            placeholder="Reviewer"
+          />
+        </label>
+        <label>
+          <span>Last reviewed</span>
+          <input
+            value={draft.lastReviewedAt}
+            onChange={(event) => updateDraft('lastReviewedAt', event.target.value)}
+            type="date"
+          />
         </label>
         <label className="notes-editor-wide">
           <span>Summary</span>

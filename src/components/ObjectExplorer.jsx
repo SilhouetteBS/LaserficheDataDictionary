@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { getColumnUsages, getReviewItems } from '../data/schemaAnalysis.js';
 
 export function ObjectExplorer({
@@ -7,10 +7,10 @@ export function ObjectExplorer({
   columnUsageQuery,
   onColumnUsageQueryChange,
   version,
-  productName,
   onDownloadReviewQueue,
   onSelectTable,
 }) {
+  const [selectedObjectKey, setSelectedObjectKey] = useState('');
   const objects = {
     views: version.source.views ?? [],
     routines: version.source.routines ?? [],
@@ -18,6 +18,8 @@ export function ObjectExplorer({
     dependencies: version.source.dependencies ?? [],
   };
   const selectedObjects = objects[objectType] ?? [];
+  const selectedObject =
+    selectedObjects.find((item, index) => getObjectKey(item, index) === selectedObjectKey) ?? selectedObjects[0];
   const reviewItems = useMemo(() => getReviewItems(version), [version]);
   const columnUsages = useMemo(() => getColumnUsages(version, columnUsageQuery), [columnUsageQuery, version]);
 
@@ -25,7 +27,6 @@ export function ObjectExplorer({
     <section className="detail-surface">
       <div className="detail-heading">
         <div>
-          <p className="product-label">{productName} {version.version}</p>
           <h2>Schema objects</h2>
           <p>Explore exported views, routines, triggers, and dependency references.</p>
         </div>
@@ -97,9 +98,15 @@ export function ObjectExplorer({
           <p className="empty-state">No {objectType} exported.</p>
         ) : (
           selectedObjects.slice(0, 250).map((item, index) => (
-            <article className="object-item" key={`${objectType}-${item.key ?? item.name ?? index}`}>
-              <strong>{item.key ?? item.name ?? item.referencingObjectKey}</strong>
+            <article
+              className={selectedObject === item ? 'object-item selected' : 'object-item'}
+              key={`${objectType}-${getObjectKey(item, index)}`}
+            >
+              <strong>{getObjectKey(item, index)}</strong>
               <p>{item.typeDescription ?? item.parentObjectTypeDescription ?? item.referencingObjectTypeDescription}</p>
+              <button type="button" onClick={() => setSelectedObjectKey(getObjectKey(item, index))}>
+                Open details
+              </button>
               {item.parentObjectKey && (
                 <button type="button" onClick={() => onSelectTable(item.parentObjectKey)}>
                   {item.parentObjectKey}
@@ -110,6 +117,55 @@ export function ObjectExplorer({
           ))
         )}
       </div>
+      {selectedObject && objectType !== 'dependencies' && (
+        <section className="object-detail-panel">
+          <div>
+            <p className="snapshot-kicker">{objectType.replace(/s$/, '')}</p>
+            <h3>{getObjectKey(selectedObject)}</h3>
+            <p>{selectedObject.typeDescription ?? selectedObject.parentObjectTypeDescription ?? 'Exported SQL object'}</p>
+          </div>
+          <dl>
+            {getObjectDetailRows(selectedObject).map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{String(value)}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="object-definition-preview">
+            <strong>Definition preview</strong>
+            {getDefinitionText(selectedObject) ? (
+              <pre>{getDefinitionText(selectedObject)}</pre>
+            ) : (
+              <p>
+                Definition text was not included in this export. The exported definition hash is review metadata and
+                is not counted as a schema change by itself.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
     </section>
   );
+}
+
+function getObjectKey(item, index = 0) {
+  return item.key ?? item.name ?? item.referencingObjectKey ?? `object-${index + 1}`;
+}
+
+function getDefinitionText(object) {
+  return object?.definition ?? object?.definitionText ?? object?.sqlDefinition ?? object?.objectDefinition ?? '';
+}
+
+function getObjectDetailRows(object) {
+  return [
+    ['Schema', object.schemaName],
+    ['Type', object.typeDescription ?? object.parentObjectTypeDescription],
+    ['Parent', object.parentObjectKey],
+    ['Disabled', object.isDisabled === undefined ? undefined : object.isDisabled ? 'Yes' : 'No'],
+    ['Instead of trigger', object.isInsteadOfTrigger === undefined ? undefined : object.isInsteadOfTrigger ? 'Yes' : 'No'],
+    ['Parameters', object.parameters?.length],
+    ['Dependencies', object.dependencies?.length],
+    ['Definition hash', object.definitionSha256],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== '');
 }

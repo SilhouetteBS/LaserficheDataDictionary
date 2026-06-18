@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { buildGeneratedReportingExamples, getReportingPaths } from '../data/reporting.js';
 
-export function ReportingGuide({ productName, version, onSelectTable }) {
+export function ReportingGuide({ version, onSelectTable }) {
   const knownTables = new Set(version.tables.map((table) => table.id));
   const reportingPaths = getReportingPaths(version.source.productKey);
   const generatedExamples = useMemo(() => buildGeneratedReportingExamples(version), [version]);
@@ -10,7 +10,6 @@ export function ReportingGuide({ productName, version, onSelectTable }) {
     <section className="detail-surface">
       <div className="detail-heading">
         <div>
-          <p className="product-label">{productName} {version.version}</p>
           <h2>Reporting guide</h2>
           <p>Common read-only paths and starter SQL patterns for support-safe exploration.</p>
         </div>

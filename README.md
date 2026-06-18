@@ -1,4 +1,4 @@
-# Laserfiche Database Dictionary
+# Laserfiche Data Dictionary
 
 Interactive static web app for documenting Laserfiche product databases for read-only reporting, troubleshooting, and education.
 
@@ -15,7 +15,7 @@ Interactive static web app for documenting Laserfiche product databases for read
 
 ## Support Warning
 
-This project is intended for read-only reporting, troubleshooting, and educational use. Manually writing to or modifying Laserfiche product databases, tables, or records may violate your Laserfiche Support plan and can cause unsupported or unstable behavior.
+This project is intended for read-only reporting, troubleshooting, and educational use. Manually writing to or modifying Laserfiche product databases, tables, etc. will violate your Laserfiche Support plan and is not supported.
 
 ## Development
 
@@ -37,6 +37,9 @@ npm run dev:editing
 ```powershell
 npm run lint
 npm run test:unit
+npm run test:diagram
+npm run validate:data
+npm run validate:notes
 npm run build
 npm run render:check
 npm run verify:public-build
@@ -78,6 +81,8 @@ Use editing-enabled builds only for local or internal review. The public static 
 
 `.github/workflows/deploy-pages.yml` publishes the static `dist/` folder to GitHub Pages on pushes to `main` and on manual dispatch. The workflow runs `npm run verify:public-build` before upload so the deployed artifact remains read-only.
 
+Before publishing publicly, follow `docs/production-readiness.md`. The public deployment workflow also runs a deployed-site smoke check against the GitHub Pages URL after deployment.
+
 ## Data Layout
 
 Generated schema files and manual documentation remain separate:
@@ -102,6 +107,8 @@ public/
 
 Database names are environment-specific and must not be used as product or version identifiers. Use explicit export labels such as `productKey`, `productVersion`, and `snapshotLabel`.
 
+`npm run validate:data` fails on manifest/schema shape problems, duplicate keys, and broken foreign key targets. SQL expression dependency references that point to aliases, pseudo tables, check constraints, or unexported helper objects are reported as warnings because SQL Server dependency metadata can contain names that are not standalone exported objects.
+
 ## Export SQL Metadata
 
 Use `docs/forms-schema-export.sql` for Forms exports.
@@ -109,6 +116,10 @@ Use `docs/forms-schema-export.sql` for Forms exports.
 Use `docs/sql-server-schema-export.sql` for a product-neutral export script that can be used for LFDS, Repository, Workflow, or Forms databases.
 
 The export script reads SQL Server catalog metadata only. It does not read Laserfiche business table rows and does not modify the database.
+
+This documentation is for read-only reporting, troubleshooting, and education. Manually writing to or modifying Laserfiche product databases, tables, etc. will violate your Laserfiche Support plan and is not supported.
+
+Foreign keys in the app come from exported SQL constraints. Dependencies come from SQL Server expression dependency metadata for views, routines, and triggers; they are useful for impact analysis, but unresolved dependency rows can be aliases, pseudo tables, caller-dependent references, or helper objects that were not exported as standalone objects.
 
 Save each SQL result set as JSON using these names:
 
@@ -127,6 +138,12 @@ dependencies.json
 ```
 
 See `docs/schema-export-guide.md` for the full export procedure.
+
+See `docs/known-limitations.md` for generated metadata boundaries and public-facing caveats.
+
+Use `docs/release-checklist.md` before publishing or importing a new product/version snapshot.
+
+Use `docs/diagram-qa.md` when changing diagram layout, connector routing, or table-card styling.
 
 ## Import Schema Exports
 
@@ -166,5 +183,6 @@ Checked-in notes should stay separate from generated `schema.json` snapshots.
 GitHub Actions runs separate jobs for:
 
 - lint and unit tests
+- static product/version data validation
 - production build and render smoke check
 - Playwright browser smoke test

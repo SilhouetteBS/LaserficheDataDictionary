@@ -9,7 +9,6 @@ export function SchemaHealthView({ version, onDownloadJson, onSelectTable }) {
     <section className="detail-surface">
       <div className="detail-heading">
         <div>
-          <p className="product-label">{version.source.productName} {version.version}</p>
           <h2>Schema health</h2>
           <p>Review structural flags that affect reporting joins, table risk, and documentation priority.</p>
         </div>
