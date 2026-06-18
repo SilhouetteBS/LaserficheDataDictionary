@@ -1,7 +1,7 @@
 {
   "productKey": "forms",
   "productName": "Forms",
-  "defaultVersion": "12.0.2509.20409",
+  "defaultVersion": "12.0.2603.30215",
   "versions": [
     {
       "version": "11.0.2311.50564",
@@ -20,6 +20,12 @@
       "label": "Forms 12.0.2509.20409",
       "schemaUrl": "/data/forms/12.0.2509.20409/schema.json",
       "notesUrl": "/data/forms/12.0.2509.20409/notes.json"
+    },
+    {
+      "version": "12.0.2603.30215",
+      "label": "Forms 12.0.2603.30215",
+      "schemaUrl": "/data/forms/12.0.2603.30215/schema.json",
+      "notesUrl": "/data/forms/12.0.2603.30215/notes.json"
     }
   ]
 }

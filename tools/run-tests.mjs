@@ -423,6 +423,7 @@ assert.deepEqual(
     'forms 11.0.2311.50564': { total: 146, resolved: 104 },
     'forms 12.0.2503.10378': { total: 162, resolved: 119 },
     'forms 12.0.2509.20409': { total: 161, resolved: 119 },
+    'forms 12.0.2603.30215': { total: 226, resolved: 181 },
     'lfds 11.0.2403.2474': { total: 37, resolved: 36 },
     'lfds 12.0.2506.370': { total: 37, resolved: 36 },
     'lfds 12.0.2510.261': { total: 45, resolved: 43 },
