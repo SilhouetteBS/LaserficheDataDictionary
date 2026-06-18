@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getColumnUsages, getReviewItems } from '../data/schemaAnalysis.js';
 
 export function ObjectExplorer({
@@ -11,6 +11,7 @@ export function ObjectExplorer({
   onSelectTable,
 }) {
   const [selectedObjectKey, setSelectedObjectKey] = useState('');
+  const detailPanelRef = useRef(null);
   const objects = {
     views: version.source.views ?? [],
     routines: version.source.routines ?? [],
@@ -22,6 +23,30 @@ export function ObjectExplorer({
     selectedObjects.find((item, index) => getObjectKey(item, index) === selectedObjectKey) ?? selectedObjects[0];
   const reviewItems = useMemo(() => getReviewItems(version), [version]);
   const columnUsages = useMemo(() => getColumnUsages(version, columnUsageQuery), [columnUsageQuery, version]);
+  const selectedObjectTypeLabel = objectType.replace(/s$/, '');
+
+  useEffect(() => {
+    setSelectedObjectKey('');
+  }, [objectType, version.version]);
+
+  function openObjectDetails(objectKey) {
+    if (objectType === 'dependencies') {
+      return;
+    }
+
+    setSelectedObjectKey(objectKey);
+    window.requestAnimationFrame(() => {
+      detailPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      detailPanelRef.current?.focus({ preventScroll: true });
+    });
+  }
+
+  function handleObjectCardKeyDown(event, objectKey) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openObjectDetails(objectKey);
+    }
+  }
 
   return (
     <section className="detail-surface">
@@ -93,58 +118,74 @@ export function ObjectExplorer({
           </div>
         </section>
       </div>
-      <div className="object-list">
-        {selectedObjects.length === 0 ? (
-          <p className="empty-state">No {objectType} exported.</p>
-        ) : (
-          selectedObjects.slice(0, 250).map((item, index) => (
-            <article
-              className={selectedObject === item ? 'object-item selected' : 'object-item'}
-              key={`${objectType}-${getObjectKey(item, index)}`}
-            >
-              <strong>{getObjectKey(item, index)}</strong>
-              <p>{item.typeDescription ?? item.parentObjectTypeDescription ?? item.referencingObjectTypeDescription}</p>
-              <button type="button" onClick={() => setSelectedObjectKey(getObjectKey(item, index))}>
-                Open details
-              </button>
-              {item.parentObjectKey && (
-                <button type="button" onClick={() => onSelectTable(item.parentObjectKey)}>
-                  {item.parentObjectKey}
-                </button>
+      <div className={objectType === 'dependencies' ? 'object-explorer-grid object-explorer-grid-list-only' : 'object-explorer-grid'}>
+        <div className="object-list">
+          {selectedObjects.length === 0 ? (
+            <p className="empty-state">No {objectType} exported.</p>
+          ) : (
+            selectedObjects.slice(0, 250).map((item, index) => {
+              const objectKey = getObjectKey(item, index);
+              return (
+                <article
+                  className={selectedObject === item ? 'object-item selected' : 'object-item'}
+                  key={`${objectType}-${objectKey}`}
+                  onClick={() => openObjectDetails(objectKey)}
+                  onKeyDown={(event) => handleObjectCardKeyDown(event, objectKey)}
+                  role={objectType === 'dependencies' ? undefined : 'button'}
+                  tabIndex={objectType === 'dependencies' ? undefined : 0}
+                >
+                  <strong>{objectKey}</strong>
+                  <p>{item.typeDescription ?? item.parentObjectTypeDescription ?? item.referencingObjectTypeDescription}</p>
+                  {item.parentObjectKey && (
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onSelectTable(item.parentObjectKey);
+                      }}
+                    >
+                      {item.parentObjectKey}
+                    </button>
+                  )}
+                  {item.referencedObjectKey && <code>{item.referencedObjectKey}</code>}
+                </article>
+              );
+            })
+          )}
+        </div>
+        {selectedObject && objectType !== 'dependencies' && (
+          <section
+            className="object-detail-panel"
+            ref={detailPanelRef}
+            tabIndex={-1}
+          >
+            <div>
+              <p className="snapshot-kicker">{selectedObjectTypeLabel}</p>
+              <h3>{getObjectKey(selectedObject)}</h3>
+              <p>{selectedObject.typeDescription ?? selectedObject.parentObjectTypeDescription ?? 'Exported SQL object'}</p>
+            </div>
+            <dl>
+              {getObjectDetailRows(selectedObject).map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{String(value)}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="object-definition-preview">
+              <strong>Definition preview</strong>
+              {getDefinitionText(selectedObject) ? (
+                <pre>{getDefinitionText(selectedObject)}</pre>
+              ) : (
+                <p>
+                  Definition text was not included in this export. The exported definition hash is review metadata and
+                  is not counted as a schema change by itself.
+                </p>
               )}
-              {item.referencedObjectKey && <code>{item.referencedObjectKey}</code>}
-            </article>
-          ))
+            </div>
+          </section>
         )}
       </div>
-      {selectedObject && objectType !== 'dependencies' && (
-        <section className="object-detail-panel">
-          <div>
-            <p className="snapshot-kicker">{objectType.replace(/s$/, '')}</p>
-            <h3>{getObjectKey(selectedObject)}</h3>
-            <p>{selectedObject.typeDescription ?? selectedObject.parentObjectTypeDescription ?? 'Exported SQL object'}</p>
-          </div>
-          <dl>
-            {getObjectDetailRows(selectedObject).map(([label, value]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{String(value)}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="object-definition-preview">
-            <strong>Definition preview</strong>
-            {getDefinitionText(selectedObject) ? (
-              <pre>{getDefinitionText(selectedObject)}</pre>
-            ) : (
-              <p>
-                Definition text was not included in this export. The exported definition hash is review metadata and
-                is not counted as a schema change by itself.
-              </p>
-            )}
-          </div>
-        </section>
-      )}
     </section>
   );
 }

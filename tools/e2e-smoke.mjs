@@ -402,10 +402,16 @@ repositoryObjectUrl.search = new URLSearchParams({
 await page.goto(repositoryObjectUrl.toString(), { waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /triggers/i }).click();
 await page.waitForTimeout(100);
-await page.locator('.object-item').filter({ hasText: 'short_str_val_insert_update' }).getByRole('button', { name: 'Open details' }).click();
+await page.locator('.object-item').filter({ hasText: 'short_str_val_insert_update' }).click();
 await page.waitForTimeout(100);
 assert.match(await page.locator('.object-detail-panel').innerText(), /TRIGGER|Trigger/i);
 assert.match(await page.locator('.object-detail-panel').innerText(), /Definition preview/i);
+await page.getByRole('button', { name: /routines/i }).click();
+await page.waitForTimeout(100);
+await page.locator('.object-item').filter({ hasText: 'dbo.clone_entry' }).first().click();
+await page.waitForTimeout(100);
+assert.match(await page.locator('.object-detail-panel').innerText(), /routine|stored procedure|procedure/i);
+assert.match(await page.locator('.object-detail-panel').innerText(), /clone_entry/i);
 
 const repositoryViewDiagramUrl = new URL(appUrl);
 repositoryViewDiagramUrl.search = new URLSearchParams({

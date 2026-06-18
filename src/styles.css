@@ -1841,6 +1841,23 @@ button {
   margin-top: 12px;
 }
 
+.object-explorer-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(360px, 0.85fr);
+  gap: 14px;
+  align-items: start;
+  padding: 0 20px 20px;
+}
+
+.object-explorer-grid .object-list {
+  margin-top: 0;
+  padding: 0;
+}
+
+.object-explorer-grid-list-only {
+  grid-template-columns: 1fr;
+}
+
 .diff-list button,
 .diff-list span,
 .changed-table-item,
@@ -1931,6 +1948,18 @@ button {
   box-shadow: 0 0 0 2px rgba(11, 111, 114, 0.1);
 }
 
+.object-item[role="button"] {
+  cursor: pointer;
+}
+
+.object-item[role="button"]:hover,
+.object-item[role="button"]:focus-visible {
+  border-color: #0b6f72;
+  background: #f1fbfa;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11, 111, 114, 0.13);
+}
+
 .diff-list button,
 .changed-table-item button,
 .object-item button,
@@ -1983,14 +2012,24 @@ button {
 
 .object-detail-panel {
   display: grid;
-  grid-template-columns: minmax(220px, 0.8fr) minmax(260px, 1fr) minmax(280px, 1.2fr);
+  grid-template-columns: 1fr;
   gap: 12px;
-  margin: 14px 20px 20px;
+  position: sticky;
+  top: 12px;
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-left: 4px solid #0b6f72;
   border-radius: 8px;
   padding: 12px;
   background: #ffffff;
+  outline: none;
+}
+
+.object-detail-panel:focus-visible {
+  box-shadow: 0 0 0 3px rgba(11, 111, 114, 0.18);
 }
 
 .object-detail-panel h3,
@@ -2034,6 +2073,8 @@ button {
 
 .object-definition-preview {
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 9px;
@@ -2047,12 +2088,15 @@ button {
 
 .object-definition-preview pre {
   max-height: 180px;
+  max-width: 100%;
   margin: 8px 0 0;
   overflow: auto;
   color: #172938;
   font-size: 11px;
   line-height: 1.45;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .object-definition-preview p {
@@ -4706,9 +4750,15 @@ code {
   .diagram-stage.focused,
   .diff-grid,
   .metadata-panels,
+  .object-explorer-grid,
   .snapshot-details,
   .table-content-grid,
   .snapshot-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .object-detail-panel {
+    position: static;
     grid-template-columns: 1fr;
   }
 
