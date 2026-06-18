@@ -5,7 +5,6 @@
     "productName": "Fixture",
     "productVersion": "1.0",
     "databaseRole": "fixture",
-    "snapshotLabel": "Fixture snapshot",
     "exportedAtUtc": "2026-01-01T00:00:00Z"
   },
   "schemas": [

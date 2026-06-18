@@ -4,7 +4,6 @@
   "productName": "Repository",
   "productVersion": "11.0.2.338",
   "databaseRole": "repository",
-  "snapshotLabel": "Laserfiche Server 11.0.2403.2474 Metadata Export",
   "exportedAtUtc": "2026-06-17T15:50:21",
   "schemas": [
     {

@@ -189,7 +189,6 @@ function toTableDictionary(table, notes) {
 export function toVersionDictionary(schema, notes) {
   return {
     version: schema.productVersion,
-    snapshotLabel: schema.snapshotLabel,
     exportedAtUtc: schema.exportedAtUtc,
     tables: schema.tables.map((table) => toTableDictionary(table, notes)),
     source: schema,

@@ -1,8 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-const backlogPath = join(process.cwd(), 'docs', 'backlog.md');
 const outputPath = process.argv[2] ?? join(process.cwd(), 'outputs', 'release-notes-draft.md');
 
 function getRecentCommits() {
@@ -16,19 +15,6 @@ function getRecentCommits() {
   }
 }
 
-function getCompletedBacklogItems() {
-  if (!existsSync(backlogPath)) {
-    return [];
-  }
-
-  return readFileSync(backlogPath, 'utf8')
-    .split('\n')
-    .map((line) => line.match(/^\d+\.\s+\[x\]\s+(.+)$/i)?.[1])
-    .filter(Boolean)
-    .slice(-30);
-}
-
-const completedItems = getCompletedBacklogItems();
 const recentCommits = getRecentCommits();
 const generatedAt = new Date().toISOString();
 const markdown = [
@@ -36,11 +22,11 @@ const markdown = [
   '',
   `Generated: ${generatedAt}`,
   '',
-  '## Completed Backlog Highlights',
+  '## Release Highlights',
   '',
-  ...(completedItems.length > 0
-    ? completedItems.map((item) => `- ${item}`)
-    : ['- No completed backlog items were found.']),
+  '- Summarize the user-facing changes for this release.',
+  '- Note any new or updated product/version schema metadata.',
+  '- Include validation or deployment notes that matter to users.',
   '',
   '## Recent Git History',
   '',

@@ -105,7 +105,7 @@ public/
 
 `data/` is the source-side copy. `public/data/` is what the static app fetches at runtime.
 
-Database names are environment-specific and must not be used as product or version identifiers. Use explicit export labels such as `productKey`, `productVersion`, and `snapshotLabel`.
+Database names are environment-specific and must not be used as product or version identifiers. Use explicit export fields such as `productKey`, `productVersion`, and `databaseRole`.
 
 `npm run validate:data` fails on manifest/schema shape problems, duplicate keys, and broken foreign key targets. SQL expression dependency references that point to aliases, pseudo tables, check constraints, or unexported helper objects are reported as warnings because SQL Server dependency metadata can contain names that are not standalone exported objects.
 

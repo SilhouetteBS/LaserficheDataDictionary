@@ -1,9 +1,10 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
-const defaultInputDir = 'C:/Users/BlakeSmith/Downloads';
+const defaultInputDir = path.join(os.homedir(), 'Downloads');
 const defaultInputs = {
   manifest: path.join(defaultInputDir, 'manifest.json'),
   schemas: path.join(defaultInputDir, 'schemas.json'),
@@ -152,7 +153,6 @@ export function normalizeSchema({
     productName: manifest.productName,
     productVersion: manifest.productVersion,
     databaseRole: manifest.databaseRole,
-    snapshotLabel: manifest.snapshotLabel,
     exportedAtUtc: manifest.exportedAtUtc,
     schemas: schemas
       .map((schema) => ({ name: schema.schemaName }))
@@ -277,7 +277,6 @@ export function runImport() {
     productKey: getOption('product', manifest.productKey),
     productName: getOption('product-name', manifest.productName),
     databaseRole: getOption('database-role', manifest.databaseRole),
-    snapshotLabel: getOption('snapshot-label', manifest.snapshotLabel),
   };
 
   const schema = normalizeSchema({

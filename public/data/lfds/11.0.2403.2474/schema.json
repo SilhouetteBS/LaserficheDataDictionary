@@ -4,7 +4,6 @@
   "productName": "LFDS",
   "productVersion": "11.0.2403.2474",
   "databaseRole": "lfds",
-  "snapshotLabel": "LFDS 11.0.2403.2474 Metadata Export",
   "exportedAtUtc": "2026-06-17T15:42:48",
   "schemas": [
     {

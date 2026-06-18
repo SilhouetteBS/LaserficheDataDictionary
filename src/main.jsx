@@ -211,9 +211,7 @@ function versionSummaryToMarkdown(productName, version) {
   const lines = [
     `# ${productName} ${version.version}`,
     '',
-    version.snapshotLabel || 'Generated schema metadata export',
-    '',
-    '## Snapshot',
+    '## Product/version metadata',
     '',
     `- Exported: ${formatSnapshotDate(version.exportedAtUtc)}`,
     `- Export format: ${formatCompletenessValue(source.exportFormatVersion)}`,
@@ -258,17 +256,17 @@ function formatSnapshotDate(value) {
 
 function getSnapshotAgeWarning(version) {
   if (!version.exportedAtUtc) {
-    return 'Export timestamp is missing; confirm the snapshot freshness before relying on it.';
+    return 'Export timestamp is missing; confirm the metadata freshness before relying on it.';
   }
   const normalizedValue = /(?:z|[+-]\d{2}:?\d{2})$/i.test(String(version.exportedAtUtc))
     ? version.exportedAtUtc
     : `${version.exportedAtUtc}Z`;
   const exportedAt = new Date(normalizedValue);
   if (Number.isNaN(exportedAt.getTime())) {
-    return 'Export timestamp could not be parsed; confirm the snapshot freshness before relying on it.';
+    return 'Export timestamp could not be parsed; confirm the metadata freshness before relying on it.';
   }
   const ageDays = Math.floor((Date.now() - exportedAt.getTime()) / 86400000);
-  return ageDays > 180 ? `This snapshot is ${ageDays.toLocaleString()} days old; verify it still matches the target environment.` : '';
+  return ageDays > 180 ? `This metadata export is ${ageDays.toLocaleString()} days old; verify it still matches the target environment.` : '';
 }
 
 function getSnapshotStats(version) {
@@ -322,12 +320,11 @@ function SnapshotFreshnessPanel({ product, productName, version, onDownloadMarkd
   const importedVersions = product.versions.map((item) => item.version).join(', ');
 
   return (
-    <section className="snapshot-panel" aria-label="Schema snapshot freshness">
+    <section className="snapshot-panel" aria-label="Product and version metadata freshness">
       <div className="snapshot-main">
         <div>
-          <p className="snapshot-kicker">Snapshot</p>
+          <p className="snapshot-kicker">Product/version</p>
           <h2>{productName} {version.version}</h2>
-          <p>{version.snapshotLabel || 'Generated schema metadata export'}</p>
           {freshnessWarning && <p className="snapshot-warning">{freshnessWarning}</p>}
         </div>
         <div className="snapshot-actions">
@@ -337,7 +334,7 @@ function SnapshotFreshnessPanel({ product, productName, version, onDownloadMarkd
             onClick={() => setShowSnapshotDetails((current) => !current)}
             type="button"
           >
-            {showSnapshotDetails ? 'Hide details' : 'Snapshot details'}
+            {showSnapshotDetails ? 'Hide details' : 'Metadata details'}
           </button>
           <button className="snapshot-details-button" onClick={onDownloadMarkdown} type="button">
             Markdown
@@ -354,16 +351,16 @@ function SnapshotFreshnessPanel({ product, productName, version, onDownloadMarkd
         ))}
       </div>
       {showSnapshotDetails ? (
-        <div className="snapshot-details" aria-label="Schema snapshot completeness">
+        <div className="snapshot-details" aria-label="Product and version metadata completeness">
           <div>
-            <h3>Export manifest and snapshot coverage</h3>
+            <h3>Export manifest and coverage</h3>
             <p>
               Product and version identity come from the export manifest and static manifests, not the SQL Server
               database name. Database names can differ by environment.
             </p>
           </div>
 
-          <div className="snapshot-completeness-grid" aria-label="Snapshot object counts">
+          <div className="snapshot-completeness-grid" aria-label="Metadata object counts">
             {rows.map((row) => (
               <span key={row.label}>
                 <strong>{row.value}</strong>

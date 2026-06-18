@@ -15,7 +15,7 @@
 
   Usage:
     1. Connect to the target Laserfiche Forms database.
-    2. Set @ProductVersion and @SnapshotLabel below.
+    2. Set @ProductVersion below.
     3. Run the script.
     4. Save each JSON result set for import.
 */
@@ -27,7 +27,6 @@ DECLARE @ProductKey nvarchar(50) = N'forms';
 DECLARE @ProductName nvarchar(100) = N'Forms';
 DECLARE @ProductVersion nvarchar(50) = N'REPLACE_WITH_FORMS_VERSION';
 DECLARE @DatabaseRole nvarchar(50) = N'forms';
-DECLARE @SnapshotLabel nvarchar(200) = N'REPLACE_WITH_SNAPSHOT_LABEL';
 DECLARE @ExportedAtUtc datetime2(0) = SYSUTCDATETIME();
 
 -- Definitions can expose implementation details. Keep off unless needed for
@@ -41,7 +40,6 @@ SELECT
   @ProductName AS productName,
   @ProductVersion AS productVersion,
   @DatabaseRole AS databaseRole,
-  @SnapshotLabel AS snapshotLabel,
   @ExportedAtUtc AS exportedAtUtc,
   JSON_QUERY(N'[
     "manifest",

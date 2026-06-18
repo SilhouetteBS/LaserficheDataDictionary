@@ -11,7 +11,6 @@ DECLARE @ProductKey nvarchar(50) = N'forms';
 DECLARE @ProductName nvarchar(100) = N'Forms';
 DECLARE @ProductVersion nvarchar(50) = N'11.x';
 DECLARE @DatabaseRole nvarchar(50) = N'forms';
-DECLARE @SnapshotLabel nvarchar(200) = N'Forms 11 metadata export';
 ```
 
 Run the script once against the Forms 11 database and once against the Forms 12 database. The actual SQL Server database name can differ in every environment and should not be used as a product or version identifier.
@@ -55,17 +54,17 @@ If SQL Server Management Studio wraps long JSON values across lines, the importe
 Place or leave the exported files at the default download paths:
 
 ```text
-C:\Users\BlakeSmith\Downloads\manifest.json
-C:\Users\BlakeSmith\Downloads\schemas.json
-C:\Users\BlakeSmith\Downloads\tables.json
-C:\Users\BlakeSmith\Downloads\columns.json
-C:\Users\BlakeSmith\Downloads\primaryAndUniqueKeys.json
-C:\Users\BlakeSmith\Downloads\foreignKeys.json
-C:\Users\BlakeSmith\Downloads\indexes.json
-C:\Users\BlakeSmith\Downloads\views.json
-C:\Users\BlakeSmith\Downloads\routines.json
-C:\Users\BlakeSmith\Downloads\triggers.json
-C:\Users\BlakeSmith\Downloads\dependencies.json
+%USERPROFILE%\Downloads\manifest.json
+%USERPROFILE%\Downloads\schemas.json
+%USERPROFILE%\Downloads\tables.json
+%USERPROFILE%\Downloads\columns.json
+%USERPROFILE%\Downloads\primaryAndUniqueKeys.json
+%USERPROFILE%\Downloads\foreignKeys.json
+%USERPROFILE%\Downloads\indexes.json
+%USERPROFILE%\Downloads\views.json
+%USERPROFILE%\Downloads\routines.json
+%USERPROFILE%\Downloads\triggers.json
+%USERPROFILE%\Downloads\dependencies.json
 ```
 
 Product-prefixed filenames are also supported and are preferred when exporting multiple products into the same folder:
