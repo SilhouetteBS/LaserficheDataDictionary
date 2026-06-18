@@ -20,7 +20,7 @@ const defaultInputs = {
 };
 
 function readJsonResultSet(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '').replace(/\r?\n/g, '');
+  const raw = cleanJsonText(fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '').replace(/\r?\n/g, ''));
   return JSON.parse(raw);
 }
 
@@ -33,7 +33,7 @@ function readOptionalJsonResultSet(filePath) {
 }
 
 function readJsonOrTabRows(filePath, columns) {
-  const raw = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '').trim();
+  const raw = cleanJsonText(fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '').trim());
   if (!raw) {
     return [];
   }
@@ -51,6 +51,17 @@ function readJsonOrTabRows(filePath, columns) {
       }),
     );
   });
+}
+
+function cleanJsonText(value) {
+  const text = value.trim();
+  if ((text.startsWith("'[") || text.startsWith("'{")) && text.endsWith("'")) {
+    return text.slice(1, -1);
+  }
+  if ((text.startsWith('[') || text.startsWith('{')) && text.endsWith("'")) {
+    return text.slice(0, -1);
+  }
+  return text;
 }
 
 function getOption(name, fallback) {
@@ -355,7 +366,7 @@ export function runImport() {
         ...existingVersions,
         productKey: schema.productKey,
         productName: schema.productName,
-        defaultVersion: existingVersions.defaultVersion ?? schema.productVersion,
+        defaultVersion: nextVersions.at(-1)?.version ?? schema.productVersion,
         versions: nextVersions,
       },
       null,

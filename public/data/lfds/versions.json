@@ -1,7 +1,7 @@
 {
   "productKey": "lfds",
   "productName": "LFDS",
-  "defaultVersion": "12.0.2506.370",
+  "defaultVersion": "12.0.2510.261",
   "versions": [
     {
       "version": "11.0.2403.2474",
@@ -14,6 +14,12 @@
       "label": "LFDS 12.0.2506.370",
       "schemaUrl": "/data/lfds/12.0.2506.370/schema.json",
       "notesUrl": "/data/lfds/12.0.2506.370/notes.json"
+    },
+    {
+      "version": "12.0.2510.261",
+      "label": "LFDS 12.0.2510.261",
+      "schemaUrl": "/data/lfds/12.0.2510.261/schema.json",
+      "notesUrl": "/data/lfds/12.0.2510.261/notes.json"
     }
   ]
 }
