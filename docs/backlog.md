@@ -306,8 +306,8 @@ This backlog tracks remaining implementation work so completed items do not keep
 74. [x] Generate release notes with `npm run release-notes:draft`.
 75. [x] Review the full diff before release.
 76. [x] Commit changes in logical commits.
-77. [ ] Push to a branch.
-78. [ ] Open a PR.
+77. [x] Push to a branch.
+78. [x] Open a PR.
 79. [ ] Require CI to pass.
 80. [ ] Review public build artifact behavior before merging.
 81. [ ] Merge to `main`.
