@@ -429,8 +429,10 @@ assert.deepEqual(
     'lfds 12.0.2510.261': { total: 45, resolved: 43 },
     'repository 11.0.2.338': { total: 350, resolved: 240 },
     'repository 12.0.1.237': { total: 350, resolved: 240 },
+    'repository 12.0.2.343': { total: 367, resolved: 254 },
     'workflow 11.0.2306.898': { total: 199, resolved: 198 },
     'workflow 12.0.2508.3111': { total: 200, resolved: 199 },
+    'workflow 12.0.2510.3321': { total: 206, resolved: 205 },
   },
 );
 assert.ok(dataReport.warningsByScope['repository 12.0.1.237'].length > 0);
