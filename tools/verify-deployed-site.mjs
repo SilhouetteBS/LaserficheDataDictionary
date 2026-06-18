@@ -1,0 +1,65 @@
+const siteUrl = process.env.SITE_URL ?? process.argv[2];
+
+if (!siteUrl) {
+  console.error('SITE_URL or first argument is required.');
+  process.exit(1);
+}
+
+const baseUrl = new URL(siteUrl.endsWith('/') ? siteUrl : `${siteUrl}/`);
+const failures = [];
+
+async function fetchText(path) {
+  const url = new URL(path, baseUrl);
+  const response = await fetch(url, { redirect: 'follow' });
+  if (!response.ok) {
+    throw new Error(`${url.href} returned HTTP ${response.status}`);
+  }
+  return response.text();
+}
+
+async function fetchJson(path) {
+  const text = await fetchText(path);
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`${new URL(path, baseUrl).href} did not return valid JSON: ${error.message}`);
+  }
+}
+
+function assert(condition, message) {
+  if (!condition) {
+    failures.push(message);
+  }
+}
+
+const html = await fetchText('./');
+assert(/Laserfiche Data Dictionary/i.test(html), 'Home page must include the app title.');
+assert(/Content-Security-Policy/i.test(html), 'Home page must include static CSP metadata.');
+assert(!/Manual documentation notes|Import preview|Import locked|Drop export JSON files|Editing enabled/i.test(html),
+  'Public HTML must not include editing or import UI strings.');
+
+const products = await fetchJson('data/products.json');
+assert(Array.isArray(products.products) && products.products.length > 0, 'products.json must contain product entries.');
+
+for (const product of products.products ?? []) {
+  const manifestPath = product.manifestUrl?.replace(/^\//, '') ?? '';
+  const manifest = await fetchJson(manifestPath);
+  assert(Array.isArray(manifest.versions) && manifest.versions.length > 0,
+    `${manifestPath} must contain version entries.`);
+  const latest = manifest.versions.at(-1);
+  const schemaPath = latest?.schemaUrl?.replace(/^\//, '') ?? '';
+  const notesPath = latest?.notesUrl?.replace(/^\//, '') ?? '';
+  const schema = await fetchJson(schemaPath);
+  await fetchJson(notesPath);
+  assert(schema.productKey === product.productKey,
+    `${schemaPath} productKey ${schema.productKey} must match manifest product ${product.productKey}.`);
+  assert(Array.isArray(schema.tables), `${schemaPath} must include a tables array.`);
+}
+
+if (failures.length > 0) {
+  console.error('Deployed site verification failed:');
+  failures.forEach((failure) => console.error(`- ${failure}`));
+  process.exit(1);
+}
+
+console.log(`Deployed site verified: ${baseUrl.href}`);

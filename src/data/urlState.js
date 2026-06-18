@@ -1,4 +1,19 @@
-const keys = ['product', 'version', 'view', 'table', 'from', 'to', 'diagramFocus'];
+const keys = [
+  'product',
+  'version',
+  'view',
+  'table',
+  'from',
+  'to',
+  'diagramFocus',
+  'diagramMode',
+  'diagramEdges',
+  'diagramDepth',
+  'diagramZoom',
+  'diagramTypes',
+  'diagramSecondHop',
+  'diagramConnectedOnly',
+];
 
 export function readUrlState(search = window.location.search) {
   const params = new URLSearchParams(search);

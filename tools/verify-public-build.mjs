@@ -4,7 +4,10 @@ import { spawnSync } from 'node:child_process';
 
 const forbiddenStrings = [
   'Manual documentation notes',
+  'Import preview',
+  'Import locked',
   'Import notes',
+  'Drop export JSON files',
   'Export notes.json',
   'Editing enabled',
   'ManualNotesEditor',

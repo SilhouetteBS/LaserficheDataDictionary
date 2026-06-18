@@ -9,7 +9,6 @@ export function ImpactView({ version, localNotesForVersion, onDownloadJson, onSe
     <section className="detail-surface">
       <div className="detail-heading">
         <div>
-          <p className="product-label">{version.source.productName} {version.version}</p>
           <h2>Table impact</h2>
           <p>Prioritize documentation by relationship density, dependency usage, database objects, and note status.</p>
         </div>

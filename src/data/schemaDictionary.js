@@ -165,6 +165,10 @@ function toTableDictionary(table, notes) {
       tableNotes.summary ?? 'Generated from SQL Server metadata. Manual table purpose documentation pending.',
     safeReportingNotes: tableNotes.safeReportingNotes ?? tableGuidance,
     warnings: tableNotes.warnings ?? tableWarnings,
+    reviewStatus: tableNotes.reviewStatus ?? 'draft',
+    owner: tableNotes.owner ?? '',
+    reviewer: tableNotes.reviewer ?? '',
+    lastReviewedAt: tableNotes.lastReviewedAt ?? '',
     columns: table.columns.map((column) => toColumnDictionary(column, primaryKeyColumns, tableNotes)),
     relationships: toRelationshipDictionaries(table),
     keys: table.keys,
@@ -212,16 +216,89 @@ function asMap(items, getKey) {
 
 function summarizeColumnChange(beforeColumn, afterColumn) {
   const changes = [];
+  const details = [];
   if ((beforeColumn.typeDefinition ?? beforeColumn.dataType) !== (afterColumn.typeDefinition ?? afterColumn.dataType)) {
     changes.push('type');
+    details.push(`type: ${beforeColumn.typeDefinition ?? beforeColumn.dataType} -> ${afterColumn.typeDefinition ?? afterColumn.dataType}`);
   }
   if (beforeColumn.isNullable !== afterColumn.isNullable) {
     changes.push('nullability');
+    details.push(`nullable: ${beforeColumn.isNullable ? 'yes' : 'no'} -> ${afterColumn.isNullable ? 'yes' : 'no'}`);
   }
   if ((beforeColumn.defaultDefinition ?? '') !== (afterColumn.defaultDefinition ?? '')) {
     changes.push('default');
+    details.push(`default: ${beforeColumn.defaultDefinition || '(none)'} -> ${afterColumn.defaultDefinition || '(none)'}`);
   }
-  return changes;
+  return { changes, details };
+}
+
+function summarizeObjectChange(beforeObject, afterObject, fields) {
+  return fields
+    .filter(([, getValue]) => String(getValue(beforeObject) ?? '') !== String(getValue(afterObject) ?? ''))
+    .map(([label, getValue]) => `${label}: ${getValue(beforeObject) || '(none)'} -> ${getValue(afterObject) || '(none)'}`);
+}
+
+function getObjectChangeKey(object) {
+  return object.key ?? object.name ?? `${object.schemaName ?? ''}.${object.name ?? ''}`;
+}
+
+function compareSchemaObjects(beforeObjects = [], afterObjects = [], objectType) {
+  const beforeMap = asMap(beforeObjects, getObjectChangeKey);
+  const afterMap = asMap(afterObjects, getObjectChangeKey);
+  const added = [...afterMap.keys()].filter((key) => !beforeMap.has(key)).sort(byName);
+  const removed = [...beforeMap.keys()].filter((key) => !afterMap.has(key)).sort(byName);
+  const changed = [...afterMap.values()]
+    .map((afterObject) => {
+      const key = getObjectChangeKey(afterObject);
+      const beforeObject = beforeMap.get(key);
+      if (!beforeObject) {
+        return null;
+      }
+      const details = summarizeObjectChange(beforeObject, afterObject, [
+        ['type', (object) => object.typeDescription ?? object.type],
+        ['parent object', (object) => object.parentObjectKey],
+        ['disabled', (object) => object.isDisabled],
+        ['instead of trigger', (object) => object.isInsteadOfTrigger],
+      ]);
+      return details.length > 0 ? { key, objectType, details } : null;
+    })
+    .filter(Boolean)
+    .sort((left, right) => byName(left.key, right.key));
+
+  return { added, removed, changed };
+}
+
+function getDependencyChangeKey(dependency) {
+  return [
+    dependency.referencingObjectKey,
+    dependency.referencingObjectTypeDescription,
+    dependency.referencedObjectKey,
+    dependency.referencedObjectTypeDescription,
+    dependency.isSchemaBoundReference ? 'schema-bound' : '',
+    dependency.isCallerDependent ? 'caller-dependent' : '',
+    dependency.isAmbiguous ? 'ambiguous' : '',
+  ].map((value) => String(value ?? '').toLowerCase()).join('|');
+}
+
+function describeDependency(dependency) {
+  const referencing = dependency.referencingObjectKey ?? dependency.referencingObjectName ?? '(unknown)';
+  const referenced = dependency.referencedObjectKey ?? dependency.referencedEntityName ?? '(unknown)';
+  return `${referencing} -> ${referenced}`;
+}
+
+function compareDependencies(beforeDependencies = [], afterDependencies = []) {
+  const beforeMap = asMap(beforeDependencies, getDependencyChangeKey);
+  const afterMap = asMap(afterDependencies, getDependencyChangeKey);
+  return {
+    added: [...afterMap.entries()]
+      .filter(([key]) => !beforeMap.has(key))
+      .map(([, dependency]) => describeDependency(dependency))
+      .sort(byName),
+    removed: [...beforeMap.entries()]
+      .filter(([key]) => !afterMap.has(key))
+      .map(([, dependency]) => describeDependency(dependency))
+      .sort(byName),
+  };
 }
 
 function compareTables(beforeTable, afterTable) {
@@ -235,8 +312,27 @@ function compareTables(beforeTable, afterTable) {
       if (!beforeColumn) {
         return null;
       }
-      const changes = summarizeColumnChange(beforeColumn, afterColumn);
-      return changes.length > 0 ? { name: afterColumn.name, changes } : null;
+      const { changes, details } = summarizeColumnChange(beforeColumn, afterColumn);
+      return changes.length > 0 ? { name: afterColumn.name, changes, details } : null;
+    })
+    .filter(Boolean)
+    .sort((left, right) => byName(left.name, right.name));
+
+  const beforeKeys = asMap(beforeTable.keys ?? [], (key) => key.name);
+  const afterKeys = asMap(afterTable.keys ?? [], (key) => key.name);
+  const addedKeys = [...afterKeys.keys()].filter((name) => !beforeKeys.has(name)).sort(byName);
+  const removedKeys = [...beforeKeys.keys()].filter((name) => !afterKeys.has(name)).sort(byName);
+  const changedKeys = [...afterKeys.values()]
+    .map((afterKey) => {
+      const beforeKey = beforeKeys.get(afterKey.name);
+      if (!beforeKey) {
+        return null;
+      }
+      const details = summarizeObjectChange(beforeKey, afterKey, [
+        ['type', (key) => key.typeDescription ?? key.type],
+        ['columns', (key) => (key.columns ?? []).map((column) => column.columnName).join(', ')],
+      ]);
+      return details.length > 0 ? { name: afterKey.name, details } : null;
     })
     .filter(Boolean)
     .sort((left, right) => byName(left.name, right.name));
@@ -245,28 +341,70 @@ function compareTables(beforeTable, afterTable) {
   const afterIndexes = asMap(afterTable.indexes ?? [], (index) => index.name);
   const addedIndexes = [...afterIndexes.keys()].filter((name) => !beforeIndexes.has(name)).sort(byName);
   const removedIndexes = [...beforeIndexes.keys()].filter((name) => !afterIndexes.has(name)).sort(byName);
+  const changedIndexes = [...afterIndexes.values()]
+    .map((afterIndex) => {
+      const beforeIndex = beforeIndexes.get(afterIndex.name);
+      if (!beforeIndex) {
+        return null;
+      }
+      const details = summarizeObjectChange(beforeIndex, afterIndex, [
+        ['type', (index) => index.typeDescription ?? index.type],
+        ['columns', (index) => (index.columns ?? []).map((column) => column.columnName).join(', ')],
+      ]);
+      return details.length > 0 ? { name: afterIndex.name, details } : null;
+    })
+    .filter(Boolean)
+    .sort((left, right) => byName(left.name, right.name));
+
   const beforeForeignKeys = asMap(beforeTable.outgoingForeignKeys ?? [], (foreignKey) => foreignKey.name);
   const afterForeignKeys = asMap(afterTable.outgoingForeignKeys ?? [], (foreignKey) => foreignKey.name);
   const addedForeignKeys = [...afterForeignKeys.keys()].filter((name) => !beforeForeignKeys.has(name)).sort(byName);
   const removedForeignKeys = [...beforeForeignKeys.keys()].filter((name) => !afterForeignKeys.has(name)).sort(byName);
+  const changedForeignKeys = [...afterForeignKeys.values()]
+    .map((afterForeignKey) => {
+      const beforeForeignKey = beforeForeignKeys.get(afterForeignKey.name);
+      if (!beforeForeignKey) {
+        return null;
+      }
+      const details = summarizeObjectChange(beforeForeignKey, afterForeignKey, [
+        ['target table', (foreignKey) => foreignKey.referencedTableKey],
+        ['columns', (foreignKey) =>
+          (foreignKey.columns ?? [])
+            .map((column) => `${column.sourceColumnName ?? column.parentColumnName} -> ${column.referencedColumnName}`)
+            .join(', ')],
+      ]);
+      return details.length > 0 ? { name: afterForeignKey.name, details } : null;
+    })
+    .filter(Boolean)
+    .sort((left, right) => byName(left.name, right.name));
 
   return {
     key: afterTable.key,
     addedColumns,
     removedColumns,
     changedColumns,
+    addedKeys,
+    removedKeys,
+    changedKeys,
     addedIndexes,
     removedIndexes,
+    changedIndexes,
     addedForeignKeys,
     removedForeignKeys,
+    changedForeignKeys,
     changed:
       addedColumns.length > 0 ||
       removedColumns.length > 0 ||
       changedColumns.length > 0 ||
+      addedKeys.length > 0 ||
+      removedKeys.length > 0 ||
+      changedKeys.length > 0 ||
       addedIndexes.length > 0 ||
       removedIndexes.length > 0 ||
+      changedIndexes.length > 0 ||
       addedForeignKeys.length > 0 ||
-      removedForeignKeys.length > 0,
+      removedForeignKeys.length > 0 ||
+      changedForeignKeys.length > 0,
   };
 }
 
@@ -286,6 +424,15 @@ export function compareVersions(beforeVersion, afterVersion) {
     })
     .filter((table) => table?.changed)
     .sort((left, right) => byName(left.key, right.key));
+  const unchangedTables = [...afterTables.keys()]
+    .filter((key) => beforeTables.has(key) && !changedTables.some((table) => table.key === key))
+    .sort(byName);
+  const objectChanges = {
+    views: compareSchemaObjects(beforeVersion.source.views, afterVersion.source.views, 'view'),
+    routines: compareSchemaObjects(beforeVersion.source.routines, afterVersion.source.routines, 'routine'),
+    triggers: compareSchemaObjects(beforeVersion.source.triggers, afterVersion.source.triggers, 'trigger'),
+  };
+  const dependencyChanges = compareDependencies(beforeVersion.source.dependencies, afterVersion.source.dependencies);
 
   return {
     fromVersion: beforeVersion.version,
@@ -293,5 +440,8 @@ export function compareVersions(beforeVersion, afterVersion) {
     addedTables,
     removedTables,
     changedTables,
+    unchangedTables,
+    objectChanges,
+    dependencyChanges,
   };
 }

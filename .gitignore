@@ -1,7 +1,7 @@
 node_modules/
 dist/
 tmp/
+artifacts/
 .env
 .env.local
 *.log
-
