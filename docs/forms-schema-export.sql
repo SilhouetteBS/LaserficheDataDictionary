@@ -29,11 +29,6 @@ DECLARE @ProductVersion nvarchar(50) = N'REPLACE_WITH_FORMS_VERSION';
 DECLARE @DatabaseRole nvarchar(50) = N'forms';
 DECLARE @SnapshotLabel nvarchar(200) = N'REPLACE_WITH_SNAPSHOT_LABEL';
 DECLARE @ExportedAtUtc datetime2(0) = SYSUTCDATETIME();
-DECLARE @ExportedBy nvarchar(256) = SUSER_SNAME();
-
--- Keep this off unless you intentionally want environment provenance captured.
--- The importer must never use these values as product/version identifiers.
-DECLARE @IncludeEnvironmentProvenance bit = 0;
 
 -- Definitions can expose implementation details. Keep off unless needed for
 -- dependency analysis or internal documentation.
@@ -48,12 +43,6 @@ SELECT
   @DatabaseRole AS databaseRole,
   @SnapshotLabel AS snapshotLabel,
   @ExportedAtUtc AS exportedAtUtc,
-  @ExportedBy AS exportedBy,
-  CASE WHEN @IncludeEnvironmentProvenance = 1 THEN DB_NAME() ELSE NULL END AS sourceDatabaseName,
-  CASE WHEN @IncludeEnvironmentProvenance = 1 THEN @@SERVERNAME ELSE NULL END AS sourceServerName,
-  CASE WHEN @IncludeEnvironmentProvenance = 1 THEN CAST(SERVERPROPERTY('ProductVersion') AS nvarchar(128)) ELSE NULL END AS sqlServerProductVersion,
-  CASE WHEN @IncludeEnvironmentProvenance = 1 THEN CAST(SERVERPROPERTY('ProductLevel') AS nvarchar(128)) ELSE NULL END AS sqlServerProductLevel,
-  CASE WHEN @IncludeEnvironmentProvenance = 1 THEN CAST(SERVERPROPERTY('Edition') AS nvarchar(128)) ELSE NULL END AS sqlServerEdition,
   JSON_QUERY(N'[
     "manifest",
     "schemas",
@@ -378,8 +367,6 @@ SELECT
     ELSE dep.referenced_entity_name
   END AS referencedObjectKey,
   referencedObject.type_desc AS referencedObjectTypeDescription,
-  CASE WHEN @IncludeEnvironmentProvenance = 1 THEN dep.referenced_database_name ELSE NULL END AS referencedDatabaseName,
-  CASE WHEN @IncludeEnvironmentProvenance = 1 THEN dep.referenced_server_name ELSE NULL END AS referencedServerName,
   CAST(dep.is_schema_bound_reference AS bit) AS isSchemaBoundReference,
   CAST(dep.is_caller_dependent AS bit) AS isCallerDependent,
   CAST(dep.is_ambiguous AS bit) AS isAmbiguous

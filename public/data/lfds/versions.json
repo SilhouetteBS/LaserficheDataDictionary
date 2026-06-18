@@ -4,6 +4,12 @@
   "defaultVersion": "12.0.2506.370",
   "versions": [
     {
+      "version": "11.0.2403.2474",
+      "label": "LFDS 11.0.2403.2474",
+      "schemaUrl": "/data/lfds/11.0.2403.2474/schema.json",
+      "notesUrl": "/data/lfds/11.0.2403.2474/notes.json"
+    },
+    {
       "version": "12.0.2506.370",
       "label": "LFDS 12.0.2506.370",
       "schemaUrl": "/data/lfds/12.0.2506.370/schema.json",

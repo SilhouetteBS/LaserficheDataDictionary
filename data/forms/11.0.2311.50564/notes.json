@@ -1,6 +1,6 @@
 {
   "productKey": "forms",
-  "productVersion": "11.0.2311",
+  "productVersion": "11.0.2311.50564",
   "tables": {
     "dbo.cf_business_processes": {
       "confidence": "inferred",
