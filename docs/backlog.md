@@ -277,9 +277,9 @@ This backlog tracks remaining implementation work so completed items do not keep
 45. [x] Confirm Pages workflow runs `verify:public-build`.
 46. [x] Confirm Pages workflow runs `test:static-build`.
 47. [x] Confirm Pages workflow runs deployed-site verification.
-48. [ ] Run `npm run verify:deployed-site` against the final hosted URL.
-49. [ ] Make deploy workflow/checks required before release. Blocked while the repository is private without GitHub Pro; GitHub returned 403 for branch protection.
-50. [ ] Confirm hosted static paths work under the final base URL.
+48. [x] Run `npm run verify:deployed-site` against the final hosted URL.
+49. [x] Make deploy workflow/checks required before release.
+50. [x] Confirm hosted static paths work under the final base URL.
 51. [x] Add a visible in-app link to Known Limitations.
 52. [x] Add visible data provenance details where users can find them.
 53. [x] Show export script version when available.
@@ -310,7 +310,7 @@ This backlog tracks remaining implementation work so completed items do not keep
 78. [x] Open a PR.
 79. [x] Require CI to pass.
 80. [x] Review public build artifact behavior before merging.
-81. [ ] Merge to `main`.
-82. [ ] Confirm GitHub Pages deployment completed.
-83. [ ] Run deployed-site smoke check against the live URL.
-84. [ ] Tag or mark the production release.
+81. [x] Merge to `main`.
+82. [x] Confirm GitHub Pages deployment completed.
+83. [x] Run deployed-site smoke check against the live URL.
+84. [x] Tag or mark the production release.
