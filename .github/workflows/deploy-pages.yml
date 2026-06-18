@@ -35,7 +35,7 @@ jobs:
         run: npm ci
 
       - name: Verify public build
-        run: npm run verify:public-build
+        run: VITE_BASE_PATH=/LaserficheDataDictionary/ npm run verify:public-build
 
       - name: Static build smoke test
         run: npm run test:static-build

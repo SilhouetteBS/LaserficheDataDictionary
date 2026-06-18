@@ -38,6 +38,12 @@ assert(/Content-Security-Policy/i.test(html), 'Home page must include static CSP
 assert(!/Manual documentation notes|Import preview|Import locked|Drop export JSON files|Editing enabled/i.test(html),
   'Public HTML must not include editing or import UI strings.');
 
+const assetPaths = [...html.matchAll(/\b(?:src|href)="([^"]+\.(?:js|css))"/g)].map((match) => match[1]);
+assert(assetPaths.length > 0, 'Home page must reference built JavaScript or CSS assets.');
+for (const assetPath of assetPaths) {
+  await fetchText(assetPath);
+}
+
 const products = await fetchJson('data/products.json');
 assert(Array.isArray(products.products) && products.products.length > 0, 'products.json must contain product entries.');
 

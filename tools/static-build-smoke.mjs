@@ -34,8 +34,8 @@ assert.match(indexHtml, /Laserfiche Data Dictionary/i, 'index.html must include 
 
 const referencedAssets = [...indexHtml.matchAll(/(?:src|href)="([^"]+)"/g)]
   .map((match) => match[1])
-  .filter((asset) => asset.startsWith('/assets/'))
-  .map((asset) => join(distDir, asset.replace(/^\//, '')));
+  .filter((asset) => /\/assets\//.test(asset))
+  .map((asset) => join(distDir, asset.replace(/^.*\/assets\//, 'assets/')));
 
 assert.ok(referencedAssets.some((asset) => asset.endsWith('.js')), 'index.html must reference a JS bundle');
 assert.ok(referencedAssets.some((asset) => asset.endsWith('.css')), 'index.html must reference a CSS bundle');

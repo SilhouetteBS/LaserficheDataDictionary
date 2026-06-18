@@ -59,6 +59,17 @@ const EditingCapabilityGuard = editingBuildEnabled
   ? lazy(() => import('./components/EditingCapabilityGuard.jsx').then((module) => ({ default: module.EditingCapabilityGuard })))
   : null;
 
+function resolvePublicUrl(url) {
+  if (!url || /^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(url)) {
+    return url;
+  }
+
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const normalizedPath = String(url).replace(/^\/+/, '');
+  return `${normalizedBase}${normalizedPath}`;
+}
+
 class DataLoadError extends Error {
   constructor(message, details = []) {
     super(message);
@@ -68,18 +79,19 @@ class DataLoadError extends Error {
 }
 
 async function fetchJson(url) {
+  const requestUrl = resolvePublicUrl(url);
   let response;
   try {
-    response = await fetch(url);
+    response = await fetch(requestUrl);
   } catch (error) {
-    throw new DataLoadError(`Unable to request ${url}.`, [
+    throw new DataLoadError(`Unable to request ${requestUrl}.`, [
       'Confirm the static site is serving the public/data folder.',
       error.message,
     ]);
   }
 
   if (!response.ok) {
-    throw new DataLoadError(`Unable to load ${url}.`, [
+    throw new DataLoadError(`Unable to load ${requestUrl}.`, [
       `HTTP status: ${response.status}`,
       'Confirm the product manifest points to an existing JSON file.',
     ]);
@@ -88,7 +100,7 @@ async function fetchJson(url) {
   try {
     return await response.json();
   } catch (error) {
-    throw new DataLoadError(`Unable to parse JSON from ${url}.`, [
+    throw new DataLoadError(`Unable to parse JSON from ${requestUrl}.`, [
       'Confirm the file was exported as JSON and was not saved as text, HTML, or CSV.',
       error.message,
     ]);
