@@ -305,17 +305,38 @@ button {
   color: #eaf3f8;
   padding: 10px;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 5px 8px;
   align-items: center;
   text-align: left;
   border-radius: 7px;
 }
 
+.table-item-name {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-weight: 850;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
 .table-item-badges {
+  grid-column: 2;
   display: inline-flex;
   gap: 5px;
   align-items: center;
+  min-width: 0;
+  opacity: 0.9;
+}
+
+.table-item-badges .confidence,
+.table-item-badges .notes-dot {
+  min-height: 18px;
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 10px;
+  line-height: 1;
 }
 
 .favorite-toggle {
@@ -359,8 +380,7 @@ button {
 }
 
 .notes-dot,
-.notes-badge,
-.inline-note-label {
+.notes-badge {
   color: #095b51;
   background: #dff5ef;
   border: 1px solid #bde6dc;
@@ -376,16 +396,6 @@ button {
   min-height: 24px;
   display: inline-flex;
   align-items: center;
-}
-
-.inline-note-label {
-  margin-left: 6px;
-}
-
-.table-item > span:nth-child(2) {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .table-item.selected {
@@ -1375,24 +1385,75 @@ button {
 
 .table-context-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 14px;
-  padding: 0 20px 18px;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 12px 20px 10px;
   border-bottom: 1px solid var(--line);
 }
 
-.table-trend-card {
-  grid-column: 1 / -1;
+.table-context-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
 }
 
-.table-examples-card {
-  grid-column: 1 / -1;
+.table-context-bar button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0 9px;
+  color: #52636f;
+  background: #f8fbfc;
+  text-align: left;
+  cursor: pointer;
+}
+
+.table-context-bar button:hover,
+.table-context-bar button:focus-visible,
+.table-context-bar button.selected {
+  border-color: #0b6f72;
+  background: #f1fbfa;
+}
+
+.table-context-bar strong {
+  color: #172938;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.table-context-bar span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-context-popover {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+.table-context-popover > p {
+  margin: 8px 0 0;
+  color: #52636f;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .table-example-list {
   display: grid;
   gap: 8px;
-  margin-top: 10px;
 }
 
 .table-example-list details {
@@ -1424,7 +1485,6 @@ button {
 .column-lifecycle-list {
   display: grid;
   gap: 6px;
-  margin-top: 10px;
 }
 
 .table-version-trend {
@@ -1477,7 +1537,6 @@ button {
 .related-object-groups {
   display: grid;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .related-object-groups > div {

@@ -71,6 +71,7 @@ export function TableWorkspace({
   const [activeTableTab, setActiveTableTab] = useState('columns');
   const [columnQuery, setColumnQuery] = useState('');
   const [tableDensity, setTableDensity] = useState('comfortable');
+  const [activeContextPanel, setActiveContextPanel] = useState('');
   const reviewAgeWarning = getReviewAgeWarning(selectedTable);
   const relatedObjects = useMemo(() => getRelatedObjectItems(version, selectedTable.id), [selectedTable.id, version]);
   const tableStability = useMemo(() => getTableStability(version, selectedTable.id), [selectedTable.id, version]);
@@ -207,7 +208,7 @@ export function TableWorkspace({
               >
                 <Star size={12} fill={favoriteObjects.includes(table.id) ? 'currentColor' : 'none'} />
               </span>
-              <span>{table.name}</span>
+              <span className="table-item-name" title={table.name}>{table.name}</span>
               <span className="table-item-badges">
                 {table.hasManualNotes && <span className="notes-dot" title="Manual notes present">Notes</span>}
                 <ConfidenceBadge value={table.confidence} />
@@ -283,23 +284,16 @@ export function TableWorkspace({
         </section>
 
         <section className="table-context-grid" aria-label="Table reporting context">
-          <div className="context-card">
-            <div className="section-title-row">
-              <h3>Version stability</h3>
-              <span>{tableStability?.stable ? 'All versions' : 'Partial'}</span>
-            </div>
-            {tableStability ? (
-              <p>
-                Seen in {tableStability.appearanceCount} of {tableStability.versionCount} imported versions
-                {tableStability.firstSeen ? `, from ${tableStability.firstSeen} through ${tableStability.lastSeen}` : ''}.
-              </p>
-            ) : (
-              <p>No version trend data is available for this table.</p>
-            )}
-          </div>
-          <RelatedObjectsCard relatedObjects={relatedObjects} navigateToTable={navigateToTable} />
-          <TableTrendCard columnLifecycleItems={columnLifecycleItems} tableVersionTrend={tableVersionTrend} />
-          <TableExamplesCard examples={tableReportingExamples} />
+          <TableContextBar
+            activePanel={activeContextPanel}
+            columnLifecycleItems={columnLifecycleItems}
+            examples={tableReportingExamples}
+            relatedObjects={relatedObjects}
+            tableStability={tableStability}
+            tableVersionTrend={tableVersionTrend}
+            navigateToTable={navigateToTable}
+            onActivePanelChange={setActiveContextPanel}
+          />
         </section>
 
         <nav className="table-detail-tabs" aria-label="Table detail sections">
@@ -487,7 +481,6 @@ export function TableWorkspace({
                   <span>{column.nullable ? 'Yes' : 'No'}</span>
                   <span>
                     {column.purpose}
-                    {column.hasManualNotes && <em className="inline-note-label"> noted</em>}
                   </span>
                   <ConfidenceBadge value={column.confidence} />
                 </div>
@@ -505,15 +498,83 @@ export function TableWorkspace({
   );
 }
 
-function TableExamplesCard({ examples }) {
+function TableContextBar({
+  activePanel,
+  columnLifecycleItems,
+  examples,
+  relatedObjects,
+  tableStability,
+  tableVersionTrend,
+  navigateToTable,
+  onActivePanelChange,
+}) {
+  const stableColumns = columnLifecycleItems.filter((column) => column.stable).length;
+  const changedColumns = columnLifecycleItems.length - stableColumns;
+  const relatedGroups = getRelatedObjectGroups(relatedObjects);
+  const relatedTotal = relatedGroups.reduce((count, [, items]) => count + items.length, 0);
+  const stabilitySummary = tableStability
+    ? `${tableStability.appearanceCount}/${tableStability.versionCount} versions`
+    : 'No trend data';
+  const relatedSummary = relatedTotal === 0
+    ? 'None'
+    : relatedGroups.map(([label, items]) => `${items.length} ${label.toLowerCase()}`).join(', ');
+  const panelItems = [
+    ['stability', 'Stability', stabilitySummary],
+    ['related', 'Related', relatedSummary],
+    ['trend', 'Trend', `${changedColumns} changed cols`],
+    ['examples', 'Examples', `${examples.length} generated`],
+  ];
+  const activePanelTitle = panelItems.find(([key]) => key === activePanel)?.[1] ?? '';
+
   return (
-    <div className="context-card table-examples-card">
-      <div className="section-title-row">
-        <h3>Examples using this table</h3>
-        <span>{examples.length}</span>
+    <>
+      <div className="table-context-bar">
+        {panelItems.map(([key, label, summary]) => (
+          <button
+            className={activePanel === key ? 'selected' : ''}
+            key={key}
+            type="button"
+            onClick={() => onActivePanelChange(activePanel === key ? '' : key)}
+          >
+            <strong>{label}</strong>
+            <span>{summary}</span>
+          </button>
+        ))}
       </div>
+      {activePanel && (
+        <section className="table-context-popover" aria-label={`${activePanelTitle} details`}>
+          <div className="section-title-row">
+            <h3>{activePanelTitle}</h3>
+            <button className="text-button" type="button" onClick={() => onActivePanelChange('')}>
+              Close
+            </button>
+          </div>
+          {activePanel === 'stability' && <VersionStabilityDetails tableStability={tableStability} />}
+          {activePanel === 'related' && (
+            <RelatedObjectsDetails
+              groups={relatedGroups}
+              navigateToTable={navigateToTable}
+              total={relatedTotal}
+            />
+          )}
+          {activePanel === 'trend' && (
+            <TableTrendDetails
+              columnLifecycleItems={columnLifecycleItems}
+              tableVersionTrend={tableVersionTrend}
+            />
+          )}
+          {activePanel === 'examples' && <TableExamplesDetails examples={examples} />}
+        </section>
+      )}
+    </>
+  );
+}
+
+function TableExamplesDetails({ examples }) {
+  return (
+    <>
       {examples.length === 0 ? (
-        <p>No table-specific examples could be generated for this table.</p>
+        <p className="empty-state">No table-specific examples could be generated for this table.</p>
       ) : (
         <div className="table-example-list">
           {examples.map((example) => (
@@ -525,7 +586,20 @@ function TableExamplesCard({ examples }) {
           ))}
         </div>
       )}
-    </div>
+    </>
+  );
+}
+
+function VersionStabilityDetails({ tableStability }) {
+  if (!tableStability) {
+    return <p>No version trend data is available for this table.</p>;
+  }
+
+  return (
+    <p>
+      Seen in {tableStability.appearanceCount} of {tableStability.versionCount} imported versions
+      {tableStability.firstSeen ? `, from ${tableStability.firstSeen} through ${tableStability.lastSeen}` : ''}.
+    </p>
   );
 }
 
@@ -551,21 +625,18 @@ function MetadataList({ title, items, emptyText, renderItem }) {
   );
 }
 
-function RelatedObjectsCard({ relatedObjects, navigateToTable }) {
-  const groups = [
+function getRelatedObjectGroups(relatedObjects) {
+  return [
     ['Views', relatedObjects.views],
     ['Routines', relatedObjects.routines],
     ['Triggers', relatedObjects.triggers],
     ['Dependencies', relatedObjects.dependencies],
   ];
-  const total = groups.reduce((count, [, items]) => count + items.length, 0);
+}
 
+function RelatedObjectsDetails({ groups, navigateToTable, total }) {
   return (
-    <div className="context-card">
-      <div className="section-title-row">
-        <h3>Related objects</h3>
-        <span>{total}</span>
-      </div>
+    <>
       {total === 0 ? (
         <p>No related views, routines, triggers, or dependencies were found in the export.</p>
       ) : (
@@ -593,20 +664,13 @@ function RelatedObjectsCard({ relatedObjects, navigateToTable }) {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
-function TableTrendCard({ columnLifecycleItems, tableVersionTrend }) {
-  const stableColumns = columnLifecycleItems.filter((column) => column.stable).length;
-  const changedColumns = columnLifecycleItems.length - stableColumns;
-
+function TableTrendDetails({ columnLifecycleItems, tableVersionTrend }) {
   return (
-    <div className="context-card table-trend-card">
-      <div className="section-title-row">
-        <h3>Table version trend</h3>
-        <span>{changedColumns} changed columns</span>
-      </div>
+    <>
       <div className="table-version-trend">
         {tableVersionTrend.map((item) => (
           <span className={item.present ? '' : 'missing'} key={item.version}>
@@ -626,7 +690,7 @@ function TableTrendCard({ columnLifecycleItems, tableVersionTrend }) {
           </span>
         ))}
       </div>
-    </div>
+    </>
   );
 }
 
