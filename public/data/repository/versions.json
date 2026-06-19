@@ -1,7 +1,7 @@
 {
   "productKey": "repository",
   "productName": "Repository",
-  "defaultVersion": "12.0.2.343",
+  "defaultVersion": "12.0.2603.1630",
   "versions": [
     {
       "version": "11.0.2.338",
@@ -20,6 +20,12 @@
       "label": "Repository 12.0.2.343",
       "schemaUrl": "/data/repository/12.0.2.343/schema.json",
       "notesUrl": "/data/repository/12.0.2.343/notes.json"
+    },
+    {
+      "version": "12.0.2603.1630",
+      "label": "Repository 12.0.2603.1630",
+      "schemaUrl": "/data/repository/12.0.2603.1630/schema.json",
+      "notesUrl": "/data/repository/12.0.2603.1630/notes.json"
     }
   ]
 }
