@@ -68,6 +68,14 @@ export function DependencyReportView({ version, onDownloadJson }) {
                     ].filter(Boolean).join(', ') || 'none'}
                   </dd>
                 </div>
+                <div>
+                  <dt>Likely reason</dt>
+                  <dd>{item.likelyReason}</dd>
+                </div>
+                <div>
+                  <dt>Suggested fix</dt>
+                  <dd>{item.suggestedFix}</dd>
+                </div>
               </dl>
             </article>
           ))

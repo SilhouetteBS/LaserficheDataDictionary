@@ -68,6 +68,7 @@ export function getTableCompletionBySchema(version) {
   return [...bySchema.entries()]
     .map(([schemaName, counts]) => ({
       label: schemaName,
+      tooltip: `Tables in the ${schemaName} schema with manual notes compared with total exported ${schemaName} tables.`,
       value: `${counts.documented}/${counts.total}`,
     }))
     .sort((left, right) => left.label.localeCompare(right.label));
@@ -75,13 +76,33 @@ export function getTableCompletionBySchema(version) {
 
 export function getObjectCompletionByType(version) {
   const objectGroups = [
-    ['Tables', version.tables, (table) => table.hasManualNotes],
-    ['Views', version.source?.views ?? [], () => false],
-    ['Routines', version.source?.routines ?? [], () => false],
-    ['Triggers', version.source?.triggers ?? [], () => false],
+    [
+      'Tables',
+      version.tables,
+      (table) => table.hasManualNotes,
+      'Exported SQL Server tables. The count shows tables with manual notes compared with total exported tables.',
+    ],
+    [
+      'Views',
+      version.source?.views ?? [],
+      () => false,
+      'Exported SQL Server views. Views are shown for reference and dependency mapping; manual notes currently apply to tables.',
+    ],
+    [
+      'Routines',
+      version.source?.routines ?? [],
+      () => false,
+      'Exported stored procedures and functions. Routines are shown for definition review and dependency mapping; manual notes currently apply to tables.',
+    ],
+    [
+      'Triggers',
+      version.source?.triggers ?? [],
+      () => false,
+      'Exported SQL Server triggers. Triggers are shown for definition review and dependency mapping; manual notes currently apply to tables.',
+    ],
   ];
-  return objectGroups.map(([label, items, isDocumented]) => {
+  return objectGroups.map(([label, items, isDocumented, tooltip]) => {
     const documented = items.filter(isDocumented).length;
-    return { label, value: `${documented}/${items.length}` };
+    return { label, tooltip, value: `${documented}/${items.length}` };
   });
 }

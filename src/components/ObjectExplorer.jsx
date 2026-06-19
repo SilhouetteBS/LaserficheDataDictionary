@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { getObjectRelatedItems } from '../data/projectInsights.js';
 import { getColumnUsages, getReviewItems } from '../data/schemaAnalysis.js';
 
 export function ObjectExplorer({
@@ -24,6 +25,10 @@ export function ObjectExplorer({
   const reviewItems = useMemo(() => getReviewItems(version), [version]);
   const columnUsages = useMemo(() => getColumnUsages(version, columnUsageQuery), [columnUsageQuery, version]);
   const selectedObjectTypeLabel = objectType.replace(/s$/, '');
+  const selectedObjectRelatedItems = useMemo(
+    () => (selectedObject ? getObjectRelatedItems(version, selectedObject) : { parent: [], dependencies: [] }),
+    [selectedObject, version],
+  );
 
   useEffect(() => {
     setSelectedObjectKey('');
@@ -81,8 +86,12 @@ export function ObjectExplorer({
             {reviewItems.slice(0, 8).map((item) => (
               <button key={item.key} type="button" onClick={() => onSelectTable(item.key)}>
                 <strong>{item.key}</strong>
-                <span>{item.confidence} - {item.columnsNeedingReview} unknown columns</span>
+                <span>
+                  {item.confidence} - {item.columnsNeedingReview} unknown columns - {item.relationshipCount} relationships
+                </span>
+                <span>{item.reason}</span>
                 {item.hasManualNotes && <em>notes started</em>}
+                <em>priority {item.score}</em>
               </button>
             ))}
           </div>
@@ -181,6 +190,37 @@ export function ObjectExplorer({
                   Definition text was not included in this export. The exported definition hash is review metadata and
                   is not counted as a schema change by itself.
                 </p>
+              )}
+            </div>
+            <div className="object-related-panel">
+              <strong>Related objects</strong>
+              {selectedObjectRelatedItems.parent.length + selectedObjectRelatedItems.dependencies.length === 0 ? (
+                <p>No parent or dependency rows were matched for this object.</p>
+              ) : (
+                <div className="related-object-groups">
+                  {selectedObjectRelatedItems.parent.length > 0 && (
+                    <div>
+                      <strong>Parent</strong>
+                      {selectedObjectRelatedItems.parent.map((item) => (
+                        <button key={item.key} type="button" onClick={() => onSelectTable(item.key)}>
+                          <span>{item.key}</span>
+                          <em>{item.description}</em>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {selectedObjectRelatedItems.dependencies.length > 0 && (
+                    <div>
+                      <strong>Dependencies</strong>
+                      {selectedObjectRelatedItems.dependencies.map((item) => (
+                        <button key={item.key} type="button">
+                          <span>{item.key}</span>
+                          <em>{item.description}</em>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </section>

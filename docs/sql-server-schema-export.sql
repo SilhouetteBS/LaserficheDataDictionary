@@ -18,6 +18,11 @@
     2. Set @ProductKey, @ProductName, @ProductVersion, and @DatabaseRole below.
     3. Run the script.
     4. Save each JSON result set for import.
+
+  Compatibility:
+    Requires SQL Server 2016 or newer for FOR JSON output.
+    dbo.sysdiagrams is excluded because it is created by SSMS database diagrams,
+    not by Laserfiche product installs.
 */
 
 SET NOCOUNT ON;
@@ -94,6 +99,7 @@ LEFT JOIN sys.extended_properties ep
   AND ep.minor_id = 0
   AND ep.name = N'MS_Description'
 WHERE t.is_ms_shipped = 0
+  AND NOT (s.name = N'dbo' AND t.name = N'sysdiagrams')
 ORDER BY s.name, t.name
 FOR JSON PATH;
 
@@ -148,6 +154,7 @@ LEFT JOIN sys.extended_properties ep
   AND ep.minor_id = c.column_id
   AND ep.name = N'MS_Description'
 WHERE t.is_ms_shipped = 0
+  AND NOT (s.name = N'dbo' AND t.name = N'sysdiagrams')
 ORDER BY s.name, t.name, c.column_id
 FOR JSON PATH;
 
@@ -182,6 +189,7 @@ JOIN sys.indexes i
   ON i.object_id = kc.parent_object_id
   AND i.index_id = kc.unique_index_id
 WHERE t.is_ms_shipped = 0
+  AND NOT (s.name = N'dbo' AND t.name = N'sysdiagrams')
 ORDER BY s.name, t.name, kc.type, kc.name
 FOR JSON PATH;
 
@@ -220,6 +228,9 @@ JOIN sys.schemas sourceSchema ON sourceSchema.schema_id = sourceTable.schema_id
 JOIN sys.tables referencedTable ON referencedTable.object_id = fk.referenced_object_id
 JOIN sys.schemas referencedSchema ON referencedSchema.schema_id = referencedTable.schema_id
 WHERE sourceTable.is_ms_shipped = 0
+  AND referencedTable.is_ms_shipped = 0
+  AND NOT (sourceSchema.name = N'dbo' AND sourceTable.name = N'sysdiagrams')
+  AND NOT (referencedSchema.name = N'dbo' AND referencedTable.name = N'sysdiagrams')
 ORDER BY sourceSchema.name, sourceTable.name, fk.name
 FOR JSON PATH;
 
@@ -256,6 +267,7 @@ FROM sys.indexes i
 JOIN sys.tables t ON t.object_id = i.object_id
 JOIN sys.schemas s ON s.schema_id = t.schema_id
 WHERE t.is_ms_shipped = 0
+  AND NOT (s.name = N'dbo' AND t.name = N'sysdiagrams')
   AND i.index_id > 0
   AND i.is_hypothetical = 0
 ORDER BY s.name, t.name, i.index_id
@@ -348,6 +360,7 @@ JOIN sys.objects parentObject ON parentObject.object_id = tr.parent_id
 JOIN sys.schemas parentSchema ON parentSchema.schema_id = parentObject.schema_id
 JOIN sys.schemas triggerSchema ON triggerSchema.schema_id = triggerObject.schema_id
 WHERE tr.is_ms_shipped = 0
+  AND NOT (parentSchema.name = N'dbo' AND parentObject.name = N'sysdiagrams')
 ORDER BY parentSchema.name, parentObject.name, tr.name
 FOR JSON PATH;
 
@@ -373,5 +386,7 @@ JOIN sys.objects referencingObject ON referencingObject.object_id = dep.referenc
 JOIN sys.schemas referencingSchema ON referencingSchema.schema_id = referencingObject.schema_id
 LEFT JOIN sys.objects referencedObject ON referencedObject.object_id = dep.referenced_id
 WHERE referencingObject.is_ms_shipped = 0
+  AND NOT (referencingSchema.name = N'dbo' AND referencingObject.name = N'sysdiagrams')
+  AND NOT (dep.referenced_schema_name = N'dbo' AND dep.referenced_entity_name = N'sysdiagrams')
 ORDER BY referencingSchema.name, referencingObject.name, dep.referenced_schema_name, dep.referenced_entity_name
 FOR JSON PATH;

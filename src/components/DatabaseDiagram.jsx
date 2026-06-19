@@ -34,6 +34,91 @@ function downloadJson(filename, value) {
   downloadText(filename, `${JSON.stringify(value, null, 2)}\n`, 'application/json');
 }
 
+const builtInDiagramPresets = [
+  {
+    id: 'builtin:users-security',
+    label: 'Users and security',
+    query: 'user',
+    edgeType: 'all',
+    mode: 'focused',
+    focusCandidates: ['dbo.cf_users', 'dbo.users', 'dbo.trustee', 'dbo.account_cache', 'dbo.directory_objects'],
+  },
+  {
+    id: 'builtin:process-instances',
+    label: 'Process instances',
+    query: 'instance',
+    edgeType: 'foreignKey',
+    mode: 'focused',
+    focusCandidates: ['dbo.cf_bp_main_instances', 'dbo.bp_instances', 'dbo.Instance'],
+  },
+  {
+    id: 'builtin:tasks',
+    label: 'Tasks',
+    query: 'task',
+    edgeType: 'foreignKey',
+    mode: 'focused',
+    focusCandidates: ['dbo.cf_bp_worker_instances', 'dbo.Task', 'dbo.Activity'],
+  },
+  {
+    id: 'builtin:repository-fields',
+    label: 'Repository fields',
+    query: 'field',
+    edgeType: 'all',
+    mode: 'focused',
+    focusCandidates: ['dbo.propdef', 'dbo.template', 'dbo.cf_fields'],
+  },
+  {
+    id: 'builtin:workflow-runtime',
+    label: 'Workflow runtime',
+    query: 'Instance',
+    edgeType: 'all',
+    mode: 'focused',
+    focusCandidates: ['dbo.Instance', 'dbo.Activity', 'dbo.Workflow'],
+  },
+  {
+    id: 'builtin:lfds-identities',
+    label: 'LFDS identities',
+    query: 'identity',
+    edgeType: 'all',
+    mode: 'focused',
+    focusCandidates: ['dbo.identity_providers', 'dbo.directory_objects', 'dbo.groups'],
+  },
+];
+
+function findShortestPath(nodes, edges, startKey, endKey) {
+  if (!startKey || !endKey || startKey === endKey) {
+    return null;
+  }
+
+  const adjacency = new Map(nodes.map((node) => [node.key, []]));
+  edges.forEach((edge) => {
+    if (!adjacency.has(edge.from) || !adjacency.has(edge.to)) {
+      return;
+    }
+    adjacency.get(edge.from).push({ edge, nextKey: edge.to });
+    adjacency.get(edge.to).push({ edge, nextKey: edge.from });
+  });
+
+  const queue = [{ key: startKey, pathEdges: [], pathKeys: [startKey] }];
+  const visited = new Set([startKey]);
+  while (queue.length > 0) {
+    const current = queue.shift();
+    for (const next of adjacency.get(current.key) ?? []) {
+      if (visited.has(next.nextKey)) {
+        continue;
+      }
+      const pathEdges = [...current.pathEdges, next.edge];
+      const pathKeys = [...current.pathKeys, next.nextKey];
+      if (next.nextKey === endKey) {
+        return { edges: pathEdges, keys: pathKeys };
+      }
+      visited.add(next.nextKey);
+      queue.push({ key: next.nextKey, pathEdges, pathKeys });
+    }
+  }
+  return null;
+}
+
 export function DatabaseDiagram({
   diagramQuery,
   edgeType,
@@ -71,6 +156,10 @@ export function DatabaseDiagram({
   const [relationshipPanelWidth, setRelationshipPanelWidth] = useState(320);
   const [selectedObjectKey, setSelectedObjectKey] = useState('');
   const [relationshipDirectionFilter, setRelationshipDirectionFilter] = useState('all');
+  const [dependencyDirection, setDependencyDirection] = useState('both');
+  const [edgeLabelMode, setEdgeLabelMode] = useState('minimal');
+  const [pathStartKey, setPathStartKey] = useState('');
+  const [pathEndKey, setPathEndKey] = useState('');
   const [diagramViewport, setDiagramViewport] = useState({
     clientHeight: 0,
     clientWidth: 0,
@@ -89,9 +178,9 @@ export function DatabaseDiagram({
       mode,
       depth,
       objectTypeFilters,
-      { connectedOnly },
+      { connectedOnly, dependencyDirection },
     ),
-    [connectedOnly, depth, diagramQuery, edgeType, focusKey, mode, objectTypeFilters, version],
+    [connectedOnly, dependencyDirection, depth, diagramQuery, edgeType, focusKey, mode, objectTypeFilters, version],
   );
   const focusedNode = focusKey ? diagram.positionedByKey.get(focusKey) : null;
   const visibleDiagramEdges = showSecondHopEdges
@@ -107,6 +196,11 @@ export function DatabaseDiagram({
     return true;
   });
   const activeEdgeId = hoveredEdgeId || pinnedEdgeId;
+  const pathResult = useMemo(
+    () => findShortestPath(diagram.nodes, visibleDiagramEdges, pathStartKey, pathEndKey),
+    [diagram.nodes, pathEndKey, pathStartKey, visibleDiagramEdges],
+  );
+  const pathEdgeIds = new Set(pathResult?.edges.map((edge) => edge.id) ?? []);
   const selectedRelationship = activeEdgeId
     ? diagram.relationshipDetails.find((relationship) => relationship.id === activeEdgeId)
     : null;
@@ -252,6 +346,10 @@ export function DatabaseDiagram({
     onModeChange('full');
     onDepthChange(1);
     onZoomChange(1);
+    setDependencyDirection('both');
+    setEdgeLabelMode('minimal');
+    setPathStartKey('');
+    setPathEndKey('');
   }
 
   function selectDiagramNode(node) {
@@ -472,6 +570,7 @@ export function DatabaseDiagram({
     onModeChange('full');
     setHoveredEdgeId('');
     setPinnedEdgeId('');
+    setDependencyDirection('both');
   }
 
   function getEdgeClassName(edge, baseClassName) {
@@ -481,7 +580,9 @@ export function DatabaseDiagram({
     } ${edge.hop === 2 ? 'diagram-edge-second-hop' : ''} ${
       activeEdgeId === edge.id ? 'diagram-edge-selected' : ''
     } ${
-      isRelationshipSelected && activeEdgeId !== edge.id ? 'diagram-edge-dimmed' : ''
+      pathEdgeIds.has(edge.id) ? 'diagram-edge-path' : ''
+    } ${
+      isRelationshipSelected && activeEdgeId !== edge.id && !pathEdgeIds.has(edge.id) ? 'diagram-edge-dimmed' : ''
     }`;
   }
 
@@ -490,7 +591,7 @@ export function DatabaseDiagram({
       return false;
     }
 
-    return !activeEdgeId || activeEdgeId === edge.id;
+    return pathEdgeIds.has(edge.id) || !activeEdgeId || activeEdgeId === edge.id;
   }
 
   function changeObjectTypeFilter(type, checked) {
@@ -498,6 +599,50 @@ export function DatabaseDiagram({
       ...objectTypeFilters,
       [type]: checked,
     });
+  }
+
+  function changeObjectTypeMode(type) {
+    if (!type) {
+      return;
+    }
+    if (type === 'all') {
+      onObjectTypeFiltersChange({ table: true, view: true, routine: true, trigger: true });
+      return;
+    }
+    onObjectTypeFiltersChange({
+      table: type === 'table',
+      view: type === 'view',
+      routine: type === 'routine',
+      trigger: type === 'trigger',
+    });
+    if (type !== 'table' && edgeType === 'foreignKey') {
+      onEdgeTypeChange('dependency');
+    }
+  }
+
+  function applyBuiltInPreset(presetId) {
+    const preset = builtInDiagramPresets.find((item) => item.id === presetId);
+    if (!preset) {
+      return false;
+    }
+    const focusCandidate = preset.focusCandidates.find((key) =>
+      (version.source.tables ?? []).some((table) => table.key === key)
+      || (version.source.views ?? []).some((view) => view.key === key)
+      || (version.source.routines ?? []).some((routine) => routine.key === key)
+      || (version.source.triggers ?? []).some((trigger) => trigger.name === key),
+    );
+    onDiagramQueryChange(focusCandidate ? '' : preset.query);
+    onEdgeTypeChange(preset.edgeType);
+    onModeChange(focusCandidate ? preset.mode : 'full');
+    onFocusKeyChange(focusCandidate ?? '');
+    onDepthChange(1);
+    return true;
+  }
+
+  function applyPreset(presetId) {
+    if (!applyBuiltInPreset(presetId)) {
+      onApplyPreset(presetId);
+    }
   }
 
   function setQuickEdgeFilter(nextEdgeType) {
@@ -783,22 +928,25 @@ export function DatabaseDiagram({
         connectedOnly={connectedOnly}
         curvedConnectors={curvedConnectors}
         depth={depth}
+        dependencyDirection={dependencyDirection}
         edgeType={edgeType}
+        edgeLabelMode={edgeLabelMode}
         focusedNode={focusedNode}
         highContrastDiagram={highContrastDiagram}
         mode={mode}
         objectTypeFilters={objectTypeFilters}
-        presets={presets}
+        presets={[...builtInDiagramPresets, ...presets]}
         selectedRelationship={selectedRelationship}
         showSecondHopEdges={showSecondHopEdges}
         onCenterFocusedObject={centerFocusedObject}
         onChangeObjectTypeFilter={changeObjectTypeFilter}
+        onChangeObjectTypeMode={changeObjectTypeMode}
         onClearFocus={clearFocus}
         onDepthChange={onDepthChange}
         onExportDiagramPng={exportDiagramPng}
         onExportDiagramSvg={exportDiagramSvg}
         onExportSelectedRelationship={exportSelectedRelationship}
-        onApplyPreset={onApplyPreset}
+        onApplyPreset={applyPreset}
         onFitDiagram={() => fitBounds(getDiagramBounds())}
         onFitSelection={() => fitBounds(getSelectedBounds())}
         onPanDiagram={panDiagram}
@@ -808,9 +956,43 @@ export function DatabaseDiagram({
         onSetCompactColumns={setCompactColumns}
         onSetConnectedOnly={onConnectedOnlyChange}
         onSetCurvedConnectors={setCurvedConnectors}
+        onSetDependencyDirection={setDependencyDirection}
+        onSetEdgeLabelMode={setEdgeLabelMode}
         onSetHighContrastDiagram={setHighContrastDiagram}
         onSetShowSecondHopEdges={onShowSecondHopEdgesChange}
       />
+
+      <div className="diagram-path-finder" aria-label="Diagram path finder">
+        <div>
+          <strong>Path finder</strong>
+          <span>Show how two visible objects connect.</span>
+        </div>
+        <label>
+          <span>From</span>
+          <select value={pathStartKey} onChange={(event) => setPathStartKey(event.target.value)}>
+            <option value="">Select object</option>
+            {diagram.nodes.map((node) => (
+              <option key={node.key} value={node.key}>{node.key}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>To</span>
+          <select value={pathEndKey} onChange={(event) => setPathEndKey(event.target.value)}>
+            <option value="">Select object</option>
+            {diagram.nodes.map((node) => (
+              <option key={node.key} value={node.key}>{node.key}</option>
+            ))}
+          </select>
+        </label>
+        {pathStartKey && pathEndKey ? (
+          <p>
+            {pathResult
+              ? `${pathResult.edges.length} hop${pathResult.edges.length === 1 ? '' : 's'}: ${pathResult.keys.join(' -> ')}`
+              : 'No visible path found. Try All edges, Full database mode, or broader object type filters.'}
+          </p>
+        ) : null}
+      </div>
 
       {showDiagramStatusRow ? (
         <div className="diagram-status-row" role="note" aria-label="Diagram status warnings">
@@ -903,6 +1085,7 @@ export function DatabaseDiagram({
               activeEdgeId={activeEdgeId}
               compactColumns={compactColumns}
               diagram={diagram}
+              edgeLabelMode={edgeLabelMode}
               focusKey={focusKey}
               mode={mode}
               pinnedEdgeId={pinnedEdgeId}

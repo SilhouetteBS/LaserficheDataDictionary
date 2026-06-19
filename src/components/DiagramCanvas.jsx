@@ -13,6 +13,7 @@ export function DiagramCanvas({
   activeEdgeId,
   compactColumns,
   diagram,
+  edgeLabelMode = 'minimal',
   focusKey,
   mode,
   pinnedEdgeId,
@@ -38,6 +39,16 @@ export function DiagramCanvas({
   getEndpointTextAnchor,
   shouldRenderHighlightOverlay,
 }) {
+  function getVisibleEdgeLabel(edge) {
+    if (edgeLabelMode === 'columns') {
+      return edge.columnSummary || edge.label;
+    }
+    if (edgeLabelMode === 'full') {
+      return edge.label;
+    }
+    return '';
+  }
+
   return (
     <div
       className={compactColumns ? 'database-diagram diagram-cards-compact' : 'database-diagram'}
@@ -66,6 +77,7 @@ export function DiagramCanvas({
         {visibleDiagramEdges.map((edge) => {
           const geometry = getDiagramEdgeGeometry(edge);
           const isActiveEdge = activeEdgeId === edge.id;
+          const edgeLabel = getVisibleEdgeLabel(edge);
           if (!geometry) {
             return null;
           }
@@ -98,6 +110,15 @@ export function DiagramCanvas({
                     : `url(#diagram-arrow-${edge.type === 'foreignKey' ? 'fk' : 'dependency'})`
                 }
               />
+              {edgeLabel ? (
+                <text
+                  className="diagram-edge-label diagram-edge-label-visible"
+                  x={geometry.midX}
+                  y={Math.min(geometry.startY, geometry.endY) + Math.abs(geometry.endY - geometry.startY) / 2 - 8}
+                >
+                  {edgeLabel}
+                </text>
+              ) : null}
             </g>
           );
         })}

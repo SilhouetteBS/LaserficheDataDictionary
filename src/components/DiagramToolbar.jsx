@@ -28,7 +28,9 @@ export function DiagramToolbar({
   connectedOnly,
   curvedConnectors,
   depth,
+  dependencyDirection,
   edgeType,
+  edgeLabelMode,
   focusedNode,
   highContrastDiagram,
   mode,
@@ -38,6 +40,7 @@ export function DiagramToolbar({
   showSecondHopEdges,
   onCenterFocusedObject,
   onChangeObjectTypeFilter,
+  onChangeObjectTypeMode,
   onClearFocus,
   onDepthChange,
   onExportDiagramPng,
@@ -53,6 +56,8 @@ export function DiagramToolbar({
   onSetCompactColumns,
   onSetConnectedOnly,
   onSetCurvedConnectors,
+  onSetDependencyDirection,
+  onSetEdgeLabelMode,
   onSetHighContrastDiagram,
   onSetShowSecondHopEdges,
 }) {
@@ -179,6 +184,14 @@ export function DiagramToolbar({
             <div className="diagram-toolbar-menu-panel diagram-options-panel">
               <div className="diagram-options-section">
                 <strong>Display</strong>
+                <label>
+                  <span>Edge labels</span>
+                  <select value={edgeLabelMode} onChange={(event) => onSetEdgeLabelMode(event.target.value)}>
+                    <option value="minimal">Minimal</option>
+                    <option value="columns">Column pair</option>
+                    <option value="full">Full name</option>
+                  </select>
+                </label>
                 <label className="diagram-toggle">
                   <input checked={compactColumns} onChange={(event) => onSetCompactColumns(event.target.checked)} type="checkbox" />
                   <span>Compact cards</span>
@@ -208,12 +221,36 @@ export function DiagramToolbar({
                       onChange={(event) => onSetConnectedOnly(event.target.checked)}
                       type="checkbox"
                     />
-                    <span>Connected only</span>
+                  <span>Connected only</span>
+                </label>
+              ) : null}
+                {(edgeType === 'dependency' || edgeType === 'all') && focusedNode ? (
+                  <label>
+                    <span>Dependencies</span>
+                    <select
+                      value={dependencyDirection}
+                      onChange={(event) => onSetDependencyDirection(event.target.value)}
+                    >
+                      <option value="both">References and referenced by</option>
+                      <option value="references">References</option>
+                      <option value="referencedBy">Referenced by</option>
+                    </select>
                   </label>
                 ) : null}
               </div>
               <div className="diagram-options-section">
                 <strong>Object types</strong>
+                <label>
+                  <span>Show only</span>
+                  <select value="" onChange={(event) => onChangeObjectTypeMode(event.target.value)}>
+                    <option value="">Choose type</option>
+                    <option value="all">All object types</option>
+                    <option value="table">Tables only</option>
+                    <option value="view">Views only</option>
+                    <option value="routine">Routines only</option>
+                    <option value="trigger">Triggers only</option>
+                  </select>
+                </label>
                 <div className="diagram-object-filter" aria-label="Diagram object type filters">
                   {['table', 'view', 'routine', 'trigger'].map((type) => (
                     <label key={type}>

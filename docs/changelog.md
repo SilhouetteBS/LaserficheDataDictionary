@@ -1,0 +1,29 @@
+# Changelog
+
+This changelog tracks public data and application changes for Laserfiche Data Dictionary.
+
+## Unreleased
+
+- Added public contribution documentation for schema exports.
+- Added a data privacy page that explains schema metadata boundaries.
+- Added GitHub issue templates for schema export submissions, documentation corrections, and bug reports.
+- Added a contribution workflow for proposed documentation notes and duplicate version review.
+- Added import preview checks for expected files, duplicate versions, and product/version consistency.
+- Added table note templates, table-specific reporting examples, glossary terms, and export script compatibility notes.
+- Added diagram path finding, built-in diagram presets, edge label modes, object-type filtering, and dependency direction controls.
+- Removed `dbo.sysdiagrams` from imported data and added importer/script exclusions so SSMS-created database diagrams are not published.
+
+## Imported Versions
+
+- Forms: `11.0.2311.50564`, `12.0.2503.10378`, `12.0.2509.20409`, `12.0.2603.30215`
+- LFDS: `11.0.2403.2474`, `12.0.2506.370`, `12.0.2510.261`
+- Repository: `11.0.2.338`, `12.0.1.237`, `12.0.2.343`
+- Workflow: `11.0.2306.898`, `12.0.2508.3111`, `12.0.2510.3321`
+
+## Initial Public Baseline
+
+- Static product/version data model
+- Tables, compare, diagram, objects, impact, health, dependencies, and reporting views
+- Public read-only warning
+- Optional local editing mode for internal documentation review
+- GitHub Pages deployment workflow

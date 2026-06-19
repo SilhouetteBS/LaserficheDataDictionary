@@ -1,4 +1,10 @@
 import { useState } from 'react';
+import {
+  getComparisonSeverityCounts,
+  getTableChangeSeverity,
+  getVersionChangeSummary,
+  isBreakingTableChange,
+} from '../data/projectInsights.js';
 
 export function ComparisonSummary({
   comparison,
@@ -15,6 +21,8 @@ export function ComparisonSummary({
     return null;
   }
   const unchangedCount = comparison.unchangedTables?.length ?? 0;
+  const changeSummary = getVersionChangeSummary(comparison);
+  const severityCounts = getComparisonSeverityCounts(comparison);
 
   return (
     <section className="comparison-panel" aria-label="Version comparison summary">
@@ -56,16 +64,19 @@ export function ComparisonSummary({
           ))}
         </div>
       </div>
-      {comparison.changedTables.length > 0 && (
-        <div className="comparison-sample">
-          <strong>Changed tables</strong>
-          <div>
-            {comparison.changedTables.slice(0, 5).map((table) => (
-              <span key={table.key}>{table.key}</span>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="comparison-narrative" aria-label="What changed in this version">
+        <strong>What changed</strong>
+        <ul>
+          {changeSummary.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="comparison-severity-strip" aria-label="Changed table severity">
+        <span className="severity-high"><strong>{severityCounts.high}</strong> high risk</span>
+        <span className="severity-medium"><strong>{severityCounts.medium}</strong> medium risk</span>
+        <span className="severity-low"><strong>{severityCounts.low}</strong> low risk</span>
+      </div>
     </section>
   );
 }
@@ -110,6 +121,8 @@ export function ComparisonDetail({
   onSelectedTableKeyChange,
 }) {
   const [changeFilter, setChangeFilter] = useState('all');
+  const [showBreakingOnly, setShowBreakingOnly] = useState(false);
+  const [columnDetailFilter, setColumnDetailFilter] = useState('all');
   if (!comparison) {
     return null;
   }
@@ -133,7 +146,21 @@ export function ComparisonDetail({
     (total, group) => total + group.changes.added.length + group.changes.removed.length + group.changes.changed.length,
     0,
   );
+  const changeFilterCounts = {
+    all: comparison.changedTables.length,
+    columns: comparison.changedTables.filter((table) =>
+      table.addedColumns.length + table.removedColumns.length + table.changedColumns.length > 0).length,
+    keys: comparison.changedTables.filter((table) =>
+      table.addedKeys.length + table.removedKeys.length + table.changedKeys.length > 0).length,
+    indexes: comparison.changedTables.filter((table) =>
+      table.addedIndexes.length + table.removedIndexes.length + table.changedIndexes.length > 0).length,
+    relationships: comparison.changedTables.filter((table) =>
+      table.addedForeignKeys.length + table.removedForeignKeys.length + table.changedForeignKeys.length > 0).length,
+  };
   const filteredChangedTables = comparison.changedTables.filter((table) => {
+    if (showBreakingOnly && !isBreakingTableChange(table)) {
+      return false;
+    }
     if (changeFilter === 'all') {
       return true;
     }
@@ -151,6 +178,16 @@ export function ComparisonDetail({
     }
     return true;
   });
+  const filteredChangedColumns = selectedChange?.changedColumns.filter((column) => {
+    if (columnDetailFilter === 'all') {
+      return true;
+    }
+    return column.changes.includes(columnDetailFilter);
+  }) ?? [];
+  const showAddedColumns = columnDetailFilter === 'all' || columnDetailFilter === 'added';
+  const showRemovedColumns = columnDetailFilter === 'all' || columnDetailFilter === 'removed';
+  const showKeyIndexChanges = columnDetailFilter === 'all' || columnDetailFilter === 'key_index';
+  const showRelationshipChanges = columnDetailFilter === 'all';
   return (
     <section className="detail-surface">
       <div className="detail-heading">
@@ -186,22 +223,39 @@ export function ComparisonDetail({
               type="button"
             >
               {label}
+              <span>{changeFilterCounts[value]}</span>
             </button>
           ))}
+          <label className="comparison-filter-toggle">
+            <input
+              checked={showBreakingOnly}
+              onChange={(event) => setShowBreakingOnly(event.target.checked)}
+              type="checkbox"
+            />
+            Breaking only
+          </label>
         </div>
         <div className="changed-table-list">
           {filteredChangedTables.map((table) => (
             <article className="changed-table-item" key={table.key}>
-              <button type="button" onClick={() => onSelectTable(table.key)}>
-                {table.key}
-              </button>
-              <button
-                className="change-detail-button"
-                type="button"
-                onClick={() => onSelectedTableKeyChange(table.key)}
-              >
-                Details
-              </button>
+              <div className="changed-table-heading">
+                <button type="button" onClick={() => onSelectTable(table.key)}>
+                  {table.key}
+                </button>
+                <span
+                  className={`severity-badge severity-${getTableChangeSeverity(table).level}`}
+                  title={getTableChangeSeverity(table).reason}
+                >
+                  {getTableChangeSeverity(table).label}
+                </span>
+                <button
+                  className="change-detail-button"
+                  type="button"
+                  onClick={() => onSelectedTableKeyChange(table.key)}
+                >
+                  Details
+                </button>
+              </div>
               <div className="change-tags">
                 <span className="change-status-added">+{table.addedColumns.length} columns</span>
                 <span className="change-status-removed">-{table.removedColumns.length} columns</span>
@@ -252,33 +306,71 @@ export function ComparisonDetail({
             </button>
           </div>
           <h4>{selectedChange.key}</h4>
-          <div className="drilldown-grid">
-            <ChangeBucket title="Added columns" items={selectedChange.addedColumns} />
-            <ChangeBucket title="Removed columns" items={selectedChange.removedColumns} />
-            <ChangeBucket
-              title="Changed columns"
-              items={selectedChange.changedColumns.map((column) => `${column.name}: ${column.details.join('; ')}`)}
-            />
-            <ChangeBucket title="Added keys" items={selectedChange.addedKeys} />
-            <ChangeBucket title="Removed keys" items={selectedChange.removedKeys} />
-            <ChangeBucket
-              title="Changed keys"
-              items={selectedChange.changedKeys.map((key) => `${key.name}: ${key.details.join('; ')}`)}
-            />
-            <ChangeBucket title="Added indexes" items={selectedChange.addedIndexes} />
-            <ChangeBucket title="Removed indexes" items={selectedChange.removedIndexes} />
-            <ChangeBucket
-              title="Changed indexes"
-              items={selectedChange.changedIndexes.map((index) => `${index.name}: ${index.details.join('; ')}`)}
-            />
-            <ChangeBucket title="Added foreign keys" items={selectedChange.addedForeignKeys} />
-            <ChangeBucket title="Removed foreign keys" items={selectedChange.removedForeignKeys} />
-            <ChangeBucket
-              title="Changed foreign keys"
-              items={selectedChange.changedForeignKeys.map((foreignKey) =>
-                `${foreignKey.name}: ${foreignKey.details.join('; ')}`)}
-            />
+          <div className="comparison-filter-row comparison-filter-row-compact" aria-label="Changed column detail filters">
+            {[
+              ['all', 'All columns', selectedChange.addedColumns.length + selectedChange.removedColumns.length + selectedChange.changedColumns.length],
+              ['added', 'Added', selectedChange.addedColumns.length],
+              ['removed', 'Removed', selectedChange.removedColumns.length],
+              ['type', 'Type changed', selectedChange.changedColumns.filter((column) => column.changes.includes('type')).length],
+              ['nullability', 'Nullability', selectedChange.changedColumns.filter((column) => column.changes.includes('nullability')).length],
+              [
+                'key_index',
+                'Keys/indexes',
+                selectedChange.addedKeys.length +
+                  selectedChange.removedKeys.length +
+                  selectedChange.changedKeys.length +
+                  selectedChange.addedIndexes.length +
+                  selectedChange.removedIndexes.length +
+                  selectedChange.changedIndexes.length,
+              ],
+            ].map(([value, label, count]) => (
+              <button
+                className={columnDetailFilter === value ? 'selected' : ''}
+                key={value}
+                onClick={() => setColumnDetailFilter(value)}
+                type="button"
+              >
+                {label}
+                <span>{count}</span>
+              </button>
+            ))}
           </div>
+          <div className="drilldown-grid">
+            {showAddedColumns && <ChangeBucket title="Added columns" items={selectedChange.addedColumns} />}
+            {showRemovedColumns && <ChangeBucket title="Removed columns" items={selectedChange.removedColumns} />}
+            {columnDetailFilter !== 'added' && columnDetailFilter !== 'removed' && columnDetailFilter !== 'key_index' && (
+              <ChangeBucket
+                title="Changed columns"
+                items={filteredChangedColumns.map((column) => `${column.name}: ${column.details.join('; ')}`)}
+              />
+            )}
+            {showKeyIndexChanges && <ChangeBucket title="Added keys" items={selectedChange.addedKeys} />}
+            {showKeyIndexChanges && <ChangeBucket title="Removed keys" items={selectedChange.removedKeys} />}
+            {showKeyIndexChanges && (
+              <ChangeBucket
+                title="Changed keys"
+                items={selectedChange.changedKeys.map((key) => `${key.name}: ${key.details.join('; ')}`)}
+              />
+            )}
+            {showKeyIndexChanges && <ChangeBucket title="Added indexes" items={selectedChange.addedIndexes} />}
+            {showKeyIndexChanges && <ChangeBucket title="Removed indexes" items={selectedChange.removedIndexes} />}
+            {showKeyIndexChanges && (
+              <ChangeBucket
+                title="Changed indexes"
+                items={selectedChange.changedIndexes.map((index) => `${index.name}: ${index.details.join('; ')}`)}
+              />
+            )}
+            {showRelationshipChanges && <ChangeBucket title="Added foreign keys" items={selectedChange.addedForeignKeys} />}
+            {showRelationshipChanges && <ChangeBucket title="Removed foreign keys" items={selectedChange.removedForeignKeys} />}
+            {showRelationshipChanges && (
+              <ChangeBucket
+                title="Changed foreign keys"
+                items={selectedChange.changedForeignKeys.map((foreignKey) =>
+                  `${foreignKey.name}: ${foreignKey.details.join('; ')}`)}
+              />
+            )}
+          </div>
+          <TableDefinitionCompare selectedChange={selectedChange} />
         </section>
       )}
     </section>
@@ -302,6 +394,43 @@ function ObjectChangeBucket({ group }) {
           status="changed"
           items={group.changes.changed.map((object) => `${object.key}: ${object.details.join('; ')}`)}
         />
+      </div>
+    </div>
+  );
+}
+
+function TableDefinitionCompare({ selectedChange }) {
+  return (
+    <section className="table-definition-compare" aria-label="Side-by-side table definition comparison">
+      <div className="section-title-row">
+        <h3>Table definition comparison</h3>
+        <span>{selectedChange.beforeDefinition.columns.length} {'->'} {selectedChange.afterDefinition.columns.length} columns</span>
+      </div>
+      <div className="definition-compare-grid">
+        <DefinitionSnapshot title="Before" definition={selectedChange.beforeDefinition} />
+        <DefinitionSnapshot title="After" definition={selectedChange.afterDefinition} />
+      </div>
+    </section>
+  );
+}
+
+function DefinitionSnapshot({ title, definition }) {
+  return (
+    <div className="definition-snapshot">
+      <strong>{title}</strong>
+      <dl>
+        <div><dt>Columns</dt><dd>{definition.columns.length}</dd></div>
+        <div><dt>Keys</dt><dd>{definition.keys.length}</dd></div>
+        <div><dt>Indexes</dt><dd>{definition.indexes.length}</dd></div>
+        <div><dt>Foreign keys</dt><dd>{definition.foreignKeys.length}</dd></div>
+      </dl>
+      <div className="definition-column-list">
+        {definition.columns.slice(0, 80).map((column) => (
+          <span key={column.name}>
+            <code>{column.name}</code>
+            <em>{column.type}{column.nullable ? ' null' : ' not null'}</em>
+          </span>
+        ))}
       </div>
     </div>
   );

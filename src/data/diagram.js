@@ -181,7 +181,7 @@ export function buildDatabaseDiagram(
   const needle = normalize(query);
   let visibleKeys = new Set(nodes.keys());
   const enabledObjectTypes = {
-    table: true,
+    table: objectTypeFilters.table !== false,
     view: objectTypeFilters.view !== false,
     routine: objectTypeFilters.routine !== false,
     trigger: objectTypeFilters.trigger !== false,
@@ -292,6 +292,20 @@ export function buildDatabaseDiagram(
   let visibleEdges = edges.filter((edge) => visibleKeys.has(edge.from) && visibleKeys.has(edge.to));
   if (mode === 'focused') {
     visibleEdges = focusKey ? visibleEdges.filter((edge) => focusedEdgeIds.has(edge.id)) : [];
+  }
+  if (focusKey && options.dependencyDirection && options.dependencyDirection !== 'both') {
+    visibleEdges = visibleEdges.filter((edge) => {
+      if (edge.type !== 'dependency') {
+        return true;
+      }
+      if (options.dependencyDirection === 'references') {
+        return edge.from === focusKey;
+      }
+      if (options.dependencyDirection === 'referencedBy') {
+        return edge.to === focusKey;
+      }
+      return true;
+    });
   }
   if (mode === 'focused') {
     visibleEdges = visibleEdges.map((edge) => ({

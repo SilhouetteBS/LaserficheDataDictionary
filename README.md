@@ -83,6 +83,13 @@ Use editing-enabled builds only for local or internal review. The public static 
 
 Before publishing publicly, follow `docs/production-readiness.md`. The public deployment workflow also runs a deployed-site smoke check against the GitHub Pages URL after deployment.
 
+Public project pages:
+
+- `docs/contribute-schema-exports.md`: metadata-only schema export contribution steps.
+- `docs/data-privacy.md`: what the project collects and what must not be submitted.
+- `docs/changelog.md`: imported versions and public-facing changes.
+- `docs/feedback.md`: analytics-free feedback through GitHub Issues.
+
 ## Data Layout
 
 Generated schema files and manual documentation remain separate:
@@ -115,7 +122,7 @@ Use `docs/forms-schema-export.sql` for Forms exports.
 
 Use `docs/sql-server-schema-export.sql` for a product-neutral export script that can be used for LFDS, Repository, Workflow, or Forms databases.
 
-The export script reads SQL Server catalog metadata only. It does not read Laserfiche business table rows and does not modify the database.
+The export script requires SQL Server 2016 or newer because it uses `FOR JSON`. It reads SQL Server catalog metadata only. It does not read Laserfiche business table rows and does not modify the database.
 
 This documentation is for read-only reporting, troubleshooting, and education. Manually writing to or modifying Laserfiche product databases, tables, etc. will violate your Laserfiche Support plan and is not supported.
 
@@ -139,11 +146,19 @@ dependencies.json
 
 See `docs/schema-export-guide.md` for the full export procedure.
 
+See `docs/contribute-schema-exports.md` for public contribution steps and privacy checks.
+
 See `docs/known-limitations.md` for generated metadata boundaries and public-facing caveats.
+
+See `docs/data-privacy.md` before submitting schema exports or screenshots.
 
 Use `docs/release-checklist.md` before publishing or importing a new product/version snapshot.
 
 Use `docs/diagram-qa.md` when changing diagram layout, connector routing, or table-card styling.
+
+Use `docs/contribution-workflow.md` for note review status, schema export submission expectations, and duplicate version handling.
+
+Use GitHub issue templates for schema export submissions, documentation corrections, and bug reports.
 
 ## Import Schema Exports
 
@@ -177,6 +192,8 @@ Manual notes are available only when `VITE_ENABLE_EDITING=true`. In editing-enab
 - export a review-ready `notes.json` shape for the selected product/version
 
 Checked-in notes should stay separate from generated `schema.json` snapshots.
+
+Drafted notes should move through Draft, In review, and Approved before being copied into the static data folders.
 
 ## CI
 

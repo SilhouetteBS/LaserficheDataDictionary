@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
-import { buildGeneratedReportingExamples, getReportingPaths } from '../data/reporting.js';
+import { exportCompatibilityNotes, glossaryTerms } from '../data/glossary.js';
+import { buildGeneratedReportingExamples, getReportingPaths, getReportingQuestions } from '../data/reporting.js';
 
 export function ReportingGuide({ version, onSelectTable }) {
   const knownTables = new Set(version.tables.map((table) => table.id));
   const reportingPaths = getReportingPaths(version.source.productKey);
+  const reportingQuestions = getReportingQuestions(version.source.productKey);
   const generatedExamples = useMemo(() => buildGeneratedReportingExamples(version), [version]);
 
   return (
@@ -15,6 +17,31 @@ export function ReportingGuide({ version, onSelectTable }) {
         </div>
       </div>
       <div className="reporting-grid">
+        <section className="reporting-section reporting-section-wide">
+          <div className="section-title-row">
+            <h3>Common reporting questions</h3>
+            <span>{reportingQuestions.length}</span>
+          </div>
+          <div className="reporting-question-list">
+            {reportingQuestions.map((item) => (
+              <article className="reporting-question" key={item.question}>
+                <h4>{item.question}</h4>
+                <p>{item.guidance}</p>
+                <div className="path-chain">
+                  {item.tables.map((tableKey) =>
+                    knownTables.has(tableKey) ? (
+                      <button key={tableKey} type="button" onClick={() => onSelectTable(tableKey)}>
+                        {tableKey}
+                      </button>
+                    ) : (
+                      <span key={tableKey}>{tableKey}</span>
+                    ),
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
         <section className="reporting-section">
           <div className="section-title-row">
             <h3>Common paths</h3>
@@ -70,6 +97,31 @@ export function ReportingGuide({ version, onSelectTable }) {
               </article>
             ))}
           </div>
+        </section>
+        <section className="reporting-section">
+          <div className="section-title-row">
+            <h3>Glossary</h3>
+            <span>{glossaryTerms.length}</span>
+          </div>
+          <div className="glossary-list">
+            {glossaryTerms.map((item) => (
+              <div key={item.term}>
+                <strong>{item.term}</strong>
+                <p>{item.definition}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="reporting-section">
+          <div className="section-title-row">
+            <h3>Export script compatibility</h3>
+            <span>{exportCompatibilityNotes.length}</span>
+          </div>
+          <ul className="compatibility-list">
+            {exportCompatibilityNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
         </section>
       </div>
     </section>

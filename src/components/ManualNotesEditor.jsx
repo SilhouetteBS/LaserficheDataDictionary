@@ -75,6 +75,36 @@ export function ManualNotesEditor({
     });
   }
 
+  function applyTableTemplate() {
+    const primaryKeyColumns = selectedTable.keys
+      .filter((key) => key.type === 'PK')
+      .flatMap((key) => key.columns.map((column) => column.columnName));
+    const commonColumns = selectedTable.columns
+      .filter((column) => /id|name|date|time|status|type|guid|uuid/i.test(column.name))
+      .slice(0, 8)
+      .map((column) => `${column.name}: ${column.dataType}`);
+    const joinTargets = selectedTable.relationships
+      .slice(0, 6)
+      .map((relationship) => `${relationship.type} ${relationship.table}`);
+
+    setDraft((current) => ({
+      ...current,
+      summary: current.summary || `Purpose: document what ${selectedTable.id} represents and how it is used for read-only reporting.`,
+      safeReportingNotes: [
+        current.safeReportingNotes,
+        'Purpose: ',
+        'Safe reporting use: SELECT-only reporting and troubleshooting. Do not write to this table.',
+        `Known columns: ${commonColumns.length > 0 ? commonColumns.join('; ') : 'review exported columns before documenting.'}`,
+        `Join notes: ${joinTargets.length > 0 ? joinTargets.join('; ') : 'no exported foreign key relationships were found.'}`,
+        `Version caveats: primary keys ${primaryKeyColumns.length > 0 ? primaryKeyColumns.join(', ') : 'were not exported'}; validate joins against the selected product/version.`,
+      ].filter(Boolean).join('\n'),
+      warnings: [
+        current.warnings,
+        'Do not use this documentation as approval to modify Laserfiche product database records.',
+      ].filter(Boolean).join('\n'),
+    }));
+  }
+
   return (
     <section className="manual-notes-panel">
       <div className="section-title-row">
@@ -167,6 +197,9 @@ export function ManualNotesEditor({
         </label>
       </div>
       <div className="notes-editor-actions">
+        <button className="text-button" type="button" onClick={applyTableTemplate}>
+          Apply note template
+        </button>
         <button className="text-button" type="button" onClick={saveDraft}>
           Save local note
         </button>
@@ -186,8 +219,8 @@ export function ManualNotesEditor({
         </label>
       </div>
       <p className="notes-editor-footnote">
-        Local storage key: <code>{localNotesKey}</code>. Export notes.json produces a product/version notes file ready
-        for review before copying into the data folder.
+        Local storage key: <code>{localNotesKey}</code>. Export notes.json creates a proposed contribution file.
+        Review status should move from Draft to In review to Approved before the notes are copied into the static data folder.
       </p>
     </section>
   );

@@ -34579,154 +34579,6 @@
       "triggers": []
     },
     {
-      "key": "dbo.sysdiagrams",
-      "schemaName": "dbo",
-      "name": "sysdiagrams",
-      "columns": [
-        {
-          "name": "name",
-          "ordinal": 1,
-          "dataType": "sysname",
-          "typeDefinition": "sysname",
-          "precision": 0,
-          "scale": 0,
-          "isNullable": false,
-          "isIdentity": false,
-          "isComputed": false,
-          "isRowGuidColumn": false,
-          "collationName": "SQL_Latin1_General_CP1_CI_AS"
-        },
-        {
-          "name": "principal_id",
-          "ordinal": 2,
-          "dataType": "int",
-          "typeDefinition": "int",
-          "precision": 10,
-          "scale": 0,
-          "isNullable": false,
-          "isIdentity": false,
-          "isComputed": false,
-          "isRowGuidColumn": false
-        },
-        {
-          "name": "diagram_id",
-          "ordinal": 3,
-          "dataType": "int",
-          "typeDefinition": "int",
-          "precision": 10,
-          "scale": 0,
-          "isNullable": false,
-          "isIdentity": true,
-          "isComputed": false,
-          "isRowGuidColumn": false
-        },
-        {
-          "name": "version",
-          "ordinal": 4,
-          "dataType": "int",
-          "typeDefinition": "int",
-          "precision": 10,
-          "scale": 0,
-          "isNullable": true,
-          "isIdentity": false,
-          "isComputed": false,
-          "isRowGuidColumn": false
-        },
-        {
-          "name": "definition",
-          "ordinal": 5,
-          "dataType": "varbinary",
-          "typeDefinition": "varbinary(max)",
-          "maxLength": -1,
-          "precision": 0,
-          "scale": 0,
-          "isNullable": true,
-          "isIdentity": false,
-          "isComputed": false,
-          "isRowGuidColumn": false
-        }
-      ],
-      "keys": [
-        {
-          "name": "PK__sysdiagr__C2B05B61B620347E",
-          "type": "PK",
-          "typeDescription": "PRIMARY_KEY_CONSTRAINT",
-          "backingIndexName": "PK__sysdiagr__C2B05B61B620347E",
-          "columns": [
-            {
-              "columnName": "diagram_id",
-              "ordinal": 1,
-              "isDescending": false
-            }
-          ]
-        },
-        {
-          "name": "UK_principal_name",
-          "type": "UQ",
-          "typeDescription": "UNIQUE_CONSTRAINT",
-          "backingIndexName": "UK_principal_name",
-          "columns": [
-            {
-              "columnName": "principal_id",
-              "ordinal": 1,
-              "isDescending": false
-            },
-            {
-              "columnName": "name",
-              "ordinal": 2,
-              "isDescending": false
-            }
-          ]
-        }
-      ],
-      "outgoingForeignKeys": [],
-      "incomingForeignKeys": [],
-      "indexes": [
-        {
-          "name": "PK__sysdiagr__C2B05B61B620347E",
-          "typeDescription": "CLUSTERED",
-          "isUnique": true,
-          "isPrimaryKey": true,
-          "isUniqueConstraint": false,
-          "hasFilter": false,
-          "columns": [
-            {
-              "columnName": "diagram_id",
-              "keyOrdinal": 1,
-              "indexColumnOrdinal": 1,
-              "isIncludedColumn": false,
-              "isDescending": false
-            }
-          ]
-        },
-        {
-          "name": "UK_principal_name",
-          "typeDescription": "NONCLUSTERED",
-          "isUnique": true,
-          "isPrimaryKey": false,
-          "isUniqueConstraint": true,
-          "hasFilter": false,
-          "columns": [
-            {
-              "columnName": "principal_id",
-              "keyOrdinal": 1,
-              "indexColumnOrdinal": 1,
-              "isIncludedColumn": false,
-              "isDescending": false
-            },
-            {
-              "columnName": "name",
-              "keyOrdinal": 2,
-              "indexColumnOrdinal": 2,
-              "isIncludedColumn": false,
-              "isDescending": false
-            }
-          ]
-        }
-      ],
-      "triggers": []
-    },
-    {
       "key": "dbo.task_metrics_mapping",
       "schemaName": "dbo",
       "name": "task_metrics_mapping",
@@ -44152,21 +44004,7 @@
           "isOutput": false
         }
       ],
-      "dependencies": [
-        {
-          "referencingSchemaName": "dbo",
-          "referencingObjectName": "sp_alterdiagram",
-          "referencingObjectKey": "dbo.sp_alterdiagram",
-          "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-          "referencedSchemaName": "dbo",
-          "referencedEntityName": "sysdiagrams",
-          "referencedObjectKey": "dbo.sysdiagrams",
-          "referencedObjectTypeDescription": "USER_TABLE",
-          "isSchemaBoundReference": false,
-          "isCallerDependent": false,
-          "isAmbiguous": false
-        }
-      ]
+      "dependencies": []
     },
     {
       "key": "dbo.sp_creatediagram",
@@ -44210,21 +44048,7 @@
           "isOutput": false
         }
       ],
-      "dependencies": [
-        {
-          "referencingSchemaName": "dbo",
-          "referencingObjectName": "sp_creatediagram",
-          "referencingObjectKey": "dbo.sp_creatediagram",
-          "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-          "referencedSchemaName": "dbo",
-          "referencedEntityName": "sysdiagrams",
-          "referencedObjectKey": "dbo.sysdiagrams",
-          "referencedObjectTypeDescription": "USER_TABLE",
-          "isSchemaBoundReference": false,
-          "isCallerDependent": false,
-          "isAmbiguous": false
-        }
-      ]
+      "dependencies": []
     },
     {
       "key": "dbo.sp_dropdiagram",
@@ -44251,21 +44075,7 @@
           "isOutput": false
         }
       ],
-      "dependencies": [
-        {
-          "referencingSchemaName": "dbo",
-          "referencingObjectName": "sp_dropdiagram",
-          "referencingObjectKey": "dbo.sp_dropdiagram",
-          "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-          "referencedSchemaName": "dbo",
-          "referencedEntityName": "sysdiagrams",
-          "referencedObjectKey": "dbo.sysdiagrams",
-          "referencedObjectTypeDescription": "USER_TABLE",
-          "isSchemaBoundReference": false,
-          "isCallerDependent": false,
-          "isAmbiguous": false
-        }
-      ]
+      "dependencies": []
     },
     {
       "key": "dbo.sp_helpdiagramdefinition",
@@ -44292,21 +44102,7 @@
           "isOutput": false
         }
       ],
-      "dependencies": [
-        {
-          "referencingSchemaName": "dbo",
-          "referencingObjectName": "sp_helpdiagramdefinition",
-          "referencingObjectKey": "dbo.sp_helpdiagramdefinition",
-          "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-          "referencedSchemaName": "dbo",
-          "referencedEntityName": "sysdiagrams",
-          "referencedObjectKey": "dbo.sysdiagrams",
-          "referencedObjectTypeDescription": "USER_TABLE",
-          "isSchemaBoundReference": false,
-          "isCallerDependent": false,
-          "isAmbiguous": false
-        }
-      ]
+      "dependencies": []
     },
     {
       "key": "dbo.sp_helpdiagrams",
@@ -44333,20 +44129,7 @@
           "isOutput": false
         }
       ],
-      "dependencies": [
-        {
-          "referencingSchemaName": "dbo",
-          "referencingObjectName": "sp_helpdiagrams",
-          "referencingObjectKey": "dbo.sp_helpdiagrams",
-          "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-          "referencedEntityName": "sysdiagrams",
-          "referencedObjectKey": "sysdiagrams",
-          "referencedObjectTypeDescription": "USER_TABLE",
-          "isSchemaBoundReference": false,
-          "isCallerDependent": false,
-          "isAmbiguous": false
-        }
-      ]
+      "dependencies": []
     },
     {
       "key": "dbo.sp_renamediagram",
@@ -44381,21 +44164,7 @@
           "isOutput": false
         }
       ],
-      "dependencies": [
-        {
-          "referencingSchemaName": "dbo",
-          "referencingObjectName": "sp_renamediagram",
-          "referencingObjectKey": "dbo.sp_renamediagram",
-          "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-          "referencedSchemaName": "dbo",
-          "referencedEntityName": "sysdiagrams",
-          "referencedObjectKey": "dbo.sysdiagrams",
-          "referencedObjectTypeDescription": "USER_TABLE",
-          "isSchemaBoundReference": false,
-          "isCallerDependent": false,
-          "isAmbiguous": false
-        }
-      ]
+      "dependencies": []
     },
     {
       "key": "dbo.sp_upgraddiagrams",
@@ -44414,19 +44183,6 @@
           "referencedSchemaName": "dbo",
           "referencedEntityName": "dtproperties",
           "referencedObjectKey": "dbo.dtproperties",
-          "isSchemaBoundReference": false,
-          "isCallerDependent": false,
-          "isAmbiguous": false
-        },
-        {
-          "referencingSchemaName": "dbo",
-          "referencingObjectName": "sp_upgraddiagrams",
-          "referencingObjectKey": "dbo.sp_upgraddiagrams",
-          "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-          "referencedSchemaName": "dbo",
-          "referencedEntityName": "sysdiagrams",
-          "referencedObjectKey": "dbo.sysdiagrams",
-          "referencedObjectTypeDescription": "USER_TABLE",
           "isSchemaBoundReference": false,
           "isCallerDependent": false,
           "isAmbiguous": false
@@ -45947,87 +45703,11 @@
       "isAmbiguous": false
     },
     {
-      "referencingObjectKey": "dbo.sp_alterdiagram",
-      "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-      "referencedObjectKey": "dbo.sysdiagrams",
-      "referencedSchemaName": "dbo",
-      "referencedEntityName": "sysdiagrams",
-      "referencedObjectTypeDescription": "USER_TABLE",
-      "isSchemaBoundReference": false,
-      "isCallerDependent": false,
-      "isAmbiguous": false
-    },
-    {
-      "referencingObjectKey": "dbo.sp_creatediagram",
-      "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-      "referencedObjectKey": "dbo.sysdiagrams",
-      "referencedSchemaName": "dbo",
-      "referencedEntityName": "sysdiagrams",
-      "referencedObjectTypeDescription": "USER_TABLE",
-      "isSchemaBoundReference": false,
-      "isCallerDependent": false,
-      "isAmbiguous": false
-    },
-    {
-      "referencingObjectKey": "dbo.sp_dropdiagram",
-      "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-      "referencedObjectKey": "dbo.sysdiagrams",
-      "referencedSchemaName": "dbo",
-      "referencedEntityName": "sysdiagrams",
-      "referencedObjectTypeDescription": "USER_TABLE",
-      "isSchemaBoundReference": false,
-      "isCallerDependent": false,
-      "isAmbiguous": false
-    },
-    {
-      "referencingObjectKey": "dbo.sp_helpdiagramdefinition",
-      "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-      "referencedObjectKey": "dbo.sysdiagrams",
-      "referencedSchemaName": "dbo",
-      "referencedEntityName": "sysdiagrams",
-      "referencedObjectTypeDescription": "USER_TABLE",
-      "isSchemaBoundReference": false,
-      "isCallerDependent": false,
-      "isAmbiguous": false
-    },
-    {
-      "referencingObjectKey": "dbo.sp_helpdiagrams",
-      "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-      "referencedObjectKey": "sysdiagrams",
-      "referencedEntityName": "sysdiagrams",
-      "referencedObjectTypeDescription": "USER_TABLE",
-      "isSchemaBoundReference": false,
-      "isCallerDependent": false,
-      "isAmbiguous": false
-    },
-    {
-      "referencingObjectKey": "dbo.sp_renamediagram",
-      "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-      "referencedObjectKey": "dbo.sysdiagrams",
-      "referencedSchemaName": "dbo",
-      "referencedEntityName": "sysdiagrams",
-      "referencedObjectTypeDescription": "USER_TABLE",
-      "isSchemaBoundReference": false,
-      "isCallerDependent": false,
-      "isAmbiguous": false
-    },
-    {
       "referencingObjectKey": "dbo.sp_upgraddiagrams",
       "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
       "referencedObjectKey": "dbo.dtproperties",
       "referencedSchemaName": "dbo",
       "referencedEntityName": "dtproperties",
-      "isSchemaBoundReference": false,
-      "isCallerDependent": false,
-      "isAmbiguous": false
-    },
-    {
-      "referencingObjectKey": "dbo.sp_upgraddiagrams",
-      "referencingObjectTypeDescription": "SQL_STORED_PROCEDURE",
-      "referencedObjectKey": "dbo.sysdiagrams",
-      "referencedSchemaName": "dbo",
-      "referencedEntityName": "sysdiagrams",
-      "referencedObjectTypeDescription": "USER_TABLE",
       "isSchemaBoundReference": false,
       "isCallerDependent": false,
       "isAmbiguous": false

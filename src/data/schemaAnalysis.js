@@ -120,8 +120,42 @@ export function getDependencyResolutionItems(version) {
           : missingSides[0] === 'referencing'
             ? 'Referencing object was not exported'
             : 'Referenced object was not exported',
+      likelyReason: getDependencyLikelyReason(dependency, missingSides),
+      suggestedFix: getDependencySuggestedFix(dependency, missingSides),
     };
   });
+}
+
+function getDependencyLikelyReason(dependency, missingSides) {
+  if (missingSides.length === 0) {
+    return 'Resolved to exported schema objects.';
+  }
+  if (dependency.isCallerDependent) {
+    return 'SQL Server marked the dependency as caller-dependent, so the exact target may only be known at runtime.';
+  }
+  if (dependency.isAmbiguous) {
+    return 'SQL Server marked the reference as ambiguous, often because the name could resolve to more than one object.';
+  }
+  if (!dependency.referencedSchemaName && dependency.referencedEntityName) {
+    return 'The dependency row does not include referenced schema metadata, which commonly happens with aliases, helper objects, or pseudo tables.';
+  }
+  if (missingSides.includes('referencing')) {
+    return 'The object that SQL Server reported as the referencing object was not part of the exported object sets.';
+  }
+  return 'The referenced object was not found in exported tables, views, routines, or triggers.';
+}
+
+function getDependencySuggestedFix(dependency, missingSides) {
+  if (missingSides.length === 0) {
+    return 'No action needed.';
+  }
+  if (dependency.isCallerDependent || dependency.isAmbiguous) {
+    return 'Treat this as a diagram completeness warning. Review the SQL definition manually if the object is important for reporting.';
+  }
+  if (!dependency.referencedSchemaName && dependency.referencedEntityName) {
+    return 'Check whether the name is an alias, pseudo table, or product helper object before adding manual notes.';
+  }
+  return 'Confirm all expected export files were included. If they were, document the unresolved row as expected SQL Server metadata noise.';
 }
 
 export function getUnresolvedDependencyItems(version) {
@@ -137,17 +171,35 @@ export function getUnresolvedDependencyItems(version) {
 export function getReviewItems(version) {
   return version.tables
     .filter((table) => table.confidence === 'unknown' || table.confidence === 'inferred')
-    .map((table) => ({
-      key: table.id,
-      confidence: table.confidence,
-      hasManualNotes: table.hasManualNotes,
-      columnsNeedingReview: table.columns.filter((column) => column.confidence === 'unknown').length,
-    }))
+    .map((table) => {
+      const relationshipCount = table.relationships.length;
+      const columnsNeedingReview = table.columns.filter((column) => column.confidence === 'unknown').length;
+      const score =
+        relationshipCount * 4 +
+        table.indexes.length +
+        table.triggers.length * 3 +
+        columnsNeedingReview * 0.5 +
+        (table.confidence === 'unknown' ? 8 : 4) +
+        (table.hasManualNotes ? 0 : 6);
+      return {
+        key: table.id,
+        confidence: table.confidence,
+        hasManualNotes: table.hasManualNotes,
+        columnsNeedingReview,
+        relationshipCount,
+        indexCount: table.indexes.length,
+        triggerCount: table.triggers.length,
+        score: Number(score.toFixed(1)),
+        reason: relationshipCount > 0
+          ? `${relationshipCount} relationships make this table useful for join-path documentation.`
+          : 'Low relationship density, but table purpose and columns still need review.',
+      };
+    })
     .sort((left, right) => {
       if (left.hasManualNotes !== right.hasManualNotes) {
         return left.hasManualNotes ? 1 : -1;
       }
-      return right.columnsNeedingReview - left.columnsNeedingReview;
+      return right.score - left.score || right.columnsNeedingReview - left.columnsNeedingReview;
     });
 }
 

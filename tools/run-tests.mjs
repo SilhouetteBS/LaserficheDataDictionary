@@ -386,8 +386,76 @@ assert.equal(notes.productKey, 'forms');
 assert.equal(notes.tables['dbo.example'].confidence, 'observed');
 
 const normalizedFixture = normalizeSchema(minimalExport);
+const sysdiagramsFixture = structuredClone(minimalExport);
+sysdiagramsFixture.tables.push({ tableKey: 'dbo.sysdiagrams', schemaName: 'dbo', tableName: 'sysdiagrams' });
+sysdiagramsFixture.columns.push({
+  tableKey: 'dbo.sysdiagrams',
+  columnName: 'diagram_id',
+  ordinal: 1,
+  dataType: 'int',
+  typeDefinition: 'int',
+  isNullable: false,
+  isIdentity: true,
+  isComputed: false,
+});
+sysdiagramsFixture.keys.push({
+  tableKey: 'dbo.sysdiagrams',
+  constraintName: 'PK__sysdiagrams',
+  constraintType: 'PK',
+  constraintTypeDescription: 'PRIMARY_KEY_CONSTRAINT',
+  backingIndexName: 'PK__sysdiagrams',
+  columns: [{ columnName: 'diagram_id', keyOrdinal: 1 }],
+});
+sysdiagramsFixture.foreignKeys.push({
+  foreignKeyName: 'FK_child_sysdiagrams',
+  sourceTableKey: 'dbo.child',
+  referencedTableKey: 'dbo.sysdiagrams',
+  deleteAction: 'NO_ACTION',
+  updateAction: 'NO_ACTION',
+  isDisabled: false,
+  isNotTrusted: false,
+  columns: [{ sourceColumnName: 'parent_id', referencedColumnName: 'diagram_id' }],
+});
+sysdiagramsFixture.indexes.push({
+  tableKey: 'dbo.sysdiagrams',
+  indexName: 'IX_sysdiagrams',
+  indexTypeDescription: 'NONCLUSTERED',
+  isUnique: false,
+  isPrimaryKey: false,
+  isUniqueConstraint: false,
+  hasFilter: false,
+  columns: [{ columnName: 'diagram_id', keyOrdinal: 1 }],
+});
+sysdiagramsFixture.triggers.push({
+  triggerName: 'tr_sysdiagrams',
+  parentObjectKey: 'dbo.sysdiagrams',
+  parentObjectTypeDescription: 'USER_TABLE',
+  isDisabled: false,
+  isInsteadOfTrigger: false,
+  definitionSha256: 'sys',
+});
+sysdiagramsFixture.dependencies.push({
+  referencingObjectKey: 'dbo.v_child',
+  referencingObjectTypeDescription: 'VIEW',
+  referencedObjectKey: 'dbo.sysdiagrams',
+  referencedSchemaName: 'dbo',
+  referencedEntityName: 'sysdiagrams',
+  referencedObjectTypeDescription: 'USER_TABLE',
+  isSchemaBoundReference: false,
+  isCallerDependent: false,
+  isAmbiguous: false,
+});
+const normalizedSysdiagramsFixture = normalizeSchema(sysdiagramsFixture);
 
 assert.equal(normalizedFixture.tables.length, 2);
+assert.equal(normalizedSysdiagramsFixture.tables.length, 2);
+assert.equal(normalizedSysdiagramsFixture.foreignKeys.length, 1);
+assert.equal(normalizedSysdiagramsFixture.triggers.length, 1);
+assert.equal(normalizedSysdiagramsFixture.dependencies.length, 1);
+assert.equal(
+  JSON.stringify(normalizedSysdiagramsFixture).includes('sysdiagrams'),
+  false,
+);
 assert.equal(normalizedFixture.foreignKeys[0].name, 'FK_child_parent');
 assert.equal(normalizedFixture.tables.find((table) => table.key === 'dbo.child').incomingForeignKeys.length, 0);
 assert.equal(normalizedFixture.tables.find((table) => table.key === 'dbo.child').outgoingForeignKeys.length, 1);
@@ -421,15 +489,15 @@ assert.deepEqual(
   ])),
   {
     'forms 11.0.2311.50564': { total: 146, resolved: 104 },
-    'forms 12.0.2503.10378': { total: 162, resolved: 119 },
-    'forms 12.0.2509.20409': { total: 161, resolved: 119 },
+    'forms 12.0.2503.10378': { total: 155, resolved: 112 },
+    'forms 12.0.2509.20409': { total: 154, resolved: 112 },
     'forms 12.0.2603.30215': { total: 226, resolved: 181 },
     'lfds 11.0.2403.2474': { total: 37, resolved: 36 },
     'lfds 12.0.2506.370': { total: 37, resolved: 36 },
-    'lfds 12.0.2510.261': { total: 45, resolved: 43 },
+    'lfds 12.0.2510.261': { total: 38, resolved: 36 },
     'repository 11.0.2.338': { total: 350, resolved: 240 },
     'repository 12.0.1.237': { total: 350, resolved: 240 },
-    'repository 12.0.2.343': { total: 367, resolved: 254 },
+    'repository 12.0.2.343': { total: 360, resolved: 247 },
     'workflow 11.0.2306.898': { total: 199, resolved: 198 },
     'workflow 12.0.2508.3111': { total: 200, resolved: 199 },
     'workflow 12.0.2510.3321': { total: 206, resolved: 205 },

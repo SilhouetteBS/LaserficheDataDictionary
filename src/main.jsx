@@ -39,6 +39,12 @@ import {
   getTableCompletionBySchema,
   getVersionTrendRows,
 } from './data/schemaCompleteness.js';
+import {
+  attachProductVersions,
+  buildGlobalSearchItems,
+  getConfidenceLegendItems,
+  getSchemaCoverageGaps,
+} from './data/projectInsights.js';
 import { readUrlState, writeUrlState } from './data/urlState.js';
 import { ComparisonDetail, ComparisonSummary } from './components/ComparisonViews.jsx';
 import { DatabaseDiagram } from './components/DatabaseDiagram.jsx';
@@ -308,7 +314,7 @@ const versionTrendColumns = [
   ['Notes', 'Percent of tables with manual notes in this version.'],
 ];
 
-function SnapshotFreshnessPanel({ product, productName, version, onDownloadMarkdown }) {
+function SnapshotFreshnessPanel({ product, productsManifest, productName, version, onDownloadMarkdown }) {
   const stats = getSnapshotStats(version);
   const [showSnapshotDetails, setShowSnapshotDetails] = useState(false);
   const source = version.source ?? {};
@@ -318,6 +324,8 @@ function SnapshotFreshnessPanel({ product, productName, version, onDownloadMarkd
   const objectCompletionRows = getObjectCompletionByType(version);
   const freshnessWarning = getSnapshotAgeWarning(version);
   const importedVersions = product.versions.map((item) => item.version).join(', ');
+  const coverageGaps = getSchemaCoverageGaps(productsManifest, product);
+  const confidenceLegendItems = getConfidenceLegendItems();
 
   return (
     <section className="snapshot-panel" aria-label="Product and version metadata freshness">
@@ -360,52 +368,70 @@ function SnapshotFreshnessPanel({ product, productName, version, onDownloadMarkd
             </p>
           </div>
 
-          <div className="snapshot-completeness-grid" aria-label="Metadata object counts">
-            {rows.map((row) => (
-              <span key={row.label}>
-                <strong>{row.value}</strong>
-                {row.label}
-              </span>
-            ))}
-          </div>
-          <div className="snapshot-completeness-grid" aria-label="Table documentation completion by schema">
-            {tableCompletionRows.slice(0, 10).map((row) => (
-              <span key={row.label}>
-                <strong>{row.value}</strong>
-                {row.label}
-              </span>
-            ))}
-          </div>
-          <div className="snapshot-completeness-grid" aria-label="Object documentation completion by type">
-            {objectCompletionRows.map((row) => (
-              <span key={row.label}>
-                <strong>{row.value}</strong>
-                {row.label}
-              </span>
-            ))}
-          </div>
+          <div className="snapshot-details-card-stack">
+            <div className="snapshot-completeness-grid" aria-label="Metadata object counts">
+              {rows.map((row) => (
+                <span key={row.label}>
+                  <strong>{row.value}</strong>
+                  {row.label}
+                </span>
+              ))}
+            </div>
+            <div className="snapshot-completeness-grid" aria-label="Object documentation completion by type">
+              {objectCompletionRows.map((row) => (
+                <span key={row.label}>
+                  <strong>{row.value}</strong>
+                  <span className="snapshot-card-label">
+                    {row.label}
+                    {row.tooltip && (
+                      <span className="info-tooltip" tabIndex={0} aria-label={`${row.label}: ${row.tooltip}`}>
+                        i
+                        <span role="tooltip">{row.tooltip}</span>
+                      </span>
+                    )}
+                  </span>
+                </span>
+              ))}
+            </div>
+            <div className="snapshot-completeness-grid" aria-label="Table documentation completion by schema">
+              {tableCompletionRows.slice(0, 10).map((row) => (
+                <span key={row.label}>
+                  <strong>{row.value}</strong>
+                  <span className="snapshot-card-label">
+                    {row.label}
+                    {row.tooltip && (
+                      <span className="info-tooltip" tabIndex={0} aria-label={`${row.label}: ${row.tooltip}`}>
+                        i
+                        <span role="tooltip">{row.tooltip}</span>
+                      </span>
+                    )}
+                  </span>
+                </span>
+              ))}
+            </div>
 
-          <dl className="snapshot-manifest-list">
-            <div>
-              <dt>Export format</dt>
-              <dd>{formatCompletenessValue(source.exportFormatVersion)}</dd>
-            </div>
-            <div>
-              <dt>Export script</dt>
-              <dd>{formatCompletenessValue(source.exportScriptVersion)}</dd>
-            </div>
-            <div>
-              <dt>Database role</dt>
-              <dd>
-                <strong>{formatCompletenessValue(source.databaseRole)}</strong>
-                <span>{getDatabaseRoleExplanation(source.databaseRole)}</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Imported versions</dt>
-              <dd>{importedVersions || 'None loaded'}</dd>
-            </div>
-          </dl>
+            <dl className="snapshot-manifest-list">
+              <div>
+                <dt>Export format</dt>
+                <dd>{formatCompletenessValue(source.exportFormatVersion)}</dd>
+              </div>
+              <div>
+                <dt>Export script</dt>
+                <dd>{formatCompletenessValue(source.exportScriptVersion)}</dd>
+              </div>
+              <div>
+                <dt>Database role</dt>
+                <dd>
+                  <strong>{formatCompletenessValue(source.databaseRole)}</strong>
+                  <span>{getDatabaseRoleExplanation(source.databaseRole)}</span>
+                </dd>
+              </div>
+              <div>
+                <dt>Imported versions</dt>
+                <dd>{importedVersions || 'None loaded'}</dd>
+              </div>
+            </dl>
+          </div>
           <div className="snapshot-trend-table">
             <h3>Version trends</h3>
             <div>
@@ -429,6 +455,37 @@ function SnapshotFreshnessPanel({ product, productName, version, onDownloadMarkd
                 </Fragment>
               ))}
             </div>
+          </div>
+          <div className="snapshot-support-grid">
+            <section className="snapshot-support-panel">
+              <div className="section-title-row">
+                <h3>Confidence legend</h3>
+                <span>{confidenceLegendItems.length}</span>
+              </div>
+              <div className="confidence-legend-list">
+                {confidenceLegendItems.map((item) => (
+                  <div key={item.value}>
+                    <strong>{item.label}</strong>
+                    <p>{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="snapshot-support-panel">
+              <div className="section-title-row">
+                <h3>Coverage gaps</h3>
+                <span>{coverageGaps.length}</span>
+              </div>
+              {coverageGaps.length === 0 ? (
+                <p className="empty-state">No immediate product/version export gaps were detected from the current manifests.</p>
+              ) : (
+                <ul>
+                  {coverageGaps.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
         </div>
       ) : null}
@@ -514,15 +571,15 @@ function App() {
   const [loadError, setLoadError] = useState('');
   const [selectedVersion, setSelectedVersion] = useState(preferredVersion);
   const [selectedTableId, setSelectedTableId] = useState(initialUrlState.table);
-  const [query, setQuery] = useState('');
-  const [tableConfidenceFilter, setTableConfidenceFilter] = useState('all');
-  const [tableNotesFilter, setTableNotesFilter] = useState('all');
+  const [query, setQuery] = useState(initialUrlState.q);
+  const [tableConfidenceFilter, setTableConfidenceFilter] = useState(initialUrlState.confidence || 'all');
+  const [tableNotesFilter, setTableNotesFilter] = useState(initialUrlState.notes || 'all');
   const [relationshipFilter, setRelationshipFilter] = useState('all');
   const [activeView, setActiveView] = useState(preferredView);
-  const [objectType, setObjectType] = useState('views');
+  const [objectType, setObjectType] = useState(initialUrlState.objectType || 'views');
   const [comparisonFromVersion, setComparisonFromVersion] = useState(initialUrlState.from);
   const [comparisonToVersion, setComparisonToVersion] = useState(initialUrlState.to);
-  const [diagramQuery, setDiagramQuery] = useState('');
+  const [diagramQuery, setDiagramQuery] = useState(initialUrlState.diagramQuery);
   const [diagramEdgeType, setDiagramEdgeType] = useState(
     getInitialDiagramEdgeType(initialUrlState.diagramEdges || initialPreferences.diagramEdges),
   );
@@ -546,7 +603,7 @@ function App() {
     getInitialBooleanToggle(initialUrlState.diagramConnectedOnly || initialPreferences.diagramConnectedOnly),
   );
   const [selectedChangedTableKey, setSelectedChangedTableKey] = useState('');
-  const [columnUsageQuery, setColumnUsageQuery] = useState('');
+  const [columnUsageQuery, setColumnUsageQuery] = useState(initialUrlState.objectQuery);
   const [localNotes, setLocalNotes] = useState(readLocalNotes);
   const [editingWarningAccepted, setEditingWarningAccepted] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -602,7 +659,7 @@ function App() {
 
       setProductsManifest(products);
       setSelectedProductKey(selectedProduct.productKey);
-      const loadedProduct = buildSchemaProduct(versionEntries);
+      const loadedProduct = attachProductVersions(buildSchemaProduct(versionEntries));
       setProduct(loadedProduct);
       const urlVersion = manifest.versions.some((version) => version.version === preferredVersion)
         ? preferredVersion
@@ -686,9 +743,15 @@ function App() {
       version: selectedVersion,
       view: activeView,
       table: selectedTableId,
+      q: query,
+      confidence: tableConfidenceFilter === 'all' ? '' : tableConfidenceFilter,
+      notes: tableNotesFilter === 'all' ? '' : tableNotesFilter,
       from: comparisonFromVersion,
       to: comparisonToVersion,
+      objectType,
+      objectQuery: columnUsageQuery,
       diagramFocus: diagramFocusKey,
+      diagramQuery,
       diagramMode,
       diagramEdges: diagramEdgeType,
       diagramDepth: String(diagramDepth),
@@ -701,6 +764,12 @@ function App() {
       product: selectedProductKey,
       version: selectedVersion,
       view: activeView,
+      q: query,
+      confidence: tableConfidenceFilter,
+      notes: tableNotesFilter,
+      objectType,
+      objectQuery: columnUsageQuery,
+      diagramQuery,
       diagramMode,
       diagramEdges: diagramEdgeType,
       diagramDepth: String(diagramDepth),
@@ -711,6 +780,7 @@ function App() {
     });
   }, [
     activeView,
+    columnUsageQuery,
     comparisonFromVersion,
     comparisonToVersion,
     diagramDepth,
@@ -718,13 +788,18 @@ function App() {
     diagramFocusKey,
     diagramMode,
     diagramObjectTypeFilters,
+    diagramQuery,
     diagramZoom,
     diagramConnectedOnly,
+    objectType,
     product,
+    query,
     selectedProductKey,
     selectedTableId,
     selectedVersion,
     showDiagramSecondHopEdges,
+    tableConfidenceFilter,
+    tableNotesFilter,
   ]);
 
   const comparison = useMemo(() => {
@@ -758,51 +833,32 @@ function App() {
     if (!version) {
       return [];
     }
-    const objectItems = [
-      ...(version.source?.views ?? []).map((object) => ({ type: 'View', label: object.key, action: () => {
-        setObjectType('views');
-        setActiveView('objects');
-        setColumnUsageQuery(object.name ?? object.key);
-      } })),
-      ...(version.source?.routines ?? []).map((object) => ({ type: 'Routine', label: object.key, action: () => {
-        setObjectType('routines');
-        setActiveView('objects');
-        setColumnUsageQuery(object.name ?? object.key);
-      } })),
-      ...(version.source?.triggers ?? []).map((object) => ({ type: 'Trigger', label: object.name, action: () => {
-        setObjectType('triggers');
-        setActiveView('objects');
-        setColumnUsageQuery(object.name);
-      } })),
-    ];
+    const globalSearchItems = buildGlobalSearchItems(version, tables).map((item) => ({
+      ...item,
+      action: () => {
+        if (item.objectType) {
+          setObjectType(item.objectType);
+          setColumnUsageQuery(item.label);
+          setActiveView('objects');
+          return;
+        }
+        if (item.tableKey) {
+          setSelectedTableId(item.tableKey);
+          setActiveView('tables');
+        }
+      },
+    }));
     return [
       ...activeViewLabels.map(([value, label]) => ({ type: 'View', label, action: () => setActiveView(value) })),
-      ...tables.map((table) => ({ type: 'Table', label: table.id, action: () => navigateToTable(table.id) })),
-      ...tables.flatMap((table) => table.columns.slice(0, 20).map((column) => ({
-        type: 'Column',
-        label: `${table.id}.${column.name}`,
-        action: () => {
-          setSelectedTableId(table.id);
-          setActiveView('tables');
-        },
-      }))),
-      ...tables.flatMap((table) => table.relationships.map((relationship) => ({
-        type: 'Relationship',
-        label: `${table.id} ${relationship.type} ${relationship.table}`,
-        action: () => {
-          setDiagramFocusKey(table.id);
-          setDiagramMode('focused');
-          setDiagramEdgeType('foreignKey');
-          setActiveView('diagram');
-        },
-      }))),
-      ...objectItems,
+      ...globalSearchItems,
     ];
   }, [activeViewLabels, tables, version]);
 
   const filteredCommandItems = useMemo(() => {
     const needle = normalize(commandQuery);
-    return commandItems.filter((item) => normalize(`${item.type} ${item.label}`).includes(needle)).slice(0, 24);
+    return commandItems
+      .filter((item) => normalize(`${item.type} ${item.label} ${item.searchText ?? ''}`).includes(needle))
+      .slice(0, 24);
   }, [commandItems, commandQuery]);
 
   useEffect(() => {
@@ -904,7 +960,7 @@ function App() {
           return { schema, notes };
         }),
       );
-      const loadedProduct = buildSchemaProduct(versionEntries);
+      const loadedProduct = attachProductVersions(buildSchemaProduct(versionEntries));
       setSelectedProductKey(selectedProduct.productKey);
       setProduct(loadedProduct);
       setSelectedVersion(manifest.defaultVersion);
@@ -914,6 +970,10 @@ function App() {
         loadedProduct.versions.find((item) => item.version === manifest.defaultVersion)?.tables[0]?.id ?? '',
       );
       setQuery('');
+      setTableConfidenceFilter('all');
+      setTableNotesFilter('all');
+      setColumnUsageQuery('');
+      setDiagramQuery('');
       setDiagramFocusKey('');
       setActiveView('tables');
     } catch (error) {
@@ -1193,6 +1253,7 @@ function App() {
 
         <SnapshotFreshnessPanel
           product={product}
+          productsManifest={productsManifest}
           productName={productName}
           version={version}
           onDownloadMarkdown={() =>
@@ -1331,6 +1392,7 @@ function App() {
             <TableWorkspace
               documentationCoverage={documentationCoverage}
               selectedTable={selectedTable}
+              version={version}
               favoriteObjects={favoriteObjects}
               filteredTables={filteredTables}
               editingEnabled={canEditNotes}

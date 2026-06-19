@@ -91,6 +91,27 @@ function groupBy(items, getKey) {
   return groups;
 }
 
+function isSysdiagramsKey(value) {
+  return String(value ?? '').toLowerCase() === 'dbo.sysdiagrams';
+}
+
+function isSysdiagramsObject(object) {
+  return isSysdiagramsKey(object?.tableKey)
+    || (String(object?.schemaName ?? '').toLowerCase() === 'dbo'
+      && String(object?.tableName ?? '').toLowerCase() === 'sysdiagrams');
+}
+
+function referencesSysdiagrams(dependency) {
+  return [
+    dependency?.referencingObjectKey,
+    dependency?.referencedObjectKey,
+  ].some(isSysdiagramsKey)
+    || (
+      String(dependency?.referencedSchemaName ?? '').toLowerCase() === 'dbo'
+      && String(dependency?.referencedEntityName ?? '').toLowerCase() === 'sysdiagrams'
+    );
+}
+
 export function normalizeSchema({
   manifest,
   schemas,
@@ -104,8 +125,19 @@ export function normalizeSchema({
   triggers,
   dependencies,
 }) {
+  const filteredTables = tables.filter((table) => !isSysdiagramsObject(table));
+  const exportedTableKeys = new Set(filteredTables.map((table) => table.tableKey));
+  const filteredColumns = columns.filter((column) => exportedTableKeys.has(column.tableKey));
+  const filteredKeys = keys.filter((key) => exportedTableKeys.has(key.tableKey));
+  const filteredIndexes = indexes.filter((index) => exportedTableKeys.has(index.tableKey));
+  const filteredForeignKeys = foreignKeys.filter((foreignKey) =>
+    exportedTableKeys.has(foreignKey.sourceTableKey) && exportedTableKeys.has(foreignKey.referencedTableKey),
+  );
+  const filteredTriggers = triggers.filter((trigger) => !isSysdiagramsKey(trigger.parentObjectKey));
+  const filteredDependencies = dependencies.filter((dependency) => !referencesSysdiagrams(dependency));
+
   const columnsByTable = new Map();
-  for (const column of columns) {
+  for (const column of filteredColumns) {
     const normalizedColumn = {
       name: column.columnName,
       ordinal: column.ordinal,
@@ -129,7 +161,7 @@ export function normalizeSchema({
   }
 
   const keysByTable = new Map();
-  for (const key of keys) {
+  for (const key of filteredKeys) {
     const tableKeys = keysByTable.get(key.tableKey) ?? [];
     tableKeys.push({
       name: key.constraintName,
@@ -141,13 +173,13 @@ export function normalizeSchema({
     keysByTable.set(key.tableKey, tableKeys);
   }
 
-  const foreignKeysBySourceTable = groupBy(foreignKeys, (foreignKey) => foreignKey.sourceTableKey);
-  const foreignKeysByReferencedTable = groupBy(foreignKeys, (foreignKey) => foreignKey.referencedTableKey);
-  const indexesByTable = groupBy(indexes, (index) => index.tableKey);
-  const triggersByParent = groupBy(triggers, (trigger) => trigger.parentObjectKey);
-  const dependenciesByReferencingObject = groupBy(dependencies, (dependency) => dependency.referencingObjectKey);
+  const foreignKeysBySourceTable = groupBy(filteredForeignKeys, (foreignKey) => foreignKey.sourceTableKey);
+  const foreignKeysByReferencedTable = groupBy(filteredForeignKeys, (foreignKey) => foreignKey.referencedTableKey);
+  const indexesByTable = groupBy(filteredIndexes, (index) => index.tableKey);
+  const triggersByParent = groupBy(filteredTriggers, (trigger) => trigger.parentObjectKey);
+  const dependenciesByReferencingObject = groupBy(filteredDependencies, (dependency) => dependency.referencingObjectKey);
 
-  const normalizedForeignKeys = foreignKeys.map((foreignKey) => ({
+  const normalizedForeignKeys = filteredForeignKeys.map((foreignKey) => ({
     name: foreignKey.foreignKeyName,
     sourceTableKey: foreignKey.sourceTableKey,
     referencedTableKey: foreignKey.referencedTableKey,
@@ -168,7 +200,7 @@ export function normalizeSchema({
     schemas: schemas
       .map((schema) => ({ name: schema.schemaName }))
       .sort((left, right) => byName(left.name, right.name)),
-    tables: tables
+    tables: filteredTables
       .map((table) => ({
         key: table.tableKey,
         schemaName: table.schemaName,
@@ -229,7 +261,7 @@ export function normalizeSchema({
       parameters: routine.parameters ?? [],
       dependencies: dependenciesByReferencingObject.get(routine.routineKey) ?? [],
     })),
-    triggers: triggers.map((trigger) => ({
+    triggers: filteredTriggers.map((trigger) => ({
       name: trigger.triggerName,
       parentObjectKey: trigger.parentObjectKey,
       parentObjectTypeDescription: trigger.parentObjectTypeDescription,
@@ -237,7 +269,7 @@ export function normalizeSchema({
       isInsteadOfTrigger: trigger.isInsteadOfTrigger,
       definitionSha256: trigger.definitionSha256,
     })),
-    dependencies: dependencies.map((dependency) =>
+    dependencies: filteredDependencies.map((dependency) =>
       cleanObject({
         referencingObjectKey: dependency.referencingObjectKey,
         referencingObjectTypeDescription: dependency.referencingObjectTypeDescription,

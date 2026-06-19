@@ -2,6 +2,30 @@ import { useState } from 'react';
 import { FileUp } from 'lucide-react';
 import { validateSchemaSnapshot } from '../data/schemaDictionary.js';
 
+const requiredImportTypes = ['manifest', 'schemas', 'tables', 'columns'];
+const optionalImportTypes = [
+  'primaryanduniquekeys',
+  'foreignkeys',
+  'indexes',
+  'views',
+  'routines',
+  'triggers',
+  'dependencies',
+];
+const importTypeLabels = {
+  manifest: 'manifest.json',
+  schemas: 'schemas.json',
+  tables: 'tables.json',
+  columns: 'columns.json',
+  primaryanduniquekeys: 'primaryAndUniqueKeys.json',
+  foreignkeys: 'foreignKeys.json',
+  indexes: 'indexes.json',
+  views: 'views.json',
+  routines: 'routines.json',
+  triggers: 'triggers.json',
+  dependencies: 'dependencies.json',
+};
+
 async function checksumFile(file) {
   const buffer = await file.arrayBuffer();
   const digest = await crypto.subtle.digest('SHA-256', buffer);
@@ -48,6 +72,9 @@ async function analyzeImportFiles(files, selectedProductKey, existingVersions) {
     }
     try {
       const parsed = JSON.parse(await file.text());
+      if (jsonByType.has(type)) {
+        warnings.push(`${file.name}: another ${type} export file was already loaded; confirm which one should be imported.`);
+      }
       jsonByType.set(type, parsed);
       entry.rows = Array.isArray(parsed) ? parsed.length : undefined;
       if (Array.isArray(parsed) && parsed.length === 0 && ['tables', 'columns'].includes(type)) {
@@ -64,18 +91,39 @@ async function analyzeImportFiles(files, selectedProductKey, existingVersions) {
   const manifest = jsonByType.get('manifest')?.[0] ?? jsonByType.get('manifest') ?? jsonByType.get('schema');
   const productKey = manifest?.productKey;
   const productVersion = manifest?.productVersion;
+  const fileManifests = [];
+  jsonByType.forEach((value, type) => {
+    const rows = Array.isArray(value) ? value : [value];
+    rows.forEach((row) => {
+      if (row?.productKey || row?.productVersion) {
+        fileManifests.push({
+          type,
+          productKey: row.productKey,
+          productVersion: row.productVersion,
+        });
+      }
+    });
+  });
   if (productKey && productKey !== selectedProductKey) {
     warnings.push(`Product mismatch: import is ${productKey}, current product is ${selectedProductKey}.`);
   }
   if (productVersion && existingVersions.includes(productVersion)) {
-    warnings.push(`Duplicate version: ${productVersion} already exists. Confirm overwrite guidance before replacing files.`);
+    warnings.push(`Version collision: ${productVersion} already exists. Do not replace static files until the duplicate has been reviewed and intentionally approved.`);
   }
-  ['manifest', 'schemas', 'tables', 'columns'].forEach((type) => {
+  fileManifests.forEach((item) => {
+    if (productKey && item.productKey && item.productKey !== productKey) {
+      errors.push(`${importTypeLabels[item.type] ?? item.type}: productKey ${item.productKey} does not match manifest ${productKey}.`);
+    }
+    if (productVersion && item.productVersion && item.productVersion !== productVersion) {
+      errors.push(`${importTypeLabels[item.type] ?? item.type}: productVersion ${item.productVersion} does not match manifest ${productVersion}.`);
+    }
+  });
+  requiredImportTypes.forEach((type) => {
     if (!jsonByType.has(type) && !jsonByType.has('schema')) {
       errors.push(`Missing required ${type}.json export result.`);
     }
   });
-  ['primaryanduniquekeys', 'foreignkeys', 'indexes', 'views', 'routines', 'triggers', 'dependencies'].forEach((type) => {
+  optionalImportTypes.forEach((type) => {
     if (!jsonByType.has(type) && !jsonByType.has('schema')) {
       warnings.push(`Optional ${type}.json result is missing; importer should treat this as an empty result only after confirmation.`);
     }
@@ -85,6 +133,13 @@ async function analyzeImportFiles(files, selectedProductKey, existingVersions) {
   }
 
   return {
+    checklist: [...requiredImportTypes, ...optionalImportTypes].map((type) => ({
+      type,
+      label: importTypeLabels[type] ?? `${type}.json`,
+      required: requiredImportTypes.includes(type),
+      status: jsonByType.has(type) || jsonByType.has('schema') ? 'present' : requiredImportTypes.includes(type) ? 'missing' : 'optional missing',
+    })),
+    collision: Boolean(productVersion && existingVersions.includes(productVersion)),
     entries: entries.sort((left, right) => left.name.localeCompare(right.name)),
     errors,
     warnings,
@@ -126,6 +181,7 @@ export function ImportPreviewView({ selectedProductKey, product }) {
           <li>Keep exports read-only and do not run any write scripts against Laserfiche databases.</li>
           <li>Use all expected JSON result files when possible; missing optional result files are treated as warnings.</li>
           <li>Review duplicate version warnings before replacing existing static files.</li>
+          <li>Use the current product-neutral export script with SQL Server 2016 or newer; it relies on FOR JSON output and catalog views.</li>
         </ul>
       </section>
       <label
@@ -151,7 +207,16 @@ export function ImportPreviewView({ selectedProductKey, product }) {
             <div><dt>Version</dt><dd>{preview.productVersion}</dd></div>
             <div><dt>Errors</dt><dd>{preview.errors.length}</dd></div>
             <div><dt>Warnings</dt><dd>{preview.warnings.length}</dd></div>
+            <div><dt>Collision</dt><dd>{preview.collision ? 'Review required' : 'None'}</dd></div>
           </dl>
+          <div className="import-file-checklist" aria-label="Expected import files">
+            {preview.checklist.map((item) => (
+              <span className={`import-file-check import-file-check-${item.status.replace(/\s+/g, '-')}`} key={item.type}>
+                <strong>{item.label}</strong>
+                <em>{item.required ? 'Required' : 'Optional'} - {item.status}</em>
+              </span>
+            ))}
+          </div>
           {preview.errors.length > 0 && (
             <div className="import-message import-message-error">
               <strong>Errors</strong>

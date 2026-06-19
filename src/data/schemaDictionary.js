@@ -379,6 +379,8 @@ function compareTables(beforeTable, afterTable) {
 
   return {
     key: afterTable.key,
+    beforeDefinition: summarizeTableDefinition(beforeTable),
+    afterDefinition: summarizeTableDefinition(afterTable),
     addedColumns,
     removedColumns,
     changedColumns,
@@ -404,6 +406,34 @@ function compareTables(beforeTable, afterTable) {
       addedForeignKeys.length > 0 ||
       removedForeignKeys.length > 0 ||
       changedForeignKeys.length > 0,
+  };
+}
+
+function summarizeTableDefinition(table) {
+  return {
+    key: table.key,
+    columns: table.columns.map((column) => ({
+      name: column.name,
+      type: column.typeDefinition ?? column.dataType,
+      nullable: column.isNullable,
+    })),
+    keys: (table.keys ?? []).map((key) => ({
+      name: key.name,
+      type: key.typeDescription ?? key.type,
+      columns: (key.columns ?? []).map((column) => column.columnName).join(', '),
+    })),
+    indexes: (table.indexes ?? []).map((index) => ({
+      name: index.name,
+      type: index.typeDescription ?? index.type,
+      columns: (index.columns ?? []).map((column) => column.columnName).join(', '),
+    })),
+    foreignKeys: (table.outgoingForeignKeys ?? []).map((foreignKey) => ({
+      name: foreignKey.name,
+      target: foreignKey.referencedTableKey,
+      columns: (foreignKey.columns ?? [])
+        .map((column) => `${column.sourceColumnName ?? column.parentColumnName} -> ${column.referencedColumnName}`)
+        .join(', '),
+    })),
   };
 }
 

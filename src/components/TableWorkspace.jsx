@@ -9,6 +9,13 @@ import {
   X,
 } from 'lucide-react';
 import { appConfig } from '../config.js';
+import {
+  getColumnLifecycleItems,
+  getRelatedObjectItems,
+  getTableStability,
+  getTableVersionTrend,
+} from '../data/projectInsights.js';
+import { buildTableReportingExamples } from '../data/reporting.js';
 import { ConfidenceBadge } from './ConfidenceBadge.jsx';
 
 const ManualNotesEditor = appConfig.editingEnabled
@@ -30,6 +37,7 @@ function getReviewAgeWarning(table) {
 export function TableWorkspace({
   documentationCoverage,
   selectedTable,
+  version,
   favoriteObjects,
   filteredTables,
   editingEnabled,
@@ -64,6 +72,17 @@ export function TableWorkspace({
   const [columnQuery, setColumnQuery] = useState('');
   const [tableDensity, setTableDensity] = useState('comfortable');
   const reviewAgeWarning = getReviewAgeWarning(selectedTable);
+  const relatedObjects = useMemo(() => getRelatedObjectItems(version, selectedTable.id), [selectedTable.id, version]);
+  const tableStability = useMemo(() => getTableStability(version, selectedTable.id), [selectedTable.id, version]);
+  const tableVersionTrend = useMemo(() => getTableVersionTrend(version, selectedTable.id), [selectedTable.id, version]);
+  const tableReportingExamples = useMemo(
+    () => buildTableReportingExamples(version, selectedTable.id),
+    [selectedTable.id, version],
+  );
+  const columnLifecycleItems = useMemo(
+    () => getColumnLifecycleItems(version, selectedTable.id),
+    [selectedTable.id, version],
+  );
   const primaryKeyColumns = useMemo(
     () => new Set(selectedTable.keys.filter((key) => key.type === 'PK').flatMap((key) => key.columns.map((column) => column.columnName))),
     [selectedTable],
@@ -261,6 +280,26 @@ export function TableWorkspace({
               ))}
             </ul>
           </div>
+        </section>
+
+        <section className="table-context-grid" aria-label="Table reporting context">
+          <div className="context-card">
+            <div className="section-title-row">
+              <h3>Version stability</h3>
+              <span>{tableStability?.stable ? 'All versions' : 'Partial'}</span>
+            </div>
+            {tableStability ? (
+              <p>
+                Seen in {tableStability.appearanceCount} of {tableStability.versionCount} imported versions
+                {tableStability.firstSeen ? `, from ${tableStability.firstSeen} through ${tableStability.lastSeen}` : ''}.
+              </p>
+            ) : (
+              <p>No version trend data is available for this table.</p>
+            )}
+          </div>
+          <RelatedObjectsCard relatedObjects={relatedObjects} navigateToTable={navigateToTable} />
+          <TableTrendCard columnLifecycleItems={columnLifecycleItems} tableVersionTrend={tableVersionTrend} />
+          <TableExamplesCard examples={tableReportingExamples} />
         </section>
 
         <nav className="table-detail-tabs" aria-label="Table detail sections">
@@ -466,6 +505,30 @@ export function TableWorkspace({
   );
 }
 
+function TableExamplesCard({ examples }) {
+  return (
+    <div className="context-card table-examples-card">
+      <div className="section-title-row">
+        <h3>Examples using this table</h3>
+        <span>{examples.length}</span>
+      </div>
+      {examples.length === 0 ? (
+        <p>No table-specific examples could be generated for this table.</p>
+      ) : (
+        <div className="table-example-list">
+          {examples.map((example) => (
+            <details key={example.title}>
+              <summary>{example.title}</summary>
+              <pre>{example.sql}</pre>
+              <p>{example.note}</p>
+            </details>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MetadataList({ title, items, emptyText, renderItem }) {
   return (
     <section className="metadata-list">
@@ -485,6 +548,85 @@ function MetadataList({ title, items, emptyText, renderItem }) {
         </div>
       )}
     </section>
+  );
+}
+
+function RelatedObjectsCard({ relatedObjects, navigateToTable }) {
+  const groups = [
+    ['Views', relatedObjects.views],
+    ['Routines', relatedObjects.routines],
+    ['Triggers', relatedObjects.triggers],
+    ['Dependencies', relatedObjects.dependencies],
+  ];
+  const total = groups.reduce((count, [, items]) => count + items.length, 0);
+
+  return (
+    <div className="context-card">
+      <div className="section-title-row">
+        <h3>Related objects</h3>
+        <span>{total}</span>
+      </div>
+      {total === 0 ? (
+        <p>No related views, routines, triggers, or dependencies were found in the export.</p>
+      ) : (
+        <div className="related-object-groups">
+          {groups.map(([label, items]) => (
+            items.length > 0 && (
+              <div key={label}>
+                <strong>{label}</strong>
+                {items.map((item) => (
+                  <button
+                    key={`${label}:${item.key}`}
+                    type="button"
+                    onClick={() => {
+                      if (label === 'Triggers' && item.key.includes('.')) {
+                        navigateToTable(item.key);
+                      }
+                    }}
+                  >
+                    <span>{item.key}</span>
+                    <em>{item.description}</em>
+                  </button>
+                ))}
+              </div>
+            )
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TableTrendCard({ columnLifecycleItems, tableVersionTrend }) {
+  const stableColumns = columnLifecycleItems.filter((column) => column.stable).length;
+  const changedColumns = columnLifecycleItems.length - stableColumns;
+
+  return (
+    <div className="context-card table-trend-card">
+      <div className="section-title-row">
+        <h3>Table version trend</h3>
+        <span>{changedColumns} changed columns</span>
+      </div>
+      <div className="table-version-trend">
+        {tableVersionTrend.map((item) => (
+          <span className={item.present ? '' : 'missing'} key={item.version}>
+            <strong>{item.version}</strong>
+            {item.present ? `${item.columns} cols / ${item.keys} keys / ${item.indexes} indexes / ${item.foreignKeys} FKs` : 'Not present'}
+          </span>
+        ))}
+      </div>
+      <div className="column-lifecycle-list">
+        {columnLifecycleItems.slice(0, 12).map((column) => (
+          <span className={column.stable ? 'stable' : 'changed'} key={column.name}>
+            <code>{column.name}</code>
+            <em>
+              {column.firstSeen} {'->'} {column.lastSeen}
+              {column.typeCount > 1 ? ` / ${column.typeCount} types` : ''}
+            </em>
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
