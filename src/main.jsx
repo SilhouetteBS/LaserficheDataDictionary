@@ -88,7 +88,7 @@ async function fetchJson(url) {
   const requestUrl = resolvePublicUrl(url);
   let response;
   try {
-    response = await fetch(requestUrl);
+    response = await fetch(requestUrl, { cache: 'no-store' });
   } catch (error) {
     throw new DataLoadError(`Unable to request ${requestUrl}.`, [
       'Confirm the static site is serving the public/data folder.',
