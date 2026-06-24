@@ -11,6 +11,7 @@
     "render:check": "node tools/render-check.mjs",
     "import:forms": "node tools/import-forms-metadata.mjs",
     "import:schema": "node tools/import-forms-metadata.mjs",
+    "generate:ai-export": "node tools/generate-ai-export.mjs",
     "lint": "eslint .",
     "test": "node tools/run-tests.mjs",
     "test:unit": "node tools/run-tests.mjs",
@@ -29,7 +30,7 @@
     "release-notes:draft": "node tools/generate-release-notes.mjs",
     "verify:public-build": "node tools/verify-public-build.mjs",
     "verify:deployed-site": "node tools/verify-deployed-site.mjs",
-    "validate": "npm run lint && npm run test:unit && npm run test:diagram && npm run validate:data && npm run validate:notes && npm run verify:lockfile && npm run verify:static-security && npm run build && npm run test:static-build && npm run audit:performance && npm run render:check",
+    "validate": "npm run lint && npm run test:unit && npm run test:diagram && npm run validate:data && npm run validate:notes && npm run generate:ai-export && npm run verify:lockfile && npm run verify:static-security && npm run build && npm run test:static-build && npm run audit:performance && npm run render:check",
     "validate:full": "npm run validate && npm run test:e2e"
   },
   "dependencies": {

@@ -495,6 +495,7 @@ assert.deepEqual(
     'lfds 11.0.2403.2474': { total: 37, resolved: 36 },
     'lfds 12.0.2506.370': { total: 37, resolved: 36 },
     'lfds 12.0.2510.261': { total: 38, resolved: 36 },
+    'lfds 12.0.2511.289': { total: 42, resolved: 40 },
     'lfds 12.0.2603.369': { total: 41, resolved: 40 },
     'repository 11.0.2.338': { total: 350, resolved: 240 },
     'repository 12.0.1.237': { total: 350, resolved: 240 },
