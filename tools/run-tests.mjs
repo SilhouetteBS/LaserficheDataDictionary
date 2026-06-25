@@ -505,6 +505,7 @@ assert.deepEqual(
     'workflow 12.0.2508.3111': { total: 200, resolved: 199 },
     'workflow 12.0.2510.3321': { total: 206, resolved: 205 },
     'workflow 12.0.2511.266': { total: 206, resolved: 160 },
+    'workflow 12.0.2605.385': { total: 221, resolved: 220 },
   },
 );
 assert.ok(dataReport.warningsByScope['repository 12.0.1.237'].length > 0);
