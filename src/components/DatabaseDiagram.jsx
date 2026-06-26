@@ -234,37 +234,7 @@ export function DatabaseDiagram({
     });
     return geometries;
   }, [curvedConnectors, diagram, focusKey, mode, visibleDiagramEdges]);
-  const clippedEdgeCount = useMemo(() => {
-    if (!diagramViewport.clientWidth || !diagramViewport.clientHeight) {
-      return 0;
-    }
-
-    const visibleBounds = {
-      bottom: (diagramViewport.scrollTop + diagramViewport.clientHeight) / zoom,
-      left: diagramViewport.scrollLeft / zoom,
-      right: (diagramViewport.scrollLeft + diagramViewport.clientWidth) / zoom,
-      top: diagramViewport.scrollTop / zoom,
-    };
-    return visibleDiagramEdges.filter((edge) => {
-      const geometry = visibleEdgeGeometries.get(edge.id);
-      if (!geometry) {
-        return false;
-      }
-
-      const edgeLeft = Math.min(geometry.startX, geometry.midX, geometry.endX);
-      const edgeRight = Math.max(geometry.startX, geometry.midX, geometry.endX);
-      const edgeTop = Math.min(geometry.startY, geometry.endY);
-      const edgeBottom = Math.max(geometry.startY, geometry.endY);
-      return (
-        edgeLeft < visibleBounds.left ||
-        edgeRight > visibleBounds.right ||
-        edgeTop < visibleBounds.top ||
-        edgeBottom > visibleBounds.bottom
-      );
-    }).length;
-  }, [diagramViewport, visibleDiagramEdges, visibleEdgeGeometries, zoom]);
   const showUnresolvedDependencyStatus = diagram.unresolvedDependencyCount > 0 && edgeType !== 'foreignKey';
-  const showDiagramStatusRow = showUnresolvedDependencyStatus || clippedEdgeCount > 0;
 
   useEffect(() => {
     updateDiagramViewport();
@@ -859,7 +829,7 @@ export function DatabaseDiagram({
             </select>
           </label>
           <label>
-            <span>Edges</span>
+            <span>Relationships</span>
             <select value={edgeType} onChange={(event) => onEdgeTypeChange(event.target.value)}>
               <option value="all">All</option>
               <option value="foreignKey">Foreign keys</option>
@@ -907,8 +877,8 @@ export function DatabaseDiagram({
           value={diagram.nodes.length}
         />
         <MetadataStat
-          label="Edges"
-          tooltip="The total number of relationship lines currently drawn between visible objects."
+          label="Relationships"
+          tooltip="The total number of visible connector lines between schema objects. These can include SQL foreign keys and SQL expression dependencies, depending on the selected relationship filter."
           value={visibleDiagramEdges.length}
         />
         <MetadataStat
@@ -994,35 +964,20 @@ export function DatabaseDiagram({
         ) : null}
       </div>
 
-      {showDiagramStatusRow ? (
+      {showUnresolvedDependencyStatus ? (
         <div className="diagram-status-row" role="note" aria-label="Diagram status warnings">
-          {showUnresolvedDependencyStatus ? (
-            <span className="diagram-status-pill">
-              <strong>Unresolved dependencies</strong>
-              <span className="info-tooltip" tabIndex={0} aria-label="Unresolved dependencies: SQL Server reported dependency rows that could not be matched to exported tables, views, routines, or triggers. These are warnings for diagram completeness and do not necessarily mean the database is invalid.">
-                i
-                <span role="tooltip">
-                  SQL Server reported dependency rows that could not be matched to exported tables, views, routines,
-                  or triggers. These are warnings for diagram completeness and do not necessarily mean the database is
-                  invalid.
-                </span>
+          <span className="diagram-status-pill">
+            <strong>Unresolved dependencies</strong>
+            <span className="info-tooltip" tabIndex={0} aria-label="Unresolved dependencies: SQL Server reported dependency rows that could not be matched to exported tables, views, routines, or triggers. These are warnings for diagram completeness and do not necessarily mean the database is invalid.">
+              i
+              <span role="tooltip">
+                SQL Server reported dependency rows that could not be matched to exported tables, views, routines,
+                or triggers. These are warnings for diagram completeness and do not necessarily mean the database is
+                invalid.
               </span>
-              <b>{diagram.unresolvedDependencyCount}</b>
             </span>
-          ) : null}
-          {clippedEdgeCount > 0 ? (
-            <span className="diagram-status-pill">
-              <strong>Off-screen lines</strong>
-              <span className="info-tooltip" tabIndex={0} aria-label="Off-screen lines: Some relationship connectors extend outside the currently visible diagram viewport. Use Fit diagram, the mini-map, pan controls, or scroll the diagram to bring them into view.">
-                i
-                <span role="tooltip">
-                  Some relationship connectors extend outside the currently visible diagram viewport. Use Fit diagram,
-                  the mini-map, pan controls, or scroll the diagram to bring them into view.
-                </span>
-              </span>
-              <b>{clippedEdgeCount}</b>
-            </span>
-          ) : null}
+            <b>{diagram.unresolvedDependencyCount}</b>
+          </span>
         </div>
       ) : null}
 
