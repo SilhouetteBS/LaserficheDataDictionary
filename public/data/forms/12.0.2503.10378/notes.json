@@ -200,11 +200,13 @@
         "Use for read-only process instance status and lifecycle reporting.",
         "Prefer SQL foreign keys and exported metadata when joining to related runtime tables.",
         "Use with cf_bp_worker_instances when reporting on suspended, interrupted, or terminated task state.",
-        "Use process instance records for read-only Forms metadata reporting."
+        "Use process instance records for read-only Forms metadata reporting.",
+        "The status column stores the main Forms process instance lifecycle state. Use worker instance state as well when reporting suspended or task-level conditions."
       ],
       "warnings": [
         "Do not update runtime instance records directly.",
-        "Forms instance monitoring status is calculated with worker instance state; do not interpret this column by itself for suspended-task reporting."
+        "Forms instance monitoring status is calculated with worker instance state; do not interpret this column by itself for suspended-task reporting.",
+        "RunningWithSuspendedTask = 6 is a Forms application state label and does not actually exist as a stored value in cf_bp_main_instances.status."
       ],
       "columns": {
         "bp_instance_id": {
@@ -217,7 +219,7 @@
         },
         "status": {
           "confidence": "observed",
-          "purpose": "Main process instance status. Observed values from Laserfiche Answers: 1 = Running, 2 = Complete, 3 = Canceled, 4 = Terminated by error, 5 = Terminated by End Event."
+          "purpose": "Main Forms process instance lifecycle status. Values: 1 = Running (instance still in progress), 2 = Complete (instance is done), 3 = Canceled (instance was canceled), 4 = TerminatedByError (instance was terminated due to a non-recoverable error), 5 = TerminatedByEndEvent (instance ended from a terminate end event), 6 = RunningWithSuspendedTask (application state label only; does not actually exist in the database), 99 = Archived (deleted instances)."
         },
         "ref_bp_instance_id": {
           "confidence": "inferred",
@@ -279,16 +281,18 @@
       "safeReportingNotes": [
         "Use with cf_bp_main_instances for read-only monitoring of suspended, interrupted, terminated, and running-with-error Forms instances.",
         "A main instance can be running while one or more worker instances are suspended, so worker status should be considered for monitoring views.",
-        "Use worker instance records for read-only Forms metadata reporting."
+        "Use worker instance records for read-only Forms metadata reporting.",
+        "The status column stores the current execution/routing state for a worker instance step in a Forms process instance."
       ],
       "warnings": [
         "Do not update runtime worker instance records directly.",
-        "Status values are sourced from a Laserfiche Answers discussion and should be verified against the target Forms version before operational alerting."
+        "Status values are sourced from a Laserfiche Answers discussion and should be verified against the target Forms version before operational alerting.",
+        "Some worker statuses are transient and may be overwritten quickly as Forms advances the process."
       ],
       "columns": {
         "status": {
           "confidence": "observed",
-          "purpose": "Worker or routing instance status. Observed values from Laserfiche Answers: 1 = Ready, 2 = Wait for trigger, 3 = Running, 4 = Step executed, 5 = Sleep, 6 = Split, 7 = Merged, 8 = Complete, 9 = Terminate, 10 = Interrupted, 11 = Suspended due to error and resumable, 13 = Suspended due to task error and not resumable."
+          "purpose": "Forms worker instance step status. Values: 1 = Ready (step is ready to start), 2 = WaitForTrigger (requires an event before moving on, such as a user task or intermediate timer event), 3 = Running (step is currently running, such as running Workflow), 4 = StepExecuted (usually transient after a task or timer is executed and quickly overwritten by the next step), 5 = Sleep (worker instance sleeps while another starts in a subprocess), 6 = Split (gateway splitting to multiple paths), 7 = Merged (gateway merged from multiple branches), 8 = Complete (step fully executed), 9 = Terminate (step was terminated before completion), 10 = Interrupted (task was stopped due to an interrupt), 11 = SuspendedDueToError (service task could not complete), 12 = Free (task is assigned to multiple users; not used), 13 = SuspendedDueToTaskError (user task is suspended)."
         },
         "instance_id": {
           "confidence": "inferred",
@@ -346,16 +350,18 @@
       "safeReportingNotes": [
         "Use for read-only reporting on resumable or pending user task assignments after validating joins to worker instances and user snapshots.",
         "Treat this table's status values separately from cf_bp_worker_instances.status until the target Forms version is verified.",
-        "Use resumable task assignment records for read-only Forms metadata reporting."
+        "Use resumable task assignment records for read-only Forms metadata reporting.",
+        "The status column stores claim, lock, cancellation, ownership, and suspension state for resumable Forms tasks."
       ],
       "warnings": [
         "Do not update resume or task assignment records directly.",
-        "A Laserfiche Answers follow-up mentions observed status values 2 and 5 in this table but does not confirm that they share the cf_bp_worker_instances status mapping."
+        "A Laserfiche Answers follow-up mentions observed status values 2 and 5 in this table but does not confirm that they share the cf_bp_worker_instances status mapping.",
+        "Use this table for read-only task availability and assignment diagnostics only; do not infer final process completion from resume-task status alone."
       ],
       "columns": {
         "status": {
-          "confidence": "unknown",
-          "purpose": "Resume or task-assignment status value. Mapping is not confirmed; do not assume it uses the cf_bp_worker_instances status code list without validating against the target Forms version."
+          "confidence": "observed",
+          "purpose": "Forms resumable worker/task status. Values: 1 = New (task is available to be claimed), 2 = Locked (task is about to be processed, such as running Workflow), 3 = Canceled (process or instance was canceled), 4 = Deleted, 5 = Ready (task is owned), 6 = Suspended (task was unable to be assigned to a user or team)."
         },
         "resume_id": {
           "confidence": "inferred",
