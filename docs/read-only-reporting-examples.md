@@ -7,6 +7,7 @@ These examples are patterns, not production-ready queries. Validate object names
 - Count submissions by process and status using exported foreign keys where available.
 - List active processes with field counts using process and field metadata.
 - Review report-related tables before aggregating submitted values.
+- Draft active-task / Monitor-style reporting objects in `reporting/forms/forms-active-task-monitor.sql`. Deploy them to a reporting database, not to the Forms product database.
 
 ## LFDS
 

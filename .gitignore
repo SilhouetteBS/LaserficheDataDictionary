@@ -6,3 +6,7 @@ outputs/
 .env
 .env.local
 *.log
+
+# Private source-review artifacts from signed-in Laserfiche Answers research.
+data/sources/
+docs/laserfiche-answers-source-review.md
