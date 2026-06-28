@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import {
   AlertTriangle,
   CalendarClock,
-  Clipboard,
   Columns3,
   Database,
   ExternalLink,
@@ -12,6 +11,7 @@ import {
   HelpCircle,
   Lock,
   Search,
+  Share2,
   ShieldAlert,
   TableProperties,
   X,
@@ -1244,7 +1244,7 @@ function App() {
               <HelpCircle size={16} />
             </button>
             <button className="icon-button" title="Copy current view link" type="button" onClick={() => copyCurrentDeepLink('current view')}>
-              <Clipboard size={16} />
+              <Share2 size={16} />
             </button>
           </div>
         </header>
