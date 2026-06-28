@@ -3866,7 +3866,7 @@ button {
 }
 
 .diagram-mini-map-viewport {
-  fill: rgba(217, 154, 0, 0.1);
+  fill: rgba(227, 82, 5, 0.1);
   stroke: var(--brand-orange);
   stroke-width: 2.5;
   vector-effect: non-scaling-stroke;
@@ -3904,8 +3904,8 @@ button {
 }
 
 .diagram-lane-label-focused {
-  color: #7a5100;
-  border-color: rgba(217, 154, 0, 0.38);
+  color: #8f3400;
+  border-color: rgba(227, 82, 5, 0.38);
 }
 
 .diagram-lane-separator {
@@ -3959,7 +3959,7 @@ button {
 
 .diagram-edge-hit-target:focus-visible {
   outline: none;
-  stroke: rgba(217, 154, 0, 0.24);
+  stroke: rgba(227, 82, 5, 0.24);
 }
 
 .diagram-edge-highlighted {
@@ -4040,7 +4040,7 @@ button {
 }
 
 .diagram-edge-label {
-  fill: #614600;
+  fill: #8f3400;
   paint-order: stroke;
   stroke: var(--orange-soft);
   stroke-width: 5px;
@@ -4075,14 +4075,14 @@ button {
 }
 
 .diagram-cardinality-label-selected {
-  fill: #614600;
+  fill: #8f3400;
   stroke: var(--orange-soft);
   stroke-width: 5px;
   font-size: 11px;
 }
 
 .diagram-column-endpoint-label {
-  fill: #614600;
+  fill: #8f3400;
   stroke: var(--orange-soft);
   stroke-width: 5px;
   font-size: 10px;

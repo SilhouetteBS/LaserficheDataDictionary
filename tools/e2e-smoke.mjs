@@ -295,14 +295,14 @@ const hoverState = await page.evaluate(() => ({
   ),
   titles: [...globalThis.document.querySelectorAll('.diagram-lines g title')].map((title) => title.textContent),
 }));
-assert.ok(hoverState.selected.some((edge) => edge.stroke === 'rgb(217, 154, 0)' && edge.strokeWidth === '5px'));
+assert.ok(hoverState.selected.some((edge) => edge.stroke === 'rgb(227, 82, 5)' && edge.strokeWidth === '5px'));
 assert.ok(hoverState.selected.every((edge) => edge.markerEnd === 'url(#diagram-arrow-selected)'));
 assert.ok(hoverState.dimmed.some((edge) => edge.stroke === 'rgb(170, 180, 188)' && edge.strokeWidth === '1.25px'));
 assert.ok(hoverState.labels.some((label) => /container_id -> id|provider_id -> id/.test(label)));
 assert.ok(hoverState.cardinalityLabels.includes('many'));
 assert.ok(hoverState.cardinalityLabels.includes('one'));
-assert.ok(hoverState.selectedCardinalityLabels.some((label) => label.text === 'many' && label.fill === 'rgb(97, 70, 0)'));
-assert.ok(hoverState.selectedCardinalityLabels.some((label) => label.text === 'one' && label.fill === 'rgb(97, 70, 0)'));
+assert.ok(hoverState.selectedCardinalityLabels.some((label) => label.text === 'many' && label.fill === 'rgb(143, 52, 0)'));
+assert.ok(hoverState.selectedCardinalityLabels.some((label) => label.text === 'one' && label.fill === 'rgb(143, 52, 0)'));
 assert.ok(hoverState.titles.some((title) => /Status: Exported SQL foreign key constraint/.test(title)));
 const layerOrder = await page.evaluate(() => ({
   highlightZ: Number.parseInt(globalThis.getComputedStyle(globalThis.document.querySelector('.diagram-highlight-lines')).zIndex, 10),
