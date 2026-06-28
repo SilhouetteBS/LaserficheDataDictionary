@@ -176,8 +176,8 @@ button {
 .sidebar-view-nav button:focus-visible,
 .sidebar-view-nav button.selected {
   color: #ffffff;
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
 }
 
 .check-row {
@@ -414,9 +414,9 @@ button {
 }
 
 .table-item.selected {
-  background: var(--brand-blue);
+  background: var(--accent-dark);
   color: #ffffff;
-  border-color: var(--brand-blue);
+  border-color: var(--accent-dark);
 }
 
 .workspace {
@@ -1158,7 +1158,7 @@ button {
 .table-browser-panel .table-item.selected {
   border-color: var(--brand-blue);
   background: #edf8f7;
-  box-shadow: 0 0 0 2px rgba(11, 111, 114, 0.12);
+  box-shadow: 0 0 0 2px rgba(28, 115, 254, 0.12);
 }
 
 .table-browser-panel .favorite-toggle {
