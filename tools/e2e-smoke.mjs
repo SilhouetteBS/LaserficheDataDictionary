@@ -47,7 +47,7 @@ page.on('console', (message) => {
 });
 
 await page.goto(appUrl, { waitUntil: 'networkidle' });
-assert.equal(await page.title(), 'Laserfiche Data Dictionary');
+assert.equal(await page.title(), 'FicheBait Laserfiche Data Dictionary');
 assert.equal(await page.locator('h1').first().textContent(), 'Laserfiche Data Dictionary');
 assert.equal(await page.getByRole('button', { name: 'Import', exact: true }).count(), 0);
 assert.equal(await page.locator('.snapshot-details').count(), 0);
