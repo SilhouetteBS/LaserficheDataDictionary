@@ -1154,9 +1154,7 @@ function App() {
     <main className="app-shell">
       <aside className="sidebar" aria-label="Product, version, and view navigation">
         <div className="brand">
-          <div className="brand-mark">
-            <Database size={22} />
-          </div>
+          <img className="brand-logo" src="fichebait-logo.png" alt="FicheBait" />
           <div>
             <h1>Laserfiche Data Dictionary</h1>
             <p>Schema, relationships, and reporting</p>

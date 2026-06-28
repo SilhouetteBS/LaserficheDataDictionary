@@ -730,7 +730,7 @@ export function DatabaseDiagram({
       if (!geometry) {
         return '';
       }
-      const stroke = edge.type === 'dependency' ? '#7a6992' : '#0b6f72';
+      const stroke = edge.type === 'dependency' ? '#7a6992' : '#1c73fe';
       const dash = edge.type === 'dependency' ? ' stroke-dasharray="6 5"' : '';
       return `<path d="${xmlEscape(geometry.path)}" fill="none" stroke="${stroke}" stroke-width="1.8"${dash}><title>${xmlEscape(edge.label)}</title></path>`;
     }).join('\n');
