@@ -37,3 +37,19 @@ The public GitHub Pages site is static and read-only. Public builds should not i
 ## Review Boundary
 
 Schema export submissions should be reviewed before publishing. If a file contains row data or environment-specific identifiers, it should be rejected and regenerated.
+
+Use `docs/privacy-review-checklist.md` for maintainer review before importing or publishing a submission.
+
+## Issue Attachments
+
+Community submissions are handled through GitHub Issues only. If an issue
+attachment contains sensitive data, remove or hide the public issue content as
+quickly as possible and ask the submitter to regenerate a metadata-only export.
+
+Do not copy submitted files into `public/data` until:
+
+- the privacy checklist passes
+- required files are present
+- product and version identity comes from the manifest
+- duplicate version warnings have been reviewed
+- validation commands pass locally

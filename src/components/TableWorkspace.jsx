@@ -84,6 +84,10 @@ export function TableWorkspace({
     () => getColumnLifecycleItems(version, selectedTable.id),
     [selectedTable.id, version],
   );
+  const columnLifecycleByName = useMemo(
+    () => new Map(columnLifecycleItems.map((column) => [column.name, column])),
+    [columnLifecycleItems],
+  );
   const primaryKeyColumns = useMemo(
     () => new Set(selectedTable.keys.filter((key) => key.type === 'PK').flatMap((key) => key.columns.map((column) => column.columnName))),
     [selectedTable],
@@ -463,9 +467,12 @@ export function TableWorkspace({
                 <span>Type</span>
                 <span>Nullable</span>
                 <span>Purpose</span>
+                <span>Seen</span>
                 <span>Status</span>
               </div>
-              {visibleColumns.map((column) => (
+              {visibleColumns.map((column) => {
+                const lifecycle = columnLifecycleByName.get(column.name);
+                return (
                 <div className="table-row" role="row" key={column.name}>
                   <strong>
                     {column.name}
@@ -482,9 +489,20 @@ export function TableWorkspace({
                   <span>
                     {column.purpose}
                   </span>
+                  <span className="column-lifecycle-cell" title={lifecycle?.types ? `Types seen: ${lifecycle.types}` : ''}>
+                    {lifecycle ? (
+                      <>
+                        <b>{lifecycle.stable ? 'Stable' : 'Changed'}</b>
+                        <em>{lifecycle.firstSeen} {'->'} {lifecycle.lastSeen}</em>
+                      </>
+                    ) : (
+                      'Current'
+                    )}
+                  </span>
                   <ConfidenceBadge value={column.confidence} />
                 </div>
-              ))}
+                );
+              })}
             </div>
             {hiddenColumnCount > 0 && (
               <p className="virtualized-note">

@@ -37,10 +37,12 @@ assignees: ""
 - [ ] Manual notes editor, notes import, and notes export are absent from public build.
 - [ ] Read-only support warning is visible.
 - [ ] Known Limitations link is visible.
+- [ ] Public docs state this is an unofficial FicheBait community resource, not Laserfiche support documentation.
 
 ## Data Review
 
 - [ ] Product/version identity comes from manifests, not SQL Server database names.
+- [ ] `docs/privacy-review-checklist.md` was completed for submitted schema exports.
 - [ ] Data validation warnings were reviewed against `docs/data-validation-warnings.md`.
 - [ ] Missing `views.json` or `triggers.json` exports are intentional.
 - [ ] Dependency resolution warnings are expected SQL Server metadata artifacts.
@@ -48,9 +50,9 @@ assignees: ""
 
 ## Deployment
 
-- [ ] PR checks passed.
-- [ ] Public build artifact was reviewed before merge.
-- [ ] Changes merged to `main`.
+- [ ] Required validation checks passed.
+- [ ] Public build artifact was reviewed before publishing.
+- [ ] Changes committed to `main`.
 - [ ] GitHub Pages deployment completed.
 - [ ] `SITE_URL=<final-url> npm run verify:deployed-site`
 - [ ] Hosted static paths work under the final base URL.

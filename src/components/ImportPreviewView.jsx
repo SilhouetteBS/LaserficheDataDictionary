@@ -133,6 +133,7 @@ async function analyzeImportFiles(files, selectedProductKey, existingVersions) {
   }
 
   return {
+    readyForReview: errors.length === 0,
     checklist: [...requiredImportTypes, ...optionalImportTypes].map((type) => ({
       type,
       label: importTypeLabels[type] ?? `${type}.json`,
@@ -182,6 +183,8 @@ export function ImportPreviewView({ selectedProductKey, product }) {
           <li>Use all expected JSON result files when possible; missing optional result files are treated as warnings.</li>
           <li>Review duplicate version warnings before replacing existing static files.</li>
           <li>Use the current product-neutral export script with SQL Server 2016 or newer; it relies on FOR JSON output and catalog views.</li>
+          <li>Submit public exports through GitHub Issues only; maintainers review, import, and publish accepted snapshots.</li>
+          <li>Run the privacy checklist before copying any submitted files into the repository.</li>
         </ul>
       </section>
       <label
@@ -205,6 +208,7 @@ export function ImportPreviewView({ selectedProductKey, product }) {
           <dl>
             <div><dt>Product</dt><dd>{preview.productKey}</dd></div>
             <div><dt>Version</dt><dd>{preview.productVersion}</dd></div>
+            <div><dt>Review status</dt><dd>{preview.readyForReview ? 'Ready for maintainer review' : 'Fix errors first'}</dd></div>
             <div><dt>Errors</dt><dd>{preview.errors.length}</dd></div>
             <div><dt>Warnings</dt><dd>{preview.warnings.length}</dd></div>
             <div><dt>Collision</dt><dd>{preview.collision ? 'Review required' : 'None'}</dd></div>

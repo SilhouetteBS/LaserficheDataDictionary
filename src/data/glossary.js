@@ -4,12 +4,28 @@ export const glossaryTerms = [
     definition: 'A metadata-only export of SQL Server catalog information. It should not include Laserfiche business row data.',
   },
   {
+    term: 'Product snapshot',
+    definition: 'One imported product/version schema package. Product and version come from the export manifest, not the SQL Server database name.',
+  },
+  {
+    term: 'Read-only reporting',
+    definition: 'SELECT-only analysis for troubleshooting, education, or reporting. It does not include writing to Laserfiche product tables or records.',
+  },
+  {
     term: 'Foreign key',
     definition: 'An exported SQL Server constraint that connects columns between two tables.',
   },
   {
     term: 'Dependency',
     definition: 'A SQL expression reference reported by SQL Server for views, routines, or triggers. It may include aliases or unresolved helper references.',
+  },
+  {
+    term: 'Unresolved dependency',
+    definition: 'A dependency row that SQL Server reported but the export could not match to an exported table, view, routine, or trigger.',
+  },
+  {
+    term: 'Documentation confidence',
+    definition: 'The review level assigned to a table, column, or object note, from unknown or inferred through observed, confirmed, deprecated, or do not rely.',
   },
   {
     term: 'Repository',

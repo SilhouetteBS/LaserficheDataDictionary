@@ -35,3 +35,4 @@ Attach screenshots only if they do not show row data, customer data, server name
 ## Safety Check
 
 - [ ] This report does not include credentials, row data, or customer-specific values.
+- [ ] This report does not include database names, server names, connection strings, or production record screenshots.

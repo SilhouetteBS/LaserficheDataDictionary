@@ -7,6 +7,7 @@ Use issues for:
 - Schema export submissions
 - Documentation corrections
 - Bug reports
+- Feature requests
 - Public build or deployment problems
 
 Do not include:
@@ -23,5 +24,21 @@ Preferred templates:
 - `Schema export submission`
 - `Documentation correction`
 - `Bug report`
+- `Feature request`
+- `Production release checklist`
 
 For general discussion, open an issue and clearly mark it as a question or proposal.
+
+Pull requests are not used for community submissions. Maintainers will make
+repository changes after issue review.
+
+## Triage Labels
+
+Suggested labels:
+
+- `schema-export`: metadata export submissions
+- `documentation`: table, column, glossary, or reporting corrections
+- `bug`: user-visible defects
+- `enhancement`: feature ideas
+- `privacy-review`: submissions that need maintainer privacy review before import
+- `needs-triage`: new issue not yet reviewed

@@ -1,0 +1,17 @@
+Copyright (c) 2026 FicheBait. All rights reserved.
+
+This repository is published so Laserfiche administrators can review the
+Laserfiche Data Dictionary, submit metadata-only schema exports, and suggest
+documentation corrections.
+
+No permission is granted to copy, modify, sublicense, redistribute, sell, or
+use this repository or its contents for a separate product or service without
+written permission from FicheBait.
+
+Schema export submissions, documentation corrections, bug reports, and other
+contributions submitted to this repository may be reviewed, edited, and
+published by FicheBait as part of the Laserfiche Data Dictionary.
+
+This project is an unofficial FicheBait community resource. It is not
+Laserfiche support documentation and does not make direct writes to Laserfiche
+product databases supported.

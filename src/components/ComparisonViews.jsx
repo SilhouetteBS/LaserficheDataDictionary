@@ -187,7 +187,7 @@ export function ComparisonDetail({
   const showAddedColumns = columnDetailFilter === 'all' || columnDetailFilter === 'added';
   const showRemovedColumns = columnDetailFilter === 'all' || columnDetailFilter === 'removed';
   const showKeyIndexChanges = columnDetailFilter === 'all' || columnDetailFilter === 'key_index';
-  const showRelationshipChanges = columnDetailFilter === 'all';
+  const showRelationshipChanges = columnDetailFilter === 'all' || columnDetailFilter === 'relationships';
   return (
     <section className="detail-surface">
       <div className="detail-heading">
@@ -323,6 +323,13 @@ export function ComparisonDetail({
                   selectedChange.removedIndexes.length +
                   selectedChange.changedIndexes.length,
               ],
+              [
+                'relationships',
+                'Relationships',
+                selectedChange.addedForeignKeys.length +
+                  selectedChange.removedForeignKeys.length +
+                  selectedChange.changedForeignKeys.length,
+              ],
             ].map(([value, label, count]) => (
               <button
                 className={columnDetailFilter === value ? 'selected' : ''}
@@ -338,7 +345,10 @@ export function ComparisonDetail({
           <div className="drilldown-grid">
             {showAddedColumns && <ChangeBucket title="Added columns" items={selectedChange.addedColumns} />}
             {showRemovedColumns && <ChangeBucket title="Removed columns" items={selectedChange.removedColumns} />}
-            {columnDetailFilter !== 'added' && columnDetailFilter !== 'removed' && columnDetailFilter !== 'key_index' && (
+            {columnDetailFilter !== 'added' &&
+              columnDetailFilter !== 'removed' &&
+              columnDetailFilter !== 'key_index' &&
+              columnDetailFilter !== 'relationships' && (
               <ChangeBucket
                 title="Changed columns"
                 items={filteredChangedColumns.map((column) => `${column.name}: ${column.details.join('; ')}`)}
@@ -399,6 +409,28 @@ function ObjectChangeBucket({ group }) {
   );
 }
 
+function getColumnChangeStatus(selectedChange, columnName, side) {
+  if (side === 'before' && selectedChange.removedColumns.includes(columnName)) {
+    return 'removed';
+  }
+  if (side === 'after' && selectedChange.addedColumns.includes(columnName)) {
+    return 'added';
+  }
+  const changedColumn = selectedChange.changedColumns.find((column) => column.name === columnName);
+  return changedColumn ? 'changed' : '';
+}
+
+function getColumnChangeDetails(selectedChange, columnName) {
+  const changedColumn = selectedChange.changedColumns.find((column) => column.name === columnName);
+  if (selectedChange.addedColumns.includes(columnName)) {
+    return 'Added column';
+  }
+  if (selectedChange.removedColumns.includes(columnName)) {
+    return 'Removed column';
+  }
+  return changedColumn?.details.join('; ') ?? '';
+}
+
 function TableDefinitionCompare({ selectedChange }) {
   return (
     <section className="table-definition-compare" aria-label="Side-by-side table definition comparison">
@@ -407,14 +439,14 @@ function TableDefinitionCompare({ selectedChange }) {
         <span>{selectedChange.beforeDefinition.columns.length} {'->'} {selectedChange.afterDefinition.columns.length} columns</span>
       </div>
       <div className="definition-compare-grid">
-        <DefinitionSnapshot title="Before" definition={selectedChange.beforeDefinition} />
-        <DefinitionSnapshot title="After" definition={selectedChange.afterDefinition} />
+        <DefinitionSnapshot side="before" title="Before" definition={selectedChange.beforeDefinition} selectedChange={selectedChange} />
+        <DefinitionSnapshot side="after" title="After" definition={selectedChange.afterDefinition} selectedChange={selectedChange} />
       </div>
     </section>
   );
 }
 
-function DefinitionSnapshot({ title, definition }) {
+function DefinitionSnapshot({ title, definition, selectedChange, side }) {
   return (
     <div className="definition-snapshot">
       <strong>{title}</strong>
@@ -425,12 +457,19 @@ function DefinitionSnapshot({ title, definition }) {
         <div><dt>Foreign keys</dt><dd>{definition.foreignKeys.length}</dd></div>
       </dl>
       <div className="definition-column-list">
-        {definition.columns.slice(0, 80).map((column) => (
-          <span key={column.name}>
+        {definition.columns.slice(0, 80).map((column) => {
+          const status = getColumnChangeStatus(selectedChange, column.name, side);
+          const details = getColumnChangeDetails(selectedChange, column.name);
+          return (
+          <span className={status ? `definition-column-${status}` : ''} key={column.name} title={details}>
             <code>{column.name}</code>
-            <em>{column.type}{column.nullable ? ' null' : ' not null'}</em>
+            <em>
+              {column.type}{column.nullable ? ' null' : ' not null'}
+              {status && <b>{status}</b>}
+            </em>
           </span>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

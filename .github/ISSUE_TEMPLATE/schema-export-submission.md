@@ -34,6 +34,9 @@ assignees: ""
 - [ ] Export does not contain customer names, document values, form submission values, or workflow instance values.
 - [ ] Export does not rely on the SQL Server database name as the product/version identifier.
 - [ ] Export does not include credentials, connection strings, server names, or screenshots.
+- [ ] Export does not include SQL Server version, compatibility level, file paths, or instance configuration.
+- [ ] Export does not include `dbo.sysdiagrams`.
+- [ ] I reviewed `docs/data-privacy.md` and `docs/privacy-review-checklist.md`.
 
 ## Duplicate Version Review
 

@@ -8,7 +8,9 @@ This changelog tracks public data and application changes for Laserfiche Data Di
 - Added a data privacy page that explains schema metadata boundaries.
 - Added GitHub issue templates for schema export submissions, documentation corrections, and bug reports.
 - Added a contribution workflow for proposed documentation notes and duplicate version review.
+- Added community-readiness and maintainer triage guidance for issue-only public feedback.
 - Added import preview checks for expected files, duplicate versions, and product/version consistency.
+- Added schema health queues for needs-documentation prioritization and unresolved dependency review.
 - Added table note templates, table-specific reporting examples, glossary terms, and export script compatibility notes.
 - Added diagram path finding, built-in diagram presets, edge label modes, object-type filtering, and dependency direction controls.
 - Removed `dbo.sysdiagrams` from imported data and added importer/script exclusions so SSMS-created database diagrams are not published.
@@ -16,9 +18,9 @@ This changelog tracks public data and application changes for Laserfiche Data Di
 ## Imported Versions
 
 - Forms: `11.0.2311.50564`, `12.0.2503.10378`, `12.0.2509.20409`, `12.0.2603.30215`
-- LFDS: `11.0.2403.2474`, `12.0.2506.370`, `12.0.2510.261`
-- Repository: `11.0.2.338`, `12.0.1.237`, `12.0.2.343`
-- Workflow: `11.0.2306.898`, `12.0.2508.3111`, `12.0.2510.3321`
+- LFDS: `11.0.2403.2474`, `12.0.2506.370`, `12.0.2510.261`, `12.0.2511.289`, `12.0.2603.369`
+- Repository: `11.0.2.338`, `12.0.1.237`, `12.0.2.343`, `12.0.3.423`
+- Workflow: `11.0.2306.898`, `12.0.2508.3111`, `12.0.2510.3321`, `12.0.2511.266`, `12.0.2605.385`
 
 ## Initial Public Baseline
 

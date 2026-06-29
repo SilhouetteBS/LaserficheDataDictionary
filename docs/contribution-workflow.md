@@ -8,7 +8,19 @@ Laserfiche Data Dictionary contributions should be reviewed before they are copi
 2. Apply the table note template when starting a new table review.
 3. Keep the note focused on purpose, safe read-only reporting use, join notes, version caveats, and known columns.
 4. Export `notes.json` from the app.
-5. Submit the exported notes for review before publishing.
+5. Submit the exported notes through a GitHub Issue for review before publishing.
+
+Community submissions are issue-only. Do not open pull requests. Maintainers
+review issue attachments or pasted Markdown/JSON, then make any repository
+changes themselves.
+
+Proposed documentation notes may be submitted as:
+
+- `notes.json` exported from local editing mode.
+- Markdown that identifies product, version, table/object, proposed summary,
+  safe reporting use, join notes, version caveats, and known columns.
+- A documentation correction issue with the current wording and proposed
+  replacement wording.
 
 Review status should move through:
 
@@ -20,6 +32,16 @@ Review status should move through:
 ## Schema Exports
 
 Schema exports must be metadata only. Do not submit table row data, customer names, record values, document metadata values, or database names.
+
+Submitted exports should move through this maintainer review path before they
+are imported:
+
+1. `Submitted`: issue opened with product, version, and expected JSON files.
+2. `Privacy review`: confirm files contain schema metadata only.
+3. `Validated`: import preview has no errors and warnings are understood.
+4. `Imported`: static data files are generated locally.
+5. `Documentation review`: notes, examples, glossary, and known limitations are reviewed.
+6. `Published`: public build and deployed site verification pass.
 
 Expected export files:
 

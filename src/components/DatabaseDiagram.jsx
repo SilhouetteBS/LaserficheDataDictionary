@@ -956,11 +956,22 @@ export function DatabaseDiagram({
           </select>
         </label>
         {pathStartKey && pathEndKey ? (
-          <p>
-            {pathResult
-              ? `${pathResult.edges.length} hop${pathResult.edges.length === 1 ? '' : 's'}: ${pathResult.keys.join(' -> ')}`
-              : 'No visible path found. Try All edges, Full database mode, or broader object type filters.'}
-          </p>
+          <div className="diagram-path-result">
+            <p>
+              {pathResult
+                ? `${pathResult.edges.length} hop${pathResult.edges.length === 1 ? '' : 's'}: ${pathResult.keys.join(' -> ')}`
+                : 'No visible path found. Try All relationships, Full database mode, or broader object type filters.'}
+            </p>
+            {pathResult ? (
+              <button
+                className="text-button"
+                type="button"
+                onClick={() => fitBounds(getNodeBounds(pathResult.keys))}
+              >
+                Fit path
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 

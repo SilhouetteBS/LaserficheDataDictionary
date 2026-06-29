@@ -47,4 +47,7 @@ Use this checklist before publishing a public build or adding a new product/vers
 
 - Update `README.md` when commands, data layout, or deployment behavior changes.
 - Update `docs/schema-export-guide.md` when export filenames or SQL scripts change.
+- Update `docs/contribute-schema-exports.md` when public product/version coverage changes.
+- Update `docs/community-readiness-runbook.md` when intake, validation, public build, or publishing expectations change.
+- Confirm `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, and `docs/privacy-review-checklist.md` are current.
 - Record known product-specific export gaps in the import notes or release notes.

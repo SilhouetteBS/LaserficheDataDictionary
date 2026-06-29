@@ -28,4 +28,5 @@ Explain why the correction is needed. Include non-sensitive source context if av
 ## Safety Check
 
 - [ ] This correction does not include row data or customer-specific values.
+- [ ] This correction does not include database names, server names, credentials, or production record screenshots.
 - [ ] This correction is for read-only reporting, troubleshooting, or education.

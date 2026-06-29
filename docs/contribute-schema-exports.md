@@ -9,11 +9,15 @@ Schema exports must not include table row data, customer data, document metadata
 Current public snapshots:
 
 - Forms: `11.0.2311.50564`, `12.0.2503.10378`, `12.0.2509.20409`, `12.0.2603.30215`
-- LFDS: `11.0.2403.2474`, `12.0.2506.370`, `12.0.2510.261`
-- Repository: `11.0.2.338`, `12.0.1.237`, `12.0.2.343`
-- Workflow: `11.0.2306.898`, `12.0.2508.3111`, `12.0.2510.3321`
+- LFDS: `11.0.2403.2474`, `12.0.2506.370`, `12.0.2510.261`, `12.0.2511.289`, `12.0.2603.369`
+- Repository: `11.0.2.338`, `12.0.1.237`, `12.0.2.343`, `12.0.3.423`
+- Workflow: `11.0.2306.898`, `12.0.2508.3111`, `12.0.2510.3321`, `12.0.2511.266`, `12.0.2605.385`
 
 Exports for other Laserfiche product versions are useful.
+
+## Missing Versions Wanted
+
+Exports are especially useful for product versions not listed above. Before exporting, check the current `public/data/<product>/versions.json` file or the public app product/version dropdown to avoid duplicate submissions.
 
 ## Export Steps
 
@@ -53,9 +57,11 @@ Before submitting:
 - Confirm the SQL Server database name was not used as the product or version identifier.
 - Confirm the files came from the metadata export script, not manual table queries.
 - Confirm `dbo.sysdiagrams` is not included. The import process excludes it, but submissions should still avoid SSMS-created diagram objects.
+- Confirm the submission passes `docs/privacy-review-checklist.md`.
 
 ## Submit
 
-Use the GitHub issue template named `Schema export submission`.
+Use the GitHub issue template named `Schema export submission`. Community
+submissions are handled through GitHub Issues only; do not open a pull request.
 
 If the product/version already exists, submit it as a replacement request and explain why the existing snapshot should be replaced.

@@ -87,16 +87,20 @@ export function ManualNotesEditor({
       .slice(0, 6)
       .map((relationship) => `${relationship.type} ${relationship.table}`);
 
+    const purposePrompt = `${selectedTable.id} stores [describe the Laserfiche object, process, or runtime state represented by this table].`;
+    const generatedNotes = [
+      'Safe reporting use: SELECT-only reporting and troubleshooting. Do not write to this table.',
+      `Join notes: ${joinTargets.length > 0 ? joinTargets.join('; ') : 'no exported foreign key relationships were found; verify joins before publishing reports.'}`,
+      `Known columns: ${commonColumns.length > 0 ? commonColumns.join('; ') : 'review exported columns before documenting.'}`,
+      `Version caveats: primary keys ${primaryKeyColumns.length > 0 ? primaryKeyColumns.join(', ') : 'were not exported'}; validate joins against the selected product/version.`,
+    ];
+
     setDraft((current) => ({
       ...current,
-      summary: current.summary || `Purpose: document what ${selectedTable.id} represents and how it is used for read-only reporting.`,
+      summary: current.summary || purposePrompt,
       safeReportingNotes: [
         current.safeReportingNotes,
-        'Purpose: ',
-        'Safe reporting use: SELECT-only reporting and troubleshooting. Do not write to this table.',
-        `Known columns: ${commonColumns.length > 0 ? commonColumns.join('; ') : 'review exported columns before documenting.'}`,
-        `Join notes: ${joinTargets.length > 0 ? joinTargets.join('; ') : 'no exported foreign key relationships were found.'}`,
-        `Version caveats: primary keys ${primaryKeyColumns.length > 0 ? primaryKeyColumns.join(', ') : 'were not exported'}; validate joins against the selected product/version.`,
+        ...generatedNotes,
       ].filter(Boolean).join('\n'),
       warnings: [
         current.warnings,

@@ -2,6 +2,8 @@
 
 Interactive static web app for documenting Laserfiche product databases for read-only reporting, troubleshooting, and education.
 
+This is an unofficial FicheBait community resource. It is not Laserfiche support documentation and does not make direct writes to Laserfiche product databases supported.
+
 ## Scope
 
 - Product/version selector backed by static JSON manifests
@@ -16,6 +18,13 @@ Interactive static web app for documenting Laserfiche product databases for read
 ## Support Warning
 
 This project is intended for read-only reporting, troubleshooting, and educational use. Manually writing to or modifying Laserfiche product databases, tables, etc. will violate your Laserfiche Support plan and is not supported.
+
+## Community Use
+
+- Read `LICENSE` before copying, modifying, or redistributing repository contents.
+- Use `CONTRIBUTING.md` before submitting feedback, documentation corrections, or schema exports.
+- Use `SECURITY.md` for sensitive data exposure reports.
+- Use `docs/privacy-review-checklist.md` before importing or publishing submitted schema exports.
 
 ## Development
 
@@ -87,6 +96,8 @@ Public project pages:
 
 - `docs/contribute-schema-exports.md`: metadata-only schema export contribution steps.
 - `docs/data-privacy.md`: what the project collects and what must not be submitted.
+- `docs/privacy-review-checklist.md`: maintainer checklist before import or publication.
+- `docs/community-readiness-runbook.md`: issue triage, schema review, validation, public build, and maintenance guidance.
 - `docs/changelog.md`: imported versions and public-facing changes.
 - `docs/feedback.md`: analytics-free feedback through GitHub Issues.
 
@@ -158,7 +169,7 @@ Use `docs/diagram-qa.md` when changing diagram layout, connector routing, or tab
 
 Use `docs/contribution-workflow.md` for note review status, schema export submission expectations, and duplicate version handling.
 
-Use GitHub issue templates for schema export submissions, documentation corrections, and bug reports.
+Use GitHub issue templates for schema export submissions, documentation corrections, bug reports, feature requests, and production release checks.
 
 ## Import Schema Exports
 

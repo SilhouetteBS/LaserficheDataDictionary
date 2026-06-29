@@ -62,9 +62,13 @@ Header status for the current static build:
 
 ## Launch Checks
 
+- Confirm `LICENSE`, `CONTRIBUTING.md`, and `SECURITY.md` are present.
+- Confirm public docs state that this is an unofficial FicheBait community resource, not Laserfiche support documentation.
 - Confirm `Import` is absent in the public navigation.
 - Confirm table notes editor controls are absent in the public build.
 - Confirm the support warning is visible.
 - Confirm `docs/known-limitations.md` is current.
+- Confirm `docs/privacy-review-checklist.md` was used for submitted schema exports.
+- Confirm `docs/community-readiness-runbook.md` is current for public issue triage and maintainer release workflow.
 - Confirm data validation warnings have been reviewed against `docs/data-validation-warnings.md`.
 - Confirm the hosted URL passes `npm run verify:deployed-site`.
