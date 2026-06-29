@@ -1,16 +1,8 @@
 name: Correction or update
 description: Report a documentation correction, missing detail, query issue, schema note, or community example update.
 title: "Correction/update: "
-labels:
-  - documentation
-  - needs-review
+labels: ["documentation", "needs-review"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for helping improve the FicheBait Laserfiche Data Dictionary.
-
-        Do not include row data, customer-specific values, database names, server names, credentials, production screenshots, or other sensitive details.
   - type: dropdown
     id: correction_type
     attributes:
@@ -39,39 +31,29 @@ body:
       label: Version
       description: Product version affected by the correction.
       placeholder: Example: 12.0.2603.30215
-    validations:
-      required: false
   - type: input
     id: area
     attributes:
       label: Page or area
       description: Where you found the issue.
       placeholder: Tables, Diagram, Objects, Impact, Health, Dependencies, Reporting
-    validations:
-      required: false
   - type: input
-    id: object
+    id: schema_object
     attributes:
       label: Table, object, column, or example
       description: The specific table, view, routine, trigger, column, relationship, or SQL example.
       placeholder: Example: dbo.cf_bp_main_instances.status
-    validations:
-      required: false
   - type: input
     id: current_link
     attributes:
       label: Current page link
       description: Link to the Data Dictionary view where the issue was found.
       placeholder: https://silhouettebs.github.io/LaserficheDataDictionary/...
-    validations:
-      required: false
   - type: textarea
     id: current_text
     attributes:
       label: Current wording or behavior
       description: Paste or summarize what currently appears.
-    validations:
-      required: false
   - type: textarea
     id: suggested_update
     attributes:
@@ -84,14 +66,9 @@ body:
     attributes:
       label: Source or validation context
       description: Include non-sensitive source context, version details, Answers links, or schema evidence if available.
-    validations:
-      required: false
-  - type: checkboxes
-    id: safety
+  - type: textarea
+    id: safety_acknowledgement
     attributes:
       label: Safety check
-      options:
-        - label: This issue does not include row data, customer-specific values, database names, server names, credentials, or production screenshots.
-          required: true
-        - label: This correction is intended for read-only reporting, troubleshooting, or education.
-          required: true
+      description: Do not include row data, customer-specific values, database names, server names, credentials, production screenshots, or other sensitive details.
+      value: This correction is intended for read-only reporting, troubleshooting, or education and does not include sensitive data.

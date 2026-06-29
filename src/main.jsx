@@ -88,7 +88,7 @@ function buildCorrectionIssueUrl({ productKey, productName, version, view, objec
   issueUrl.searchParams.set('product', productLabel);
   issueUrl.searchParams.set('version', version || '');
   issueUrl.searchParams.set('area', view || '');
-  issueUrl.searchParams.set('object', objectLabel || '');
+  issueUrl.searchParams.set('schema_object', objectLabel || '');
   issueUrl.searchParams.set('current_link', currentUrl || '');
   issueUrl.searchParams.set(
     'current_text',
