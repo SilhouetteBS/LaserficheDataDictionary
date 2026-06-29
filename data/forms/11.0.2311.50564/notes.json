@@ -337,13 +337,13 @@
       "summary": "Resume or pending-task assignment records associated with worker instances.",
       "safeReportingNotes": [
         "Use for read-only reporting on resumable or pending user task assignments after validating joins to worker instances and user snapshots.",
-        "Treat this table's status values separately from cf_bp_worker_instances.status until the target Forms version is verified.",
         "Use resumable task assignment records for read-only Forms metadata reporting.",
-        "The status column stores claim, lock, cancellation, ownership, and suspension state for resumable Forms tasks."
+        "The status column stores claim, lock, cancellation, ownership, and suspension state for resumable Forms tasks.",
+        "The status column mapping is: 1 New, 2 Locked, 3 Canceled, 4 Deleted, 5 Ready, 6 Suspended.",
+        "Status value mapping updated from Laserfiche Answers clarification."
       ],
       "warnings": [
         "Do not update resume or task assignment records directly.",
-        "A Laserfiche Answers follow-up mentions observed status values 2 and 5 in this table but does not confirm that they share the cf_bp_worker_instances status mapping.",
         "Use this table for read-only task availability and assignment diagnostics only; do not infer final process completion from resume-task status alone."
       ],
       "columns": {
@@ -908,14 +908,17 @@
       }
     },
     "dbo.cf_bp_worker_instance_history": {
-      "confidence": "inferred",
+      "confidence": "observed",
       "summary": "Historical record of worker instance execution and task assignment activity.",
       "safeReportingNotes": [
         "Use for read-only audit-style reporting on process step timing, task assignment, completion, and due-date history.",
-        "Use worker instance history records for read-only Forms metadata reporting."
+        "Use worker instance history records for read-only Forms metadata reporting.",
+        "The status column stores string lifecycle/event values; use the documented value reference before aggregating task history states.",
+        "Status value mapping updated from Laserfiche Answers clarification."
       ],
       "warnings": [
-        "Do not update worker instance history records directly."
+        "Do not update worker instance history records directly.",
+        "Do not treat worker instance history status as the same mapping as cf_bp_worker_instances.status; history uses string event values."
       ],
       "columns": {
         "history_id": {
@@ -943,8 +946,8 @@
           "purpose": "Timestamp when the step or worker history segment finished."
         },
         "status": {
-          "confidence": "inferred",
-          "purpose": "Historical worker status value; verify mapping before public reporting."
+          "confidence": "observed",
+          "purpose": "Historical worker instance status string for step and task lifecycle events. Reference values: complete = 1 (step is complete), terminate = 2 (step was terminated), assigned = 3 (task was assigned to users), waiting = 4 (step is in waiting state), reassigned = 5 (task was reassigned), running = 6 (step is running), interrupted = 7 (step was interrupted by signal or timer), suspended = 8 (service task was suspended), claimed = 9 (user task was claimed by user), released = 10 (user task was released by user), taskSuspended = 11 (user task was suspended), AssignmentError = 12 (user task assignment failed because there were no valid approvers), Unused = 13 (currently unused), AssignedByRoundRobin = 14 (user task owner assigned automatically by round robin), DueDateEdited = 15 (due date modified), PriorityEdited = 16 (priority modified)."
         },
         "submission_id": {
           "confidence": "inferred",
@@ -3079,10 +3082,13 @@
       }
     },
     "dbo.cf_bp_worker_instnc_to_resume_archive": {
-      "confidence": "inferred",
+      "confidence": "observed",
       "summary": "Mapping records for archived resumable task assignment.",
       "safeReportingNotes": [
-        "Use archived resumable task assignment records for read-only Forms metadata reporting."
+        "Use archived resumable task assignment records for read-only Forms metadata reporting.",
+        "Use archived resumable task assignment records for read-only Forms task availability and assignment history reporting.",
+        "The status column uses the same mapping as cf_bp_worker_instnc_to_resume.status: 1 New, 2 Locked, 3 Canceled, 4 Deleted, 5 Ready, 6 Suspended.",
+        "Status value mapping updated from Laserfiche Answers clarification."
       ],
       "columns": {
         "id": {
@@ -3114,8 +3120,8 @@
           "purpose": "Count value for resume count on the archived resumable task assignment record."
         },
         "status": {
-          "confidence": "inferred",
-          "purpose": "Status value for the record; verify the value mapping before public reporting."
+          "confidence": "observed",
+          "purpose": "Forms resumable worker/task status. Values: 1 = New (task is available to be claimed), 2 = Locked (task is about to be processed, such as running Workflow), 3 = Canceled (process or instance was canceled), 4 = Deleted, 5 = Ready (task is owned), 6 = Suspended (task was unable to be assigned to a user or team)."
         },
         "archived_by": {
           "confidence": "inferred",
@@ -3145,7 +3151,10 @@
           "confidence": "inferred",
           "purpose": "Form submission identifier."
         }
-      }
+      },
+      "warnings": [
+        "Use archived rows for historical reporting only; do not infer current task availability from archive status alone."
+      ]
     },
     "dbo.cf_business_processes_archive": {
       "confidence": "inferred",
