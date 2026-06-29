@@ -5664,6 +5664,20 @@ code {
     justify-content: flex-start;
   }
 
+  .topbar-actions .feedback-link {
+    width: 46px;
+    padding: 0;
+  }
+
+  .topbar-actions .feedback-link span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
   .heading-actions {
     justify-content: flex-start;
   }

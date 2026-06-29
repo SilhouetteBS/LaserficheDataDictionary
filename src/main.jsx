@@ -1266,12 +1266,13 @@ function App() {
             <a
               className="text-button feedback-link"
               href={correctionIssueUrl}
+              aria-label="Report a correction or update"
               rel="noreferrer"
               target="_blank"
               title="Report a correction or update"
             >
               <MessageSquarePlus size={14} />
-              Report correction
+              <span>Report correction</span>
             </a>
             <button className="text-button command-button" type="button" onClick={() => setCommandOpen(true)}>
               <Search size={14} />
