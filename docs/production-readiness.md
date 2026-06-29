@@ -63,7 +63,7 @@ Header status for the current static build:
 ## Launch Checks
 
 - Confirm `LICENSE`, `CONTRIBUTING.md`, and `SECURITY.md` are present.
-- Confirm public docs state that this is an unofficial FicheBait community resource, not Laserfiche support documentation.
+- Confirm public docs state that this is an unofficial FicheBait community research aid, is not affiliated with or endorsed by Laserfiche, and is not Laserfiche support documentation.
 - Confirm `Import` is absent in the public navigation.
 - Confirm table notes editor controls are absent in the public build.
 - Confirm the support warning is visible.

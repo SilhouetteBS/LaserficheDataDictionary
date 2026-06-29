@@ -9,4 +9,5 @@
 - Focused diagram mode shows direct relationships to the selected object; deeper context is available through the depth control where supported.
 - Public builds are read-only. Manual notes editing is intended only for local or internal review builds.
 - This project is for read-only reporting, troubleshooting, and education. It does not authorize direct writes to Laserfiche product databases.
-- This is an unofficial FicheBait community resource, not Laserfiche support documentation.
+- This helper is an unofficial FicheBait community research aid. It is not affiliated with or endorsed by Laserfiche, is not Laserfiche support documentation, and does not make direct writes to Laserfiche product databases supported.
+- Validate fixes in a test or maintenance window before changing production systems.

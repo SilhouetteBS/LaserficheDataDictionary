@@ -2,7 +2,7 @@
 
 Interactive static web app for documenting Laserfiche product databases for read-only reporting, troubleshooting, and education.
 
-This is an unofficial FicheBait community resource. It is not Laserfiche support documentation and does not make direct writes to Laserfiche product databases supported.
+This is an unofficial FicheBait community research aid. It is not affiliated with or endorsed by Laserfiche, is not Laserfiche support documentation, and does not make direct writes to Laserfiche product databases supported. Validate fixes in a test or maintenance window before changing production systems.
 
 ## Scope
 

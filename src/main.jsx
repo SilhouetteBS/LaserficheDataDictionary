@@ -1221,7 +1221,9 @@ function App() {
             <p>
               This documentation is for read-only reporting, troubleshooting, and education. Manually
               writing to or modifying Laserfiche product databases, tables, etc. will violate your
-              Laserfiche Support plan and is not supported.
+              Laserfiche Support plan and is not supported. This helper is a community research aid
+              and is not affiliated with or endorsed by Laserfiche. Validate fixes in a test or
+              maintenance window before changing production systems.
               {' '}
               <a
                 className="warning-link"
