@@ -81,30 +81,36 @@ function buildCorrectionIssueUrl({ productKey, productName, version, view, objec
   const issueUrl = new URL('https://github.com/SilhouetteBS/LaserficheDataDictionary/issues/new');
   const productLabel = productName || productKey || '';
 
-  issueUrl.searchParams.set('template', 'correction-update.yml');
-  issueUrl.searchParams.set('title', `Correction/update: ${productName || productKey} ${version || ''}`.trim());
+  issueUrl.searchParams.set('template', 'documentation-correction.md');
+  issueUrl.searchParams.set('title', `Documentation correction: ${productLabel} ${version || ''}`.trim());
   issueUrl.searchParams.set('labels', 'documentation,needs-review');
-  issueUrl.searchParams.set('correction_type', 'Other correction or update');
-  issueUrl.searchParams.set('product', productLabel);
-  issueUrl.searchParams.set('version', version || '');
-  issueUrl.searchParams.set('area', view || '');
-  issueUrl.searchParams.set('schema_object', objectLabel || '');
-  issueUrl.searchParams.set('current_link', currentUrl || '');
-  issueUrl.searchParams.set(
-    'current_text',
-    [
-      `Opened from: ${productLabel || 'Unknown product'}${version ? ` ${version}` : ''}`,
-      view ? `Area: ${view}` : '',
-      objectLabel ? `Object: ${objectLabel}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n'),
-  );
-  issueUrl.searchParams.set('suggested_update', 'Describe the correction or update you recommend.');
-  issueUrl.searchParams.set(
-    'source_context',
-    'Include non-sensitive source context, version details, Laserfiche Answers links, or schema evidence if available.',
-  );
+  issueUrl.searchParams.set('body', [
+    '## Location',
+    '',
+    `- Product: ${productLabel}`,
+    `- Version: ${version || ''}`,
+    `- Page or tab: ${view || ''}`,
+    `- Table/object/column: ${objectLabel || ''}`,
+    `- Current page link: ${currentUrl || ''}`,
+    '',
+    '## Current Wording',
+    '',
+    'Paste or summarize the current wording.',
+    '',
+    '## Suggested Correction',
+    '',
+    'Write the proposed replacement or clarification.',
+    '',
+    '## Reason',
+    '',
+    'Explain why the correction is needed. Include non-sensitive source context if available.',
+    '',
+    '## Safety Check',
+    '',
+    '- [ ] This correction does not include row data or customer-specific values.',
+    '- [ ] This correction does not include database names, server names, credentials, or production record screenshots.',
+    '- [ ] This correction is for read-only reporting, troubleshooting, or education.',
+  ].join('\n'));
   return issueUrl.toString();
 }
 
