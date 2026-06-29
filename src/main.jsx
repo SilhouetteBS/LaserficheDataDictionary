@@ -10,6 +10,7 @@ import {
   GitBranch,
   HelpCircle,
   Lock,
+  MessageSquarePlus,
   Search,
   Share2,
   ShieldAlert,
@@ -74,6 +75,22 @@ function resolvePublicUrl(url) {
   const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
   const normalizedPath = String(url).replace(/^\/+/, '');
   return `${normalizedBase}${normalizedPath}`;
+}
+
+function buildCorrectionIssueUrl({ productKey, productName, version, view, objectLabel, currentUrl }) {
+  const issueUrl = new URL('https://github.com/SilhouetteBS/LaserficheDataDictionary/issues/new');
+  issueUrl.searchParams.set('template', 'correction-update.yml');
+  issueUrl.searchParams.set('title', `Correction/update: ${productName || productKey} ${version || ''}`.trim());
+  issueUrl.searchParams.set('product', productName || productKey || '');
+  issueUrl.searchParams.set('version', version || '');
+  issueUrl.searchParams.set('area', view || '');
+  issueUrl.searchParams.set('object', objectLabel || '');
+  issueUrl.searchParams.set('current_link', currentUrl || '');
+  issueUrl.searchParams.set(
+    'source_context',
+    'Opened from the FicheBait Laserfiche Data Dictionary feedback link.',
+  );
+  return issueUrl.toString();
 }
 
 class DataLoadError extends Error {
@@ -1149,6 +1166,14 @@ function App() {
     }
     return relationship.type === relationshipFilter;
   });
+  const correctionIssueUrl = buildCorrectionIssueUrl({
+    productKey: selectedProductKey,
+    productName,
+    version: selectedVersion,
+    view: activeView,
+    objectLabel: activeView === 'tables' ? selectedTable.id : '',
+    currentUrl: window.location.href,
+  });
 
   return (
     <main className="app-shell">
@@ -1238,6 +1263,16 @@ function App() {
           </div>
 
           <div className="topbar-actions">
+            <a
+              className="text-button feedback-link"
+              href={correctionIssueUrl}
+              rel="noreferrer"
+              target="_blank"
+              title="Report a correction or update"
+            >
+              <MessageSquarePlus size={14} />
+              Report correction
+            </a>
             <button className="text-button command-button" type="button" onClick={() => setCommandOpen(true)}>
               <Search size={14} />
               Command

@@ -12,6 +12,8 @@
     "import:forms": "node tools/import-forms-metadata.mjs",
     "import:schema": "node tools/import-forms-metadata.mjs",
     "generate:ai-export": "node tools/generate-ai-export.mjs",
+    "research:answers-sql": "node tools/answers-sql-research.mjs",
+    "research:answers-sql:existing": "node tools/answers-sql-research.mjs --review-existing",
     "lint": "eslint .",
     "test": "node tools/run-tests.mjs",
     "test:unit": "node tools/run-tests.mjs",

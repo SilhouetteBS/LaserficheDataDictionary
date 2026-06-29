@@ -9,6 +9,7 @@ Use issues for:
 - Bug reports
 - Feature requests
 - Public build or deployment problems
+- Corrections or updates opened from the in-app feedback link
 
 Do not include:
 
@@ -22,6 +23,7 @@ Do not include:
 Preferred templates:
 
 - `Schema export submission`
+- `Correction or update`
 - `Documentation correction`
 - `Bug report`
 - `Feature request`

@@ -503,17 +503,23 @@ button {
 }
 
 .topbar-actions .text-button,
-.topbar-actions .icon-button {
+.topbar-actions .icon-button,
+.topbar-actions .feedback-link {
   height: 46px;
   min-height: 46px;
 }
 
-.topbar-actions .command-button {
+.topbar-actions .command-button,
+.topbar-actions .feedback-link {
   display: inline-flex;
   gap: 7px;
   align-items: center;
   justify-content: center;
   padding: 0 12px;
+}
+
+.topbar-actions .feedback-link {
+  text-decoration: none;
 }
 
 .editing-mode-badge {
