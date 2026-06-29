@@ -79,46 +79,32 @@ function resolvePublicUrl(url) {
 
 function buildCorrectionIssueUrl({ productKey, productName, version, view, objectLabel, currentUrl }) {
   const issueUrl = new URL('https://github.com/SilhouetteBS/LaserficheDataDictionary/issues/new');
+  const productLabel = productName || productKey || '';
+
+  issueUrl.searchParams.set('template', 'correction-update.yml');
   issueUrl.searchParams.set('title', `Correction/update: ${productName || productKey} ${version || ''}`.trim());
   issueUrl.searchParams.set('labels', 'documentation,needs-review');
-  issueUrl.searchParams.set('body', [
-    '## Correction Type',
-    '',
-    '- [ ] Table or column documentation',
-    '- [ ] Relationship or diagram',
-    '- [ ] SQL/reporting example',
-    '- [ ] Product/version metadata',
-    '- [ ] Missing schema object',
-    '- [ ] UI or navigation issue',
-    '- [ ] Other correction or update',
-    '',
-    '## Location',
-    '',
-    `- Product: ${productName || productKey || ''}`,
-    `- Version: ${version || ''}`,
-    `- Page or area: ${view || ''}`,
-    `- Table/object/column/example: ${objectLabel || ''}`,
-    `- Current page link: ${currentUrl || ''}`,
-    '',
-    '## Current Wording or Behavior',
-    '',
-    'Paste or summarize what currently appears.',
-    '',
-    '## Suggested Correction or Update',
-    '',
-    'Explain what should change.',
-    '',
-    '## Source or Validation Context',
-    '',
-    'Include non-sensitive source context, version details, Answers links, or schema evidence if available.',
-    '',
-    '## Safety Check',
-    '',
-    '- [ ] This issue does not include row data, customer-specific values, database names, server names, credentials, or production screenshots.',
-    '- [ ] This correction is intended for read-only reporting, troubleshooting, or education.',
-    '',
-    '_Opened from the FicheBait Laserfiche Data Dictionary feedback link._',
-  ].join('\n'));
+  issueUrl.searchParams.set('correction_type', 'Other correction or update');
+  issueUrl.searchParams.set('product', productLabel);
+  issueUrl.searchParams.set('version', version || '');
+  issueUrl.searchParams.set('area', view || '');
+  issueUrl.searchParams.set('object', objectLabel || '');
+  issueUrl.searchParams.set('current_link', currentUrl || '');
+  issueUrl.searchParams.set(
+    'current_text',
+    [
+      `Opened from: ${productLabel || 'Unknown product'}${version ? ` ${version}` : ''}`,
+      view ? `Area: ${view}` : '',
+      objectLabel ? `Object: ${objectLabel}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  );
+  issueUrl.searchParams.set('suggested_update', 'Describe the correction or update you recommend.');
+  issueUrl.searchParams.set(
+    'source_context',
+    'Include non-sensitive source context, version details, Laserfiche Answers links, or schema evidence if available.',
+  );
   return issueUrl.toString();
 }
 
