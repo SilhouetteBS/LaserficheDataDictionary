@@ -12,25 +12,25 @@ source links and schema-match notes without copying raw forum SQL.
 - List active processes with field counts using process and field metadata.
 - Review report-related tables before aggregating submitted values.
 - Draft active-task / Monitor-style reporting objects in `reporting/forms/forms-active-task-monitor.sql`. Deploy them to a reporting database, not to the Forms product database.
-- Review field-value-to-instance lookup candidates before publishing a second reusable Forms script.
+- Draft field-value-to-instance lookup objects in `reporting/forms/forms-field-value-instance-lookup.sql`. This pattern helps connect submitted values back to Forms submissions and process instances.
 
 ## LFDS
 
 - Inventory identity providers and directory object counts.
 - Review license allocation metadata by product or registration.
 - List registration records for troubleshooting inventory.
-- Review user/license inventory candidates based on `directory_objects`, `user_licenses`, `user_logins`, and `container_limits`.
+- Draft user/license inventory objects in `reporting/lfds/lfds-user-license-inventory.sql` based on `directory_objects`, `user_licenses`, `user_logins`, and `container_limits`.
 
 ## Repository
 
 - Count entries by type and volume.
 - Review template and field usage metadata.
 - Inventory trustee and security-related metadata.
-- Review path and metadata lookup candidates based on `toc`, `doc`, `vol`, `propdef`, `propset`, and `propval`.
+- Draft path and metadata lookup objects in `reporting/repository/repository-path-metadata-lookup.sql` based on `toc`, `doc`, `vol`, `propdef`, `propset`, and `propval`.
 
 ## Workflow
 
 - Count workflows by enabled/disabled status.
 - Inventory schedules and event subscriptions.
 - Review workflow activity definitions for documentation coverage.
-- Review queue-size and search-activity diagnostic candidates with row/date filters before publishing runnable SQL.
+- Draft queue/search diagnostic objects in `reporting/workflow/workflow-queue-search-diagnostics.sql` with row/date filters for queue, search, and completion review.

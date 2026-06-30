@@ -21,7 +21,149 @@ export const productReportingPaths = {
       tables: ['dbo.cf_bp_worker_instances', 'dbo.cf_bp_worker_instance_history', 'dbo.cf_bp_task_reminders'],
     },
   ],
+  lfds: [
+    {
+      title: 'Directory identities and providers',
+      summary: 'Start with directory objects, then add provider context and login details.',
+      tables: ['dbo.directory_objects', 'dbo.identity_providers', 'dbo.user_logins'],
+    },
+    {
+      title: 'User licenses',
+      summary: 'Use directory object SIDs to connect identity records to license assignments.',
+      tables: ['dbo.directory_objects', 'dbo.user_licenses', 'dbo.container_limits'],
+    },
+    {
+      title: 'SAML to Laserfiche SID mapping',
+      summary: 'Use SID mapping tables when reconciling federated users to Laserfiche identities.',
+      tables: ['dbo.saml_lf_sid_mappings', 'dbo.directory_objects', 'dbo.identity_providers'],
+    },
+  ],
+  repository: [
+    {
+      title: 'Repository entry inventory',
+      summary: 'Start from TOC entries, then add parent, volume, and template context.',
+      tables: ['dbo.toc', 'dbo.vol', 'dbo.propset'],
+    },
+    {
+      title: 'Field metadata and values',
+      summary: 'Use field definitions with property values to report entry metadata.',
+      tables: ['dbo.propdef', 'dbo.propval', 'dbo.toc'],
+    },
+    {
+      title: 'Document pages and electronic documents',
+      summary: 'Use entry and page tables to review page counts, image sizes, and text inventory.',
+      tables: ['dbo.toc', 'dbo.doc', 'dbo.vol'],
+    },
+  ],
+  workflow: [
+    {
+      title: 'Task queue diagnostics',
+      summary: 'Use queue and queue data tables to review retry state, queued work, and task payload size.',
+      tables: ['dbo.workflow_task_queue', 'dbo.workflow_task_queue_data'],
+    },
+    {
+      title: 'Search activity tracing',
+      summary: 'Connect search instance records to search entry records for current and logged activity.',
+      tables: ['dbo.search_instance', 'dbo.search_entry', 'dbo.search_instance_log', 'dbo.search_entry_log'],
+    },
+    {
+      title: 'Instance completion status',
+      summary: 'Use completion records for workflow instance completion and retry diagnostics.',
+      tables: ['dbo.instance_completion'],
+    },
+  ],
 };
+
+const repoBlobBaseUrl = 'https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main';
+
+export const communityReportingPatterns = {
+  forms: [
+    {
+      title: 'Forms active task and Monitor reporting',
+      summary:
+        'Creates reporting-database views and procedures for active Forms tasks, worker instances, and Monitor-style task review.',
+      scriptPath: 'reporting/forms/forms-active-task-monitor.sql',
+      evidencePath: 'reporting/forms/forms-active-task-monitor-evidence.md',
+      sourceCount: 6,
+      tables: [
+        'dbo.cf_bp_main_instances',
+        'dbo.cf_bp_worker_instances',
+        'dbo.cf_bp_worker_instance_history',
+        'dbo.cf_bp_data',
+      ],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+    },
+    {
+      title: 'Forms field-value to instance lookup',
+      summary:
+        'Creates a reporting view and procedure that connect submitted values to Forms submissions and business process instances.',
+      scriptPath: 'reporting/forms/forms-field-value-instance-lookup.sql',
+      evidencePath: 'reporting/forms/forms-field-value-instance-lookup-evidence.md',
+      sourceCount: 5,
+      tables: ['dbo.cf_bp_data', 'dbo.cf_submissions', 'dbo.cf_bp_main_instances', 'dbo.cf_fields'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+    },
+  ],
+  lfds: [
+    {
+      title: 'LFDS user and license inventory',
+      summary:
+        'Creates read-only reporting objects for directory users, identity providers, logins, licenses, limits, and SAML SID mappings.',
+      scriptPath: 'reporting/lfds/lfds-user-license-inventory.sql',
+      evidencePath: 'reporting/lfds/lfds-user-license-inventory-evidence.md',
+      sourceCount: 6,
+      tables: [
+        'dbo.directory_objects',
+        'dbo.identity_providers',
+        'dbo.user_logins',
+        'dbo.user_licenses',
+        'dbo.container_limits',
+        'dbo.saml_lf_sid_mappings',
+      ],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+    },
+  ],
+  repository: [
+    {
+      title: 'Repository path and metadata lookup',
+      summary:
+        'Creates read-only reporting views and a lookup procedure for entries, parent folders, volumes, pages, templates, and field values.',
+      scriptPath: 'reporting/repository/repository-path-metadata-lookup.sql',
+      evidencePath: 'reporting/repository/repository-path-metadata-lookup-evidence.md',
+      sourceCount: 11,
+      tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.propset', 'dbo.propdef', 'dbo.propval'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+    },
+  ],
+  workflow: [
+    {
+      title: 'Workflow queue and search diagnostics',
+      summary:
+        'Creates read-only reporting objects for workflow task queues, queue payload sizes, search activity, and completion status.',
+      scriptPath: 'reporting/workflow/workflow-queue-search-diagnostics.sql',
+      evidencePath: 'reporting/workflow/workflow-queue-search-diagnostics-evidence.md',
+      sourceCount: 4,
+      tables: [
+        'dbo.workflow_task_queue',
+        'dbo.workflow_task_queue_data',
+        'dbo.search_instance',
+        'dbo.search_entry',
+        'dbo.search_instance_log',
+        'dbo.search_entry_log',
+        'dbo.instance_completion',
+      ],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+    },
+  ],
+};
+
+export function getCommunityReportingPatterns(productKey) {
+  return (communityReportingPatterns[productKey] ?? []).map((pattern) => ({
+    ...pattern,
+    scriptUrl: `${repoBlobBaseUrl}/${pattern.scriptPath}`,
+    evidenceUrl: `${repoBlobBaseUrl}/${pattern.evidencePath}`,
+  }));
+}
 
 export function getReportingPaths(productKey) {
   return productReportingPaths[productKey] ?? [];

@@ -1,11 +1,17 @@
 import { useMemo } from 'react';
 import { exportCompatibilityNotes, glossaryTerms } from '../data/glossary.js';
-import { buildGeneratedReportingExamples, getReportingPaths, getReportingQuestions } from '../data/reporting.js';
+import {
+  buildGeneratedReportingExamples,
+  getCommunityReportingPatterns,
+  getReportingPaths,
+  getReportingQuestions,
+} from '../data/reporting.js';
 
 export function ReportingGuide({ version, onSelectTable }) {
   const knownTables = new Set(version.tables.map((table) => table.id));
   const reportingPaths = getReportingPaths(version.source.productKey);
   const reportingQuestions = getReportingQuestions(version.source.productKey);
+  const communityPatterns = getCommunityReportingPatterns(version.source.productKey);
   const generatedExamples = useMemo(() => buildGeneratedReportingExamples(version), [version]);
 
   return (
@@ -98,6 +104,51 @@ export function ReportingGuide({ version, onSelectTable }) {
             ))}
           </div>
         </section>
+        {communityPatterns.length > 0 ? (
+          <section className="reporting-section reporting-section-wide">
+            <div className="section-title-row">
+              <h3>Community reviewed scripts</h3>
+              <span>{communityPatterns.length}</span>
+            </div>
+            <div className="community-pattern-list">
+              {communityPatterns.map((pattern) => (
+                <article className="community-pattern-card" key={pattern.scriptPath}>
+                  <div className="community-pattern-heading">
+                    <div>
+                      <h4>{pattern.title}</h4>
+                      <p>{pattern.summary}</p>
+                    </div>
+                    <span>{pattern.sourceCount} sources</span>
+                  </div>
+                  <div className="community-pattern-tags">
+                    {pattern.tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
+                  <div className="example-table-links">
+                    {pattern.tables.map((tableKey) =>
+                      knownTables.has(tableKey) ? (
+                        <button key={tableKey} type="button" onClick={() => onSelectTable(tableKey)}>
+                          {tableKey}
+                        </button>
+                      ) : (
+                        <span key={tableKey}>{tableKey}</span>
+                      ),
+                    )}
+                  </div>
+                  <div className="community-pattern-actions">
+                    <a href={pattern.scriptUrl} target="_blank" rel="noreferrer">
+                      Open SQL
+                    </a>
+                    <a href={pattern.evidenceUrl} target="_blank" rel="noreferrer">
+                      Review notes
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
         <section className="reporting-section">
           <div className="section-title-row">
             <h3>Glossary</h3>

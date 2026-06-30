@@ -12,3 +12,4 @@ This folder contains public-safe reporting object drafts. They are based on expo
 ## Patterns
 
 - `forms-active-task-monitor.sql`: Active Forms task / Monitor-style reporting view, optional indexed snapshot table, refresh stored procedure, and filtered read stored procedure.
+- `forms-field-value-instance-lookup.sql`: Submitted field-value lookup view and stored procedure that connect values to submissions and process instances.
