@@ -23,7 +23,7 @@ const notepadPlusSqlTheme = {
   name: 'fichebait-notepad-plus-sql',
   type: 'light',
   colors: {
-    'editor.background': '#ffffff',
+    'editor.background': '#f8fbfc',
     'editor.foreground': '#000000',
   },
   tokenColors: [
