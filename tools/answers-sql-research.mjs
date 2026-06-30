@@ -7,6 +7,8 @@ const sourceDir = path.join(root, 'data', 'sources');
 const reviewedPostsPath = path.join(sourceDir, 'answers-sql-reviewed-posts.json');
 const seedPath = path.join(root, '.tmp', 'answers-sql-research', 'candidates.json');
 const reviewExisting = process.argv.includes('--review-existing');
+const limitArg = process.argv.find((arg) => arg.startsWith('--limit='));
+const batchLimit = Math.max(1, Math.min(250, Number(limitArg?.split('=')[1] ?? 50) || 50));
 
 const productSearchTerms = {
   forms: [
@@ -146,7 +148,7 @@ function extractQuestionLinks(html, product, foundBy) {
       : new URL(match[1], 'https://answers.laserfiche.com').href;
     const cleanUrl = href.replace(/#.*$/, '');
     const title = decodeHtml(match[2]);
-    if (!title || ['posted by', 'updated by'].includes(title.toLowerCase())) continue;
+    if (!title || ['posted', 'updated', 'posted by', 'updated by'].includes(title.toLowerCase())) continue;
     if (seen.has(cleanUrl)) continue;
     seen.add(cleanUrl);
     links.push({ product, title, url: cleanUrl, foundBy: [foundBy] });
@@ -161,25 +163,34 @@ async function collectCandidates(product, seeds, reviewedPosts) {
       .map((item) => [normalizeQuestionUrl(item.url), { ...item, url: normalizeQuestionUrl(item.url), foundBy: [...new Set(item.foundBy ?? [])] }]),
   );
   for (const term of productSearchTerms[product]) {
-    if (map.size >= 50) break;
-    const url = `https://answers.laserfiche.com/questions?q=${encodeURIComponent(term)}`;
-    try {
-      const html = await fetchText(url);
-      for (const item of extractQuestionLinks(html, product, term)) {
-        const normalizedUrl = normalizeQuestionUrl(item.url);
-        if (hasReviewedUrl(reviewedPosts, normalizedUrl)) continue;
-        if (!map.has(normalizedUrl)) {
-          map.set(normalizedUrl, { ...item, url: normalizedUrl });
-        } else if (!map.get(normalizedUrl).foundBy.includes(term)) {
-          map.get(normalizedUrl).foundBy.push(term);
+    if (map.size >= batchLimit) break;
+    for (let page = 1; page <= 8; page += 1) {
+      const pageSuffix = page === 1 ? '' : `&page=${page}`;
+      const url = `https://answers.laserfiche.com/questions?q=${encodeURIComponent(term)}${pageSuffix}`;
+      try {
+        const html = await fetchText(url);
+        const links = extractQuestionLinks(html, product, term);
+        if (links.length === 0) break;
+        let addedOnPage = 0;
+        for (const item of links) {
+          const normalizedUrl = normalizeQuestionUrl(item.url);
+          if (hasReviewedUrl(reviewedPosts, normalizedUrl)) continue;
+          if (!map.has(normalizedUrl)) {
+            map.set(normalizedUrl, { ...item, url: normalizedUrl });
+            addedOnPage += 1;
+          } else if (!map.get(normalizedUrl).foundBy.includes(term)) {
+            map.get(normalizedUrl).foundBy.push(term);
+          }
+          if (map.size >= batchLimit) break;
         }
-        if (map.size >= 50) break;
+        if (map.size >= batchLimit || (page > 1 && addedOnPage === 0)) break;
+      } catch (error) {
+        console.warn(`Search failed for ${product}: ${term} page ${page}: ${error.message}`);
+        break;
       }
-    } catch (error) {
-      console.warn(`Search failed for ${product}: ${term}: ${error.message}`);
     }
   }
-  return [...map.values()].slice(0, 50);
+  return [...map.values()].slice(0, batchLimit);
 }
 
 function upsertReviewedPosts(reviewedPosts, reviewed) {
@@ -576,7 +587,7 @@ for (const product of Object.keys(productSearchTerms)) {
   console.warn(`Collecting ${product} candidates...`);
   schemaByProduct[product] = await loadSchemaTerms(product);
   candidates[product] = reviewExisting
-    ? (seeds[product] ?? []).slice(0, 50)
+    ? (seeds[product] ?? []).slice(0, batchLimit)
     : await collectCandidates(product, seeds[product], reviewedPosts);
   console.warn(`Reviewing ${candidates[product].length} ${product} candidates...`);
   reviewed[product] = await mapLimit(candidates[product], 6, async (item) => {

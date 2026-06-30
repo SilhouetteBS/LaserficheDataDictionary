@@ -22,6 +22,7 @@ Provide read-only storage, recycle-bin, volume, account-cache, trustee, trusted 
 - [Error executing SQL command](https://answers.laserfiche.com/questions/68697/Error-executing-SQL-command)
 - [Where are Windows Account details stored in SQL](https://answers.laserfiche.com/questions/63116/Where-are-Windows-Account-details-stored-in-SQL)
 - [lookup a repository folder](https://answers.laserfiche.com/questions/157902/lookup-a-repository-folder)
+- [Getting the Created By field](https://answers.laserfiche.com/questions/160770/Getting-the-Created-By-field)
 
 ## Cautions
 

@@ -23,6 +23,7 @@ Provide read-only inventory views for LFDS directory users, login activity, lice
 - [Linking multiple SAML identity providers through common username](https://answers.laserfiche.com/questions/213876/Linking-multiple-SAML-identity-providers-through-common-username)
 - [Last sign-in time in LFDS 12, database location?](https://answers.laserfiche.com/questions/232845/Last-signin-time-in-LFDS-12-database-location)
 - [Directory Server database](https://answers.laserfiche.com/questions/117487/Directory-Server-database)
+- [LFDS database user_logins table not updated for some Windows users](https://answers.laserfiche.com/questions/236312/LFDS-database-userlogins-table-not-updated-for-some-Windows-users)
 
 ## Cautions
 

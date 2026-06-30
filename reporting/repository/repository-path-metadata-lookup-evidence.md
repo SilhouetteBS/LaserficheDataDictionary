@@ -22,6 +22,7 @@ Provide read-only entry, volume, page, template, and field metadata lookup objec
 - [Query to see how many pages in repository are in color and black & white?](https://answers.laserfiche.com/questions/168368/Query-to-see-how-many-pages-in-repository-are-in-color-and-black--white)
 - [SQL query on LF Server tables for specific metadata](https://answers.laserfiche.com/questions/201363/SQL-query-on-LF-Server-tables-for-specific-metadata)
 - [What table in SQL is the document path located?](https://answers.laserfiche.com/questions/67002/What-table-in-SQL-is-the-document-path-located)
+- [Audit trail on Number of Records in Each Folder](https://answers.laserfiche.com/questions/154758/Audit-trail-on-Number-of-Records-in-Each-Folder)
 
 ## Cautions
 

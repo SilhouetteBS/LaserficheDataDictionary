@@ -17,6 +17,9 @@ Provide a read-only Forms user, user-type, administrator, activation, login, and
 
 - [Named users list](https://answers.laserfiche.com/questions/122499/Named-users-list)
 - [Get group name in Forms](https://answers.laserfiche.com/questions/149043/Get-group-name-in-Forms)
+- [Join login and username](https://answers.laserfiche.com/questions/141935/Join-login-and-username)
+- [Participant User Not Seeing Anything After Logging In](https://answers.laserfiche.com/questions/64738/Participant-User-Not-Seeing-Anything-After-Logging-In)
+- [SQL Query to Find Forms Processes User Has Access Rights To](https://answers.laserfiche.com/questions/224490/SQL-Query-to-Find-Forms-Processes-User-Has-Access-Rights-To)
 
 ## Cautions
 

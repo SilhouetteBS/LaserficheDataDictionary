@@ -20,6 +20,7 @@ Provide read-only helper patterns for repository schema-version checks, Workflow
 - [SQL Database looking for LF Server version 8.6.1](https://answers.laserfiche.com/questions/89879/SQL-Database-looking-for-LF-Server-version-861)
 - [Token not found error in Custom Query](https://answers.laserfiche.com/questions/132492/Token-not-found-error-in-Custom-Query)
 - [How can I store the binary hex value from a SQL Query without Workflow converting it](https://answers.laserfiche.com/questions/48378/How-can-I-store-the-binary-hex-value-from-a-SQL-Query-without-Workflow-conveting-it-to-a-series-of-decimal-numbers)
+- [SQL database schema does not match error 9110](https://answers.laserfiche.com/questions/52173/SQL-database-schema-does-not-match-error-9110)
 
 ## Cautions
 

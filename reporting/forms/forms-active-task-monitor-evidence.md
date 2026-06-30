@@ -23,6 +23,20 @@ Provide a reporting-database object that returns active Forms task rows with pro
 - `dbo.cf_bp_worker_instnc_to_resume.owner_snapshot_id -> dbo.cf_user_snapshot.id`: confirmed foreign key `FK_owner_snapshot_worker_instnc_to_resume`.
 - `dbo.cf_bp_worker_instnc_to_resume.team_id -> dbo.teams.id`: confirmed foreign key `FK_team_worker_instnc_to_resume`.
 
+## Queue Sources Processed
+
+- [Forms Instance Monitoring](https://answers.laserfiche.com/questions/102452/Forms-Instance-Monitoring)
+- [Troubleshoot Forms SQL Blockers](https://answers.laserfiche.com/questions/233803/Troubleshoot-Forms-SQL-Blockers)
+- [Forms report with start time and end time for each User Task](https://answers.laserfiche.com/questions/212282/Forms-report-with--start-time-and-end-time-for-each-User-Task-in-Forms-process)
+- [Report to use for Active Forms](https://answers.laserfiche.com/questions/216937/Report-to-use-for-Active-Forms)
+- [Forms Report to Dynamically show all tasks started by you](https://answers.laserfiche.com/questions/184820/Forms-Report-to-Dynamically-show-all-tasks-started-by-you)
+- [Generating Report on Unassigned Tasks](https://answers.laserfiche.com/questions/208760/Generating-Report-on-Unassigned-Tasks)
+- [delete outstanding forms from a deleted account](https://answers.laserfiche.com/questions/233682/delete-outstanding-forms-from-a-deleted-account)
+- [Current step information from Monitor page](https://answers.laserfiche.com/questions/215801/How-can-I-retrieve-the-current-step-information-from-an-SQL-table-which-is-displayed-on-the-Monitor-page)
+- [Forms SQL query for all instances at a gateway step](https://answers.laserfiche.com/questions/197726/Forms-SQL-query-for-all-instances-at-a-gateway-step)
+- [Forms Inbox Email Reminder](https://answers.laserfiche.com/questions/76772/Forms-Inbox-Email-Reminder)
+- [Number of active Forms tasks for each user type](https://answers.laserfiche.com/questions/131323/Number-of-active-Forms-tasks-for-each-user-type)
+
 ## Cautions
 
 - `dbo.cf_bp_worker_instances.bp_instance_id -> dbo.cf_bp_main_instances.bp_instance_id` exists in the export as `FK_bp_worker_insts_bp_m_inst`, but it is marked not trusted. The relationship is still used because it is the runtime parent instance path, but it should be validated with row counts in each environment.

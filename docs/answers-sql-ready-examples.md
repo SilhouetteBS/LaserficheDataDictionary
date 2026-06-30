@@ -145,6 +145,25 @@ New or updated published patterns:
 - LFDS: `reporting/lfds/lfds-claims-group-license-inventory.sql`
 - Workflow: `reporting/workflow/workflow-queue-search-diagnostics.sql`
 
+## Expanded 492-Row Search Batch
+
+On 2026-06-30, paged Answers searches were used after the first-page strategy was exhausted.
+
+- Reviewed unique rows: 492.
+- Product rows reviewed: Forms 138, LFDS 91, Repository 128, Workflow 135.
+- Promoted into Reporting guide patterns: 12 rows represented by 2 new scripts and 7 existing script evidence updates.
+- Non-promoted/reference rows documented: 480 rows in `docs/answers-sql-processed-batch-2026-06-30-3.md`.
+- One ready object-definition row was kept as reference-only because it was not a portable read-only reporting script.
+
+New or updated published patterns:
+
+- Forms: `reporting/forms/forms-session-diagnostics.sql`
+- Workflow: `reporting/workflow/workflow-definition-history.sql`
+- Forms: active task/Monitor source links updated
+- Forms: user/group inventory source links updated
+- LFDS: user/license inventory source links updated
+- Repository: path/metadata, query compatibility, and storage/security source links updated
+
 ## General Cleanup Rules Applied
 
 - Do not rely on a database name; use parameters, SQLCMD variables, synonyms, or deployment-time configuration.

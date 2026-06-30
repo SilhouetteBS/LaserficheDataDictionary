@@ -33,6 +33,10 @@ const reportingAssetLoaders = {
     import('../../reporting/forms/forms-authenticated-participant-signup-evidence.md?raw').then(
       (module) => module.default,
     ),
+  'reporting/forms/forms-session-diagnostics.sql': () =>
+    import('../../reporting/forms/forms-session-diagnostics.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-session-diagnostics-evidence.md': () =>
+    import('../../reporting/forms/forms-session-diagnostics-evidence.md?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory.sql': () =>
     import('../../reporting/lfds/lfds-user-license-inventory.sql?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory-evidence.md': () =>
@@ -75,6 +79,10 @@ const reportingAssetLoaders = {
     import('../../reporting/workflow/workflow-external-data-source-guidance.sql?raw').then((module) => module.default),
   'reporting/workflow/workflow-external-data-source-guidance-evidence.md': () =>
     import('../../reporting/workflow/workflow-external-data-source-guidance-evidence.md?raw').then((module) => module.default),
+  'reporting/workflow/workflow-definition-history.sql': () =>
+    import('../../reporting/workflow/workflow-definition-history.sql?raw').then((module) => module.default),
+  'reporting/workflow/workflow-definition-history-evidence.md': () =>
+    import('../../reporting/workflow/workflow-definition-history-evidence.md?raw').then((module) => module.default),
 };
 
 export const productReportingPaths = {
@@ -163,7 +171,7 @@ export const communityReportingPatterns = {
         'Creates reporting-database views and procedures for active Forms tasks, worker instances, and Monitor-style task review.',
       scriptPath: 'reporting/forms/forms-active-task-monitor.sql',
       evidencePath: 'reporting/forms/forms-active-task-monitor-evidence.md',
-      sourceCount: 6,
+      sourceCount: 11,
       tables: [
         'dbo.cf_bp_main_instances',
         'dbo.cf_bp_worker_instances',
@@ -203,6 +211,18 @@ export const communityReportingPatterns = {
         {
           title: 'Current step information from Monitor page',
           url: 'https://answers.laserfiche.com/questions/215801/How-can-I-retrieve-the-current-step-information-from-an-SQL-table-which-is-displayed-on-the-Monitor-page',
+        },
+        {
+          title: 'Forms SQL query for all instances at a gateway step',
+          url: 'https://answers.laserfiche.com/questions/197726/Forms-SQL-query-for-all-instances-at-a-gateway-step',
+        },
+        {
+          title: 'Forms Inbox Email Reminder',
+          url: 'https://answers.laserfiche.com/questions/76772/Forms-Inbox-Email-Reminder',
+        },
+        {
+          title: 'Number of active Forms tasks for each user type',
+          url: 'https://answers.laserfiche.com/questions/131323/Number-of-active-Forms-tasks-for-each-user-type',
         },
       ],
     },
@@ -252,7 +272,7 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for Forms users, user types, administrator flags, activation, login timestamps, and group membership.',
       scriptPath: 'reporting/forms/forms-user-group-inventory.sql',
       evidencePath: 'reporting/forms/forms-user-group-inventory-evidence.md',
-      sourceCount: 2,
+      sourceCount: 5,
       tables: ['dbo.cf_users', 'dbo.cf_usergroups_users_mapping', 'dbo.cf_usergroups'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -263,6 +283,18 @@ export const communityReportingPatterns = {
         {
           title: 'Get group name in Forms',
           url: 'https://answers.laserfiche.com/questions/149043/Get-group-name-in-Forms',
+        },
+        {
+          title: 'Join login and username',
+          url: 'https://answers.laserfiche.com/questions/141935/Join-login-and-username',
+        },
+        {
+          title: 'Participant User Not Seeing Anything After Logging In',
+          url: 'https://answers.laserfiche.com/questions/64738/Participant-User-Not-Seeing-Anything-After-Logging-In',
+        },
+        {
+          title: 'SQL Query to Find Forms Processes User Has Access Rights To',
+          url: 'https://answers.laserfiche.com/questions/224490/SQL-Query-to-Find-Forms-Processes-User-Has-Access-Rights-To',
         },
       ],
     },
@@ -405,6 +437,22 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'Forms session diagnostics',
+      summary:
+        'Creates read-only diagnostics for Forms sessions, last activity, user context, and session-variable row counts.',
+      scriptPath: 'reporting/forms/forms-session-diagnostics.sql',
+      evidencePath: 'reporting/forms/forms-session-diagnostics-evidence.md',
+      sourceCount: 1,
+      tables: ['dbo.cf_sessions', 'dbo.cf_session_variables', 'dbo.cf_users'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Forms SQL queries are consuming all the server resources',
+          url: 'https://answers.laserfiche.com/questions/118286/Forms-SQL-queries-are-consuming-all-the-server-resources',
+        },
+      ],
+    },
   ],
   lfds: [
     {
@@ -413,7 +461,7 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for directory users, identity providers, logins, licenses, limits, and SAML SID mappings.',
       scriptPath: 'reporting/lfds/lfds-user-license-inventory.sql',
       evidencePath: 'reporting/lfds/lfds-user-license-inventory-evidence.md',
-      sourceCount: 8,
+      sourceCount: 9,
       tables: [
         'dbo.directory_objects',
         'dbo.identity_providers',
@@ -451,6 +499,10 @@ export const communityReportingPatterns = {
         {
           title: 'Directory Server database',
           url: 'https://answers.laserfiche.com/questions/117487/Directory-Server-database',
+        },
+        {
+          title: 'LFDS database user_logins table not updated for some Windows users',
+          url: 'https://answers.laserfiche.com/questions/236312/LFDS-database-userlogins-table-not-updated-for-some-Windows-users',
         },
       ],
     },
@@ -532,7 +584,7 @@ export const communityReportingPatterns = {
         'Creates read-only reporting views and a lookup procedure for entries, parent folders, volumes, pages, templates, and field values.',
       scriptPath: 'reporting/repository/repository-path-metadata-lookup.sql',
       evidencePath: 'reporting/repository/repository-path-metadata-lookup-evidence.md',
-      sourceCount: 11,
+      sourceCount: 12,
       tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.propset', 'dbo.propdef', 'dbo.propval'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -555,6 +607,10 @@ export const communityReportingPatterns = {
         {
           title: 'What table in SQL is the document path located?',
           url: 'https://answers.laserfiche.com/questions/67002/What-table-in-SQL-is-the-document-path-located',
+        },
+        {
+          title: 'Audit trail on Number of Records in Each Folder',
+          url: 'https://answers.laserfiche.com/questions/154758/Audit-trail-on-Number-of-Records-in-Each-Folder',
         },
       ],
     },
@@ -592,7 +648,7 @@ export const communityReportingPatterns = {
         'Creates read-only helper objects for repository schema-version checks, Workflow Custom Query token conflicts, and binary-to-hex conversion.',
       scriptPath: 'reporting/repository/repository-query-compatibility-helpers.sql',
       evidencePath: 'reporting/repository/repository-query-compatibility-helpers-evidence.md',
-      sourceCount: 6,
+      sourceCount: 7,
       tables: ['dbo.dboptions', 'dbo.toc', 'dbo.propval', 'dbo.propdef'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -620,6 +676,10 @@ export const communityReportingPatterns = {
           title: 'Store binary hex value from SQL Query',
           url: 'https://answers.laserfiche.com/questions/48378/How-can-I-store-the-binary-hex-value-from-a-SQL-Query-without-Workflow-conveting-it-to-a-series-of-decimal-numbers',
         },
+        {
+          title: 'SQL database schema does not match error 9110',
+          url: 'https://answers.laserfiche.com/questions/52173/SQL-database-schema-does-not-match-error-9110',
+        },
       ],
     },
     {
@@ -628,7 +688,7 @@ export const communityReportingPatterns = {
         'Creates read-only diagnostics for recycle bin entries, volume storage, account cache, trustee, trusted group, and trusted login context.',
       scriptPath: 'reporting/repository/repository-storage-security-diagnostics.sql',
       evidencePath: 'reporting/repository/repository-storage-security-diagnostics-evidence.md',
-      sourceCount: 7,
+      sourceCount: 8,
       tables: [
         'dbo.recycle_bin',
         'dbo.toc',
@@ -667,6 +727,10 @@ export const communityReportingPatterns = {
         {
           title: 'lookup a repository folder',
           url: 'https://answers.laserfiche.com/questions/157902/lookup-a-repository-folder',
+        },
+        {
+          title: 'Getting the Created By field',
+          url: 'https://answers.laserfiche.com/questions/160770/Getting-the-Created-By-field',
         },
       ],
     },
@@ -769,6 +833,22 @@ export const communityReportingPatterns = {
         {
           title: 'Stop schedule for workflow',
           url: 'https://answers.laserfiche.com/questions/196997/Stop-schedule-for-workflow',
+        },
+      ],
+    },
+    {
+      title: 'Workflow definition history',
+      summary:
+        'Creates read-only inventory for Workflow definitions, current version metadata, modification history, and code/assembly payload sizes.',
+      scriptPath: 'reporting/workflow/workflow-definition-history.sql',
+      evidencePath: 'reporting/workflow/workflow-definition-history-evidence.md',
+      sourceCount: 1,
+      tables: ['dbo.workflow', 'dbo.workflow_history', 'dbo.workflow_code'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Workflow Last Modified Date',
+          url: 'https://answers.laserfiche.com/questions/142410/Workflow-Last-Modified-Date',
         },
       ],
     },
