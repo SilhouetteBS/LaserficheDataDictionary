@@ -7,93 +7,223 @@ import {
   getReportingQuestions,
 } from '../data/reporting.js';
 
+const guidanceItems = [
+  { key: 'questions', label: 'Common questions' },
+  { key: 'paths', label: 'Common paths' },
+  { key: 'generated', label: 'Generated examples' },
+];
+
+const referenceItems = [
+  { key: 'glossary', label: 'Glossary' },
+  { key: 'compatibility', label: 'Export compatibility' },
+  { key: 'cautions', label: 'Caution notes' },
+];
+
+function getScriptKey(pattern) {
+  return `script:${pattern.scriptPath}`;
+}
+
+function NavButton({ item, selectedView, onSelect, meta }) {
+  return (
+    <button
+      type="button"
+      className={selectedView === item.key ? 'selected' : ''}
+      onClick={() => onSelect(item.key)}
+      title={item.label}
+    >
+      <span>{item.label}</span>
+      {meta ? <em>{meta}</em> : null}
+    </button>
+  );
+}
+
+function TableLinks({ tables, knownTables, onSelectTable }) {
+  return (
+    <div className="example-table-links">
+      {tables.map((tableKey) =>
+        knownTables.has(tableKey) ? (
+          <button key={tableKey} type="button" onClick={() => onSelectTable(tableKey)}>
+            {tableKey}
+          </button>
+        ) : (
+          <span key={tableKey}>{tableKey}</span>
+        ),
+      )}
+    </div>
+  );
+}
+
+function ReportingSectionHeader({ title, count }) {
+  return (
+    <div className="section-title-row">
+      <h3>{title}</h3>
+      {typeof count === 'number' ? <span>{count}</span> : null}
+    </div>
+  );
+}
+
+function ScriptStatusTags({ tags }) {
+  return (
+    <div className="community-pattern-tags">
+      {tags.map((tag) => (
+        <span key={tag}>{tag}</span>
+      ))}
+    </div>
+  );
+}
+
 export function ReportingGuide({ version, onSelectTable }) {
-  const [scriptModal, setScriptModal] = useState(null);
-  const knownTables = new Set(version.tables.map((table) => table.id));
-  const reportingPaths = getReportingPaths(version.source.productKey);
-  const reportingQuestions = getReportingQuestions(version.source.productKey);
-  const communityPatterns = getCommunityReportingPatterns(version.source.productKey);
+  const [selectedView, setSelectedView] = useState('overview');
+  const [scriptTab, setScriptTab] = useState('summary');
+  const [scriptContent, setScriptContent] = useState({ key: '', status: 'idle', text: '' });
+  const knownTables = useMemo(() => new Set(version.tables.map((table) => table.id)), [version.tables]);
+  const reportingPaths = useMemo(() => getReportingPaths(version.source.productKey), [version.source.productKey]);
+  const reportingQuestions = useMemo(
+    () => getReportingQuestions(version.source.productKey),
+    [version.source.productKey],
+  );
+  const communityPatterns = useMemo(
+    () => getCommunityReportingPatterns(version.source.productKey),
+    [version.source.productKey],
+  );
   const generatedExamples = useMemo(() => buildGeneratedReportingExamples(version), [version]);
+  const selectedScript = communityPatterns.find((pattern) => getScriptKey(pattern) === selectedView);
 
   useEffect(() => {
-    if (!scriptModal) {
+    setSelectedView('overview');
+    setScriptTab('summary');
+    setScriptContent({ key: '', status: 'idle', text: '' });
+  }, [version.source.productKey, version.version]);
+
+  useEffect(() => {
+    if (!selectedScript || scriptTab === 'summary') {
+      setScriptContent({ key: '', status: 'idle', text: '' });
       return undefined;
     }
 
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setScriptModal(null);
-      }
+    const contentUrl = scriptTab === 'sql' ? selectedScript.scriptAssetUrl : selectedScript.evidenceAssetUrl;
+    const contentKey = `${selectedScript.scriptPath}:${scriptTab}`;
+    let canceled = false;
+    setScriptContent({ key: contentKey, status: 'loading', text: '' });
+
+    fetch(contentUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Unable to load ${contentUrl}`);
+        }
+        return response.text();
+      })
+      .then((text) => {
+        if (!canceled) {
+          setScriptContent({ key: contentKey, status: 'ready', text });
+        }
+      })
+      .catch((error) => {
+        if (!canceled) {
+          setScriptContent({ key: contentKey, status: 'error', text: error.message });
+        }
+      });
+
+    return () => {
+      canceled = true;
     };
+  }, [scriptTab, selectedScript]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [scriptModal]);
+  function selectReportingView(key) {
+    setSelectedView(key);
+    if (!key.startsWith('script:')) {
+      setScriptTab('summary');
+      setScriptContent({ key: '', status: 'idle', text: '' });
+    }
+  }
 
-  return (
-    <section className="detail-surface">
-      <div className="detail-heading">
-        <div>
-          <h2>Reporting guide</h2>
-          <p>Common read-only paths and starter SQL patterns for support-safe exploration.</p>
+  function renderOverview() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Reporting overview" />
+        <div className="reporting-overview-grid">
+          <article>
+            <strong>{reportingQuestions.length}</strong>
+            <span>Common questions</span>
+            <p>Starting points for read-only reporting and troubleshooting.</p>
+          </article>
+          <article>
+            <strong>{reportingPaths.length}</strong>
+            <span>Common paths</span>
+            <p>Product-specific table paths for building reporting queries.</p>
+          </article>
+          <article>
+            <strong>{generatedExamples.length}</strong>
+            <span>Generated examples</span>
+            <p>Schema-driven starter SQL generated from the selected snapshot.</p>
+          </article>
+          <article>
+            <strong>{communityPatterns.length}</strong>
+            <span>Reporting scripts</span>
+            <p>Read-only SQL examples sourced from community review and schema matching.</p>
+          </article>
         </div>
-      </div>
-      <div className="reporting-grid">
-        <section className="reporting-section reporting-section-wide">
-          <div className="section-title-row">
-            <h3>Common reporting questions</h3>
-            <span>{reportingQuestions.length}</span>
-          </div>
-          <div className="reporting-question-list">
-            {reportingQuestions.map((item) => (
-              <article className="reporting-question" key={item.question}>
-                <h4>{item.question}</h4>
-                <p>{item.guidance}</p>
-                <div className="path-chain">
-                  {item.tables.map((tableKey) =>
-                    knownTables.has(tableKey) ? (
-                      <button key={tableKey} type="button" onClick={() => onSelectTable(tableKey)}>
-                        {tableKey}
-                      </button>
-                    ) : (
-                      <span key={tableKey}>{tableKey}</span>
-                    ),
-                  )}
+        {communityPatterns.length > 0 ? (
+          <div className="reporting-script-summary-list">
+            {communityPatterns.map((pattern) => (
+              <article key={pattern.scriptPath}>
+                <div>
+                  <h4>{pattern.title}</h4>
+                  <p>{pattern.summary}</p>
+                  <ScriptStatusTags tags={pattern.tags} />
                 </div>
+                <button type="button" onClick={() => selectReportingView(getScriptKey(pattern))}>
+                  Open
+                </button>
               </article>
             ))}
           </div>
-        </section>
-        <section className="reporting-section">
-          <div className="section-title-row">
-            <h3>Common paths</h3>
-            <span>{reportingPaths.length}</span>
-          </div>
-          <div className="reporting-path-list">
-            {reportingPaths.map((path) => (
-              <article className="reporting-path" key={path.title}>
-                <h4>{path.title}</h4>
-                <p>{path.summary}</p>
-                <div className="path-chain">
-                  {path.tables.map((tableKey) =>
-                    knownTables.has(tableKey) ? (
-                      <button key={tableKey} type="button" onClick={() => onSelectTable(tableKey)}>
-                        {tableKey}
-                      </button>
-                    ) : (
-                      <span key={tableKey}>{tableKey}</span>
-                    ),
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-        <section className="reporting-section">
-          <div className="section-title-row">
-            <h3>Safe examples</h3>
-            <span>{generatedExamples.length}</span>
-          </div>
+        ) : (
+          <p className="empty-note">No community reporting scripts are available for this product yet.</p>
+        )}
+      </section>
+    );
+  }
+
+  function renderQuestions() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Common reporting questions" count={reportingQuestions.length} />
+        <div className="reporting-question-list">
+          {reportingQuestions.map((item) => (
+            <article className="reporting-question" key={item.question}>
+              <h4>{item.question}</h4>
+              <p>{item.guidance}</p>
+              <TableLinks tables={item.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
+            </article>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  function renderPaths() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Common paths" count={reportingPaths.length} />
+        <div className="reporting-path-list">
+          {reportingPaths.map((path) => (
+            <article className="reporting-path" key={path.title}>
+              <h4>{path.title}</h4>
+              <p>{path.summary}</p>
+              <TableLinks tables={path.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
+            </article>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  function renderGeneratedExamples() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Generated examples" count={generatedExamples.length} />
+        {generatedExamples.length > 0 ? (
           <div className="query-example-list">
             {generatedExamples.map((example) => (
               <article className="query-example" key={example.title}>
@@ -105,139 +235,214 @@ export function ReportingGuide({ version, onSelectTable }) {
                 </div>
                 {example.sql ? <pre>{example.sql}</pre> : <p>No SQL generated for this snapshot.</p>}
                 <p>{example.note}</p>
-                <div className="example-table-links">
-                  {example.tables.map((tableKey) =>
-                    knownTables.has(tableKey) ? (
-                      <button key={tableKey} type="button" onClick={() => onSelectTable(tableKey)}>
-                        {tableKey}
-                      </button>
-                    ) : (
-                      <span key={tableKey}>{tableKey}</span>
-                    ),
-                  )}
-                </div>
+                <TableLinks tables={example.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
               </article>
             ))}
           </div>
-        </section>
-        {communityPatterns.length > 0 ? (
-          <section className="reporting-section reporting-section-wide">
-            <div className="section-title-row">
-              <h3>Community reviewed scripts</h3>
-              <span>{communityPatterns.length}</span>
-            </div>
-            <div className="community-pattern-list">
-              {communityPatterns.map((pattern) => (
-                <article className="community-pattern-card" key={pattern.scriptPath}>
-                  <div className="community-pattern-heading">
-                    <div>
-                      <h4>{pattern.title}</h4>
-                      <p>{pattern.summary}</p>
-                    </div>
-                    <span>{pattern.sourceCount} sources</span>
-                  </div>
-                  <div className="community-pattern-tags">
-                    {pattern.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
-                  </div>
-                  <div className="example-table-links">
-                    {pattern.tables.map((tableKey) =>
-                      knownTables.has(tableKey) ? (
-                        <button key={tableKey} type="button" onClick={() => onSelectTable(tableKey)}>
-                          {tableKey}
-                        </button>
-                      ) : (
-                        <span key={tableKey}>{tableKey}</span>
-                      ),
-                    )}
-                  </div>
-                  <div className="community-pattern-actions">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setScriptModal({
-                          title: `${pattern.title} SQL`,
-                          subtitle: pattern.scriptPath,
-                          content: pattern.sql,
-                          type: 'sql',
-                        })
-                      }
-                    >
-                      Open SQL
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setScriptModal({
-                          title: `${pattern.title} review notes`,
-                          subtitle: pattern.evidencePath,
-                          content: pattern.evidence,
-                          type: 'notes',
-                        })
-                      }
-                    >
-                      Review notes
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-        <section className="reporting-section">
-          <div className="section-title-row">
-            <h3>Glossary</h3>
-            <span>{glossaryTerms.length}</span>
+        ) : (
+          <p className="empty-note">No generated examples are available for this product yet.</p>
+        )}
+      </section>
+    );
+  }
+
+  function renderScriptDetail(pattern) {
+    if (!pattern) {
+      return renderOverview();
+    }
+
+    return (
+      <section className="reporting-section reporting-section-full">
+        <div className="reporting-script-detail-heading">
+          <div>
+            <h3>{pattern.title}</h3>
+            <p>{pattern.summary}</p>
           </div>
-          <div className="glossary-list">
-            {glossaryTerms.map((item) => (
-              <div key={item.term}>
-                <strong>{item.term}</strong>
-                <p>{item.definition}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        <section className="reporting-section">
-          <div className="section-title-row">
-            <h3>Export script compatibility</h3>
-            <span>{exportCompatibilityNotes.length}</span>
-          </div>
-          <ul className="compatibility-list">
-            {exportCompatibilityNotes.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-        </section>
-      </div>
-      {scriptModal ? (
-        <div className="script-modal-backdrop" role="presentation" onMouseDown={() => setScriptModal(null)}>
-          <div
-            className="script-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label={scriptModal.title}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <div className="script-modal-heading">
-              <div>
-                <h3>{scriptModal.title}</h3>
-                <p>{scriptModal.subtitle}</p>
-              </div>
-              <button type="button" onClick={() => setScriptModal(null)} aria-label="Close script preview">
-                X
-              </button>
-            </div>
-            <div className="script-modal-warning">
-              Read-only reporting aid. This script is tagged as not live tested unless the review notes state otherwise.
-            </div>
-            <pre className={scriptModal.type === 'sql' ? 'script-modal-content sql' : 'script-modal-content notes'}>
-              {scriptModal.content}
-            </pre>
-          </div>
+          <span>{pattern.sourceCount} sources</span>
         </div>
-      ) : null}
+        <ScriptStatusTags tags={pattern.tags} />
+        <TableLinks tables={pattern.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
+        <div className="reporting-script-tabs" role="tablist" aria-label={`${pattern.title} content`}>
+          {['summary', 'sql', 'notes'].map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={scriptTab === tab}
+              className={scriptTab === tab ? 'selected' : ''}
+              onClick={() => setScriptTab(tab)}
+            >
+              {tab === 'sql' ? 'SQL' : tab === 'notes' ? 'Review notes' : 'Summary'}
+            </button>
+          ))}
+        </div>
+        {scriptTab === 'summary' ? (
+          <div className="reporting-script-summary">
+            <dl>
+              <div>
+                <dt>Script path</dt>
+                <dd>{pattern.scriptPath}</dd>
+              </div>
+              <div>
+                <dt>Review notes</dt>
+                <dd>{pattern.evidencePath}</dd>
+              </div>
+              <div>
+                <dt>Testing status</dt>
+                <dd>{pattern.tags.includes('Not live tested') ? 'Not live tested' : 'Review notes available'}</dd>
+              </div>
+            </dl>
+            <p>
+              These scripts are available for community use before formal validation. The status tags are intended to
+              make that clear, and corrections should be submitted if a script does not work for a specific product
+              version.
+            </p>
+          </div>
+        ) : scriptContent.status === 'ready' ? (
+          <pre className={scriptTab === 'sql' ? 'reporting-script-content sql' : 'reporting-script-content notes'}>
+            {scriptContent.text}
+          </pre>
+        ) : (
+          <div className={`reporting-script-content-state ${scriptContent.status}`}>
+            {scriptContent.status === 'error' ? scriptContent.text : 'Loading content...'}
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  function renderGlossary() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Glossary" count={glossaryTerms.length} />
+        <div className="glossary-list">
+          {glossaryTerms.map((item) => (
+            <div key={item.term}>
+              <strong>{item.term}</strong>
+              <p>{item.definition}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  function renderCompatibility() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Export script compatibility" count={exportCompatibilityNotes.length} />
+        <ul className="compatibility-list">
+          {exportCompatibilityNotes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
+
+  function renderCautions() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Caution notes" />
+        <div className="reporting-caution-list">
+          <article>
+            <h4>Keep reporting objects separate</h4>
+            <p>Create views, stored procedures, tables, and indexes in a separate reporting database, not inside a Laserfiche product database.</p>
+          </article>
+          <article>
+            <h4>Do not publish write operations</h4>
+            <p>Examples that update, delete, insert, merge, alter, drop, or repair Laserfiche product records should stay in the caution list only.</p>
+          </article>
+          <article>
+            <h4>Validate before production use</h4>
+            <p>Scripts tagged as not live tested are schema-matched starting points. Validate them in a test environment before depending on them.</p>
+          </article>
+        </div>
+      </section>
+    );
+  }
+
+  function renderSelectedView() {
+    if (selectedView === 'overview') {
+      return renderOverview();
+    }
+    if (selectedView === 'questions') {
+      return renderQuestions();
+    }
+    if (selectedView === 'paths') {
+      return renderPaths();
+    }
+    if (selectedView === 'generated') {
+      return renderGeneratedExamples();
+    }
+    if (selectedView === 'glossary') {
+      return renderGlossary();
+    }
+    if (selectedView === 'compatibility') {
+      return renderCompatibility();
+    }
+    if (selectedView === 'cautions') {
+      return renderCautions();
+    }
+    return renderScriptDetail(selectedScript);
+  }
+
+  return (
+    <section className="detail-surface">
+      <div className="detail-heading">
+        <div>
+          <h2>Reporting guide</h2>
+          <p>Product-scoped read-only paths and SQL patterns for support-safe exploration.</p>
+        </div>
+      </div>
+      <div className="reporting-workspace">
+        <aside className="reporting-nav" aria-label="Reporting sections">
+          <div className="reporting-nav-group">
+            <NavButton item={{ key: 'overview', label: 'Overview' }} selectedView={selectedView} onSelect={selectReportingView} />
+          </div>
+          <div className="reporting-nav-group">
+            <strong>Guidance</strong>
+            {guidanceItems.map((item) => (
+              <NavButton
+                key={item.key}
+                item={item}
+                selectedView={selectedView}
+                onSelect={selectReportingView}
+                meta={
+                  item.key === 'questions'
+                    ? reportingQuestions.length
+                    : item.key === 'paths'
+                      ? reportingPaths.length
+                      : generatedExamples.length
+                }
+              />
+            ))}
+          </div>
+          <div className="reporting-nav-group">
+            <strong>Scripts</strong>
+            {communityPatterns.length > 0 ? (
+              communityPatterns.map((pattern) => (
+                <NavButton
+                  key={pattern.scriptPath}
+                  item={{ key: getScriptKey(pattern), label: pattern.title }}
+                  selectedView={selectedView}
+                  onSelect={selectReportingView}
+                  meta={pattern.tags.includes('Not live tested') ? 'Not live tested' : undefined}
+                />
+              ))
+            ) : (
+              <p>No scripts yet.</p>
+            )}
+          </div>
+          <div className="reporting-nav-group">
+            <strong>Reference</strong>
+            {referenceItems.map((item) => (
+              <NavButton key={item.key} item={item} selectedView={selectedView} onSelect={selectReportingView} />
+            ))}
+          </div>
+        </aside>
+        <div className="reporting-detail-pane">{renderSelectedView()}</div>
+      </div>
     </section>
   );
 }

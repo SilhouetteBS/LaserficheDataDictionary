@@ -1,11 +1,45 @@
-const reportingResources =
-  typeof import.meta.glob === 'function'
-    ? import.meta.glob('../../reporting/**/*.{md,sql}', { eager: true, import: 'default', query: '?raw' })
-    : {};
-
-function getReportingResource(path) {
-  return reportingResources[`../../${path}`] ?? '';
-}
+const reportingAssetUrls = {
+  'reporting/forms/forms-active-task-monitor.sql': new URL(
+    '../../reporting/forms/forms-active-task-monitor.sql',
+    import.meta.url,
+  ).href,
+  'reporting/forms/forms-active-task-monitor-evidence.md': new URL(
+    '../../reporting/forms/forms-active-task-monitor-evidence.md',
+    import.meta.url,
+  ).href,
+  'reporting/forms/forms-field-value-instance-lookup.sql': new URL(
+    '../../reporting/forms/forms-field-value-instance-lookup.sql',
+    import.meta.url,
+  ).href,
+  'reporting/forms/forms-field-value-instance-lookup-evidence.md': new URL(
+    '../../reporting/forms/forms-field-value-instance-lookup-evidence.md',
+    import.meta.url,
+  ).href,
+  'reporting/lfds/lfds-user-license-inventory.sql': new URL(
+    '../../reporting/lfds/lfds-user-license-inventory.sql',
+    import.meta.url,
+  ).href,
+  'reporting/lfds/lfds-user-license-inventory-evidence.md': new URL(
+    '../../reporting/lfds/lfds-user-license-inventory-evidence.md',
+    import.meta.url,
+  ).href,
+  'reporting/repository/repository-path-metadata-lookup.sql': new URL(
+    '../../reporting/repository/repository-path-metadata-lookup.sql',
+    import.meta.url,
+  ).href,
+  'reporting/repository/repository-path-metadata-lookup-evidence.md': new URL(
+    '../../reporting/repository/repository-path-metadata-lookup-evidence.md',
+    import.meta.url,
+  ).href,
+  'reporting/workflow/workflow-queue-search-diagnostics.sql': new URL(
+    '../../reporting/workflow/workflow-queue-search-diagnostics.sql',
+    import.meta.url,
+  ).href,
+  'reporting/workflow/workflow-queue-search-diagnostics-evidence.md': new URL(
+    '../../reporting/workflow/workflow-queue-search-diagnostics-evidence.md',
+    import.meta.url,
+  ).href,
+};
 
 export const productReportingPaths = {
   forms: [
@@ -93,8 +127,6 @@ export const communityReportingPatterns = {
         'Creates reporting-database views and procedures for active Forms tasks, worker instances, and Monitor-style task review.',
       scriptPath: 'reporting/forms/forms-active-task-monitor.sql',
       evidencePath: 'reporting/forms/forms-active-task-monitor-evidence.md',
-      sql: getReportingResource('reporting/forms/forms-active-task-monitor.sql'),
-      evidence: getReportingResource('reporting/forms/forms-active-task-monitor-evidence.md'),
       sourceCount: 6,
       tables: [
         'dbo.cf_bp_main_instances',
@@ -110,8 +142,6 @@ export const communityReportingPatterns = {
         'Creates a reporting view and procedure that connect submitted values to Forms submissions and business process instances.',
       scriptPath: 'reporting/forms/forms-field-value-instance-lookup.sql',
       evidencePath: 'reporting/forms/forms-field-value-instance-lookup-evidence.md',
-      sql: getReportingResource('reporting/forms/forms-field-value-instance-lookup.sql'),
-      evidence: getReportingResource('reporting/forms/forms-field-value-instance-lookup-evidence.md'),
       sourceCount: 5,
       tables: ['dbo.cf_bp_data', 'dbo.cf_submissions', 'dbo.cf_bp_main_instances', 'dbo.cf_fields'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
@@ -124,8 +154,6 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for directory users, identity providers, logins, licenses, limits, and SAML SID mappings.',
       scriptPath: 'reporting/lfds/lfds-user-license-inventory.sql',
       evidencePath: 'reporting/lfds/lfds-user-license-inventory-evidence.md',
-      sql: getReportingResource('reporting/lfds/lfds-user-license-inventory.sql'),
-      evidence: getReportingResource('reporting/lfds/lfds-user-license-inventory-evidence.md'),
       sourceCount: 6,
       tables: [
         'dbo.directory_objects',
@@ -145,8 +173,6 @@ export const communityReportingPatterns = {
         'Creates read-only reporting views and a lookup procedure for entries, parent folders, volumes, pages, templates, and field values.',
       scriptPath: 'reporting/repository/repository-path-metadata-lookup.sql',
       evidencePath: 'reporting/repository/repository-path-metadata-lookup-evidence.md',
-      sql: getReportingResource('reporting/repository/repository-path-metadata-lookup.sql'),
-      evidence: getReportingResource('reporting/repository/repository-path-metadata-lookup-evidence.md'),
       sourceCount: 11,
       tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.propset', 'dbo.propdef', 'dbo.propval'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
@@ -159,8 +185,6 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for workflow task queues, queue payload sizes, search activity, and completion status.',
       scriptPath: 'reporting/workflow/workflow-queue-search-diagnostics.sql',
       evidencePath: 'reporting/workflow/workflow-queue-search-diagnostics-evidence.md',
-      sql: getReportingResource('reporting/workflow/workflow-queue-search-diagnostics.sql'),
-      evidence: getReportingResource('reporting/workflow/workflow-queue-search-diagnostics-evidence.md'),
       sourceCount: 4,
       tables: [
         'dbo.workflow_task_queue',
@@ -181,6 +205,8 @@ export function getCommunityReportingPatterns(productKey) {
     ...pattern,
     scriptUrl: `${repoBlobBaseUrl}/${pattern.scriptPath}`,
     evidenceUrl: `${repoBlobBaseUrl}/${pattern.evidencePath}`,
+    scriptAssetUrl: reportingAssetUrls[pattern.scriptPath],
+    evidenceAssetUrl: reportingAssetUrls[pattern.evidencePath],
   }));
 }
 
