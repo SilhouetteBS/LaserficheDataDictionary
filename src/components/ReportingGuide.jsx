@@ -23,11 +23,13 @@ function getScriptKey(pattern) {
   return `script:${pattern.scriptPath}`;
 }
 
-function NavButton({ item, selectedView, onSelect, meta }) {
+function NavButton({ item, selectedView, onSelect, meta, stackedMeta = false }) {
   return (
     <button
       type="button"
-      className={selectedView === item.key ? 'selected' : ''}
+      className={[selectedView === item.key ? 'selected' : '', stackedMeta ? 'stacked-meta' : '']
+        .filter(Boolean)
+        .join(' ')}
       onClick={() => onSelect(item.key)}
       title={item.label}
     >
@@ -74,7 +76,7 @@ function ScriptStatusTags({ tags }) {
 
 export function ReportingGuide({ version, onSelectTable }) {
   const [selectedView, setSelectedView] = useState('overview');
-  const [scriptTab, setScriptTab] = useState('summary');
+  const [scriptTab, setScriptTab] = useState('sql');
   const [scriptContent, setScriptContent] = useState({ key: '', status: 'idle', text: '' });
   const knownTables = useMemo(() => new Set(version.tables.map((table) => table.id)), [version.tables]);
   const reportingPaths = useMemo(() => getReportingPaths(version.source.productKey), [version.source.productKey]);
@@ -91,12 +93,12 @@ export function ReportingGuide({ version, onSelectTable }) {
 
   useEffect(() => {
     setSelectedView('overview');
-    setScriptTab('summary');
+    setScriptTab('sql');
     setScriptContent({ key: '', status: 'idle', text: '' });
   }, [version.source.productKey, version.version]);
 
   useEffect(() => {
-    if (!selectedScript || scriptTab === 'summary') {
+    if (!selectedScript) {
       setScriptContent({ key: '', status: 'idle', text: '' });
       return undefined;
     }
@@ -131,8 +133,10 @@ export function ReportingGuide({ version, onSelectTable }) {
 
   function selectReportingView(key) {
     setSelectedView(key);
-    if (!key.startsWith('script:')) {
-      setScriptTab('summary');
+    if (key.startsWith('script:')) {
+      setScriptTab('sql');
+    } else {
+      setScriptTab('sql');
       setScriptContent({ key: '', status: 'idle', text: '' });
     }
   }
@@ -263,7 +267,7 @@ export function ReportingGuide({ version, onSelectTable }) {
         <ScriptStatusTags tags={pattern.tags} />
         <TableLinks tables={pattern.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
         <div className="reporting-script-tabs" role="tablist" aria-label={`${pattern.title} content`}>
-          {['summary', 'sql', 'notes'].map((tab) => (
+          {['sql', 'notes'].map((tab) => (
             <button
               key={tab}
               type="button"
@@ -272,33 +276,11 @@ export function ReportingGuide({ version, onSelectTable }) {
               className={scriptTab === tab ? 'selected' : ''}
               onClick={() => setScriptTab(tab)}
             >
-              {tab === 'sql' ? 'SQL' : tab === 'notes' ? 'Review notes' : 'Summary'}
+              {tab === 'sql' ? 'SQL' : 'Review notes'}
             </button>
           ))}
         </div>
-        {scriptTab === 'summary' ? (
-          <div className="reporting-script-summary">
-            <dl>
-              <div>
-                <dt>Script path</dt>
-                <dd>{pattern.scriptPath}</dd>
-              </div>
-              <div>
-                <dt>Review notes</dt>
-                <dd>{pattern.evidencePath}</dd>
-              </div>
-              <div>
-                <dt>Testing status</dt>
-                <dd>{pattern.tags.includes('Not live tested') ? 'Not live tested' : 'Review notes available'}</dd>
-              </div>
-            </dl>
-            <p>
-              These scripts are available for community use before formal validation. The status tags are intended to
-              make that clear, and corrections should be submitted if a script does not work for a specific product
-              version.
-            </p>
-          </div>
-        ) : scriptContent.status === 'ready' ? (
+        {scriptContent.status === 'ready' ? (
           <pre className={scriptTab === 'sql' ? 'reporting-script-content sql' : 'reporting-script-content notes'}>
             {scriptContent.text}
           </pre>
@@ -428,6 +410,7 @@ export function ReportingGuide({ version, onSelectTable }) {
                   selectedView={selectedView}
                   onSelect={selectReportingView}
                   meta={pattern.tags.includes('Not live tested') ? 'Not live tested' : undefined}
+                  stackedMeta
                 />
               ))
             ) : (
