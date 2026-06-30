@@ -5263,7 +5263,7 @@ button {
   border: 1px solid #c8c8c8;
   border-radius: 4px;
   overflow: hidden;
-  background: #fbfdff;
+  background: #f8fbfc;
 }
 
 .reporting-sql-highlight pre {
@@ -5271,7 +5271,7 @@ button {
   overflow: auto;
   margin: 0;
   padding: 0;
-  background: #fbfdff !important;
+  background: #f8fbfc !important;
   color: #000000 !important;
   font-family: Consolas, 'Courier New', ui-monospace, monospace;
   font-size: 12px;
@@ -5303,7 +5303,7 @@ button {
   border-right: 1px solid #c8c8c8;
   padding: 0 10px 0 0;
   color: #808080;
-  background: #f2f6f9;
+  background: #f8fbfc;
   text-align: right;
   user-select: none;
 }
