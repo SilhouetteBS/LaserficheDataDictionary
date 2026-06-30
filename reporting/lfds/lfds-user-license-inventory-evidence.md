@@ -21,6 +21,8 @@ Provide read-only inventory views for LFDS directory users, login activity, lice
 - [Directory Server Database query help](https://answers.laserfiche.com/questions/204411/Directory-Server-Database-query-help)
 - [Number of licenses we own](https://answers.laserfiche.com/questions/184000/Number-of-licenses-we-ownin-the-database)
 - [Linking multiple SAML identity providers through common username](https://answers.laserfiche.com/questions/213876/Linking-multiple-SAML-identity-providers-through-common-username)
+- [Last sign-in time in LFDS 12, database location?](https://answers.laserfiche.com/questions/232845/Last-signin-time-in-LFDS-12-database-location)
+- [Directory Server database](https://answers.laserfiche.com/questions/117487/Directory-Server-database)
 
 ## Cautions
 

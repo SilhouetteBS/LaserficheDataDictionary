@@ -18,6 +18,9 @@ Provide read-only queue-size, search-activity, and instance-completion diagnosti
 - [Workflow activity search SQL error ambiguous column name](https://answers.laserfiche.com/questions/62128/Workflow-activity-search-SQL-error-ambiguous-column-name)
 - [A transport-level error has occurred when receiving results from the server](https://answers.laserfiche.com/questions/105587/A-transportlevel-error-has-occurred-when-receiving-results-from-the-server-provider-TCP-Provider-error-0--The-semaphore-timeout-period-has-expired)
 - [workflow_task_queue_data table size very large](https://answers.laserfiche.com/questions/128584/workflowTaskQueuedata-table-size-very-large--Using-SQL-Express-database)
+- [SQL Query to identify workflows running more than an Hour](https://answers.laserfiche.com/questions/136072/SQL-Query-to-identify-workflows-running-more-than-an-Hour)
+- [SQL Query to get the number of workflows by repository name or ID](https://answers.laserfiche.com/questions/153150/SQL-Query-to-get-the-number-of-workflows-by-repository-name-or-ID)
+- [Feature Request: List all rules invoking a given workflow rule](https://answers.laserfiche.com/questions/181460/Feature-Request-List-all-rules-invoking-a-given-separate-workflow-rule)
 
 ## Cautions
 

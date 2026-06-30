@@ -129,6 +129,22 @@ New published patterns:
 - LFDS: `reporting/lfds/lfds-claims-group-license-inventory.sql`
 - Repository: `reporting/repository/repository-storage-security-diagnostics.sql`
 
+## Additional 195-Post Search Batch
+
+On 2026-06-30, another batch reviewed 50 Forms, 45 LFDS, 50 Repository, and 50 Workflow Answers posts. LFDS had 45 new candidates available after skipping already-reviewed posts.
+
+- Reviewed: 195 additional Answers posts.
+- Promoted into Reporting guide patterns: 8 rows represented by 1 new script and 3 existing script evidence updates.
+- Non-promoted/reference rows documented: 187 rows in `docs/answers-sql-processed-batch-2026-06-30-2.md`.
+- One Repository ready object-definition/performance row was kept as reference-only because it was not a portable read-only reporting script.
+
+New or updated published patterns:
+
+- Forms: `reporting/forms/forms-authenticated-participant-signup.sql`
+- LFDS: `reporting/lfds/lfds-user-license-inventory.sql`
+- LFDS: `reporting/lfds/lfds-claims-group-license-inventory.sql`
+- Workflow: `reporting/workflow/workflow-queue-search-diagnostics.sql`
+
 ## General Cleanup Rules Applied
 
 - Do not rely on a database name; use parameters, SQLCMD variables, synonyms, or deployment-time configuration.

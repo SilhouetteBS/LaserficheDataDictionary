@@ -27,6 +27,12 @@ const reportingAssetLoaders = {
     import('../../reporting/forms/forms-attachment-error-draft-diagnostics.sql?raw').then((module) => module.default),
   'reporting/forms/forms-attachment-error-draft-diagnostics-evidence.md': () =>
     import('../../reporting/forms/forms-attachment-error-draft-diagnostics-evidence.md?raw').then((module) => module.default),
+  'reporting/forms/forms-authenticated-participant-signup.sql': () =>
+    import('../../reporting/forms/forms-authenticated-participant-signup.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-authenticated-participant-signup-evidence.md': () =>
+    import('../../reporting/forms/forms-authenticated-participant-signup-evidence.md?raw').then(
+      (module) => module.default,
+    ),
   'reporting/lfds/lfds-user-license-inventory.sql': () =>
     import('../../reporting/lfds/lfds-user-license-inventory.sql?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory-evidence.md': () =>
@@ -383,6 +389,22 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'Forms authenticated participant sign-ups',
+      summary:
+        'Creates a read-only reporting view and procedure for authenticated participant sign-up records and creation dates.',
+      scriptPath: 'reporting/forms/forms-authenticated-participant-signup.sql',
+      evidencePath: 'reporting/forms/forms-authenticated-participant-signup-evidence.md',
+      sourceCount: 1,
+      tables: ['dbo.cf_users_sign_up'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Creation date of a forms authenticated participant',
+          url: 'https://answers.laserfiche.com/questions/100971/Creation-date-of-a-forms-authenticated-participant',
+        },
+      ],
+    },
   ],
   lfds: [
     {
@@ -391,7 +413,7 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for directory users, identity providers, logins, licenses, limits, and SAML SID mappings.',
       scriptPath: 'reporting/lfds/lfds-user-license-inventory.sql',
       evidencePath: 'reporting/lfds/lfds-user-license-inventory-evidence.md',
-      sourceCount: 6,
+      sourceCount: 8,
       tables: [
         'dbo.directory_objects',
         'dbo.identity_providers',
@@ -422,6 +444,14 @@ export const communityReportingPatterns = {
           title: 'Linking multiple SAML identity providers through common username',
           url: 'https://answers.laserfiche.com/questions/213876/Linking-multiple-SAML-identity-providers-through-common-username',
         },
+        {
+          title: 'Last sign-in time in LFDS 12, database location?',
+          url: 'https://answers.laserfiche.com/questions/232845/Last-signin-time-in-LFDS-12-database-location',
+        },
+        {
+          title: 'Directory Server database',
+          url: 'https://answers.laserfiche.com/questions/117487/Directory-Server-database',
+        },
       ],
     },
     {
@@ -450,7 +480,7 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for directory objects, additional claims, group membership, license rows, and login context.',
       scriptPath: 'reporting/lfds/lfds-claims-group-license-inventory.sql',
       evidencePath: 'reporting/lfds/lfds-claims-group-license-inventory-evidence.md',
-      sourceCount: 7,
+      sourceCount: 8,
       tables: [
         'dbo.directory_objects',
         'dbo.additional_claims',
@@ -487,6 +517,10 @@ export const communityReportingPatterns = {
         {
           title: 'LFDS User License Display Limitations',
           url: 'https://answers.laserfiche.com/questions/172516/LFDS-User-License-Display-Limitations',
+        },
+        {
+          title: 'From Workflows, retrieving email and manager info for LFDS Trustees',
+          url: 'https://answers.laserfiche.com/questions/147922/From-Workflows-retrieving-email-and-manager-info-for-LFDS-Thrustees',
         },
       ],
     },
@@ -530,7 +564,7 @@ export const communityReportingPatterns = {
         'Creates read-only diagnostics for page counts, likely color pages, image/text sizes, active documents, and search-related troubleshooting context.',
       scriptPath: 'reporting/repository/repository-page-and-search-diagnostics.sql',
       evidencePath: 'reporting/repository/repository-page-and-search-diagnostics-evidence.md',
-      sourceCount: 4,
+      sourceCount: 7,
       tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.active_doc'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -667,6 +701,18 @@ export const communityReportingPatterns = {
         {
           title: 'workflow_task_queue_data table size very large',
           url: 'https://answers.laserfiche.com/questions/128584/workflowTaskQueuedata-table-size-very-large--Using-SQL-Express-database',
+        },
+        {
+          title: 'SQL Query to identify workflows running more than an Hour',
+          url: 'https://answers.laserfiche.com/questions/136072/SQL-Query-to-identify-workflows-running-more-than-an-Hour',
+        },
+        {
+          title: 'SQL Query to get the number of workflows by repository name or ID',
+          url: 'https://answers.laserfiche.com/questions/153150/SQL-Query-to-get-the-number-of-workflows-by-repository-name-or-ID',
+        },
+        {
+          title: 'Feature Request: List all rules invoking a given workflow rule',
+          url: 'https://answers.laserfiche.com/questions/181460/Feature-Request-List-all-rules-invoking-a-given-separate-workflow-rule',
         },
       ],
     },

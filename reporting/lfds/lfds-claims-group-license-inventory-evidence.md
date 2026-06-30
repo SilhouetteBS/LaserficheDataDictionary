@@ -21,6 +21,7 @@ Provide read-only inventory for LFDS directory objects, additional claims, group
 - [How to adjust a form's functionality based on the group the user is in](https://answers.laserfiche.com/questions/194574/How-to-adjust-a-forms-functionality-based-on-the-group-the-user-is-in)
 - [Query for Forms](https://answers.laserfiche.com/questions/199344/Query-for-Forms)
 - [LFDS User License Display Limitations](https://answers.laserfiche.com/questions/172516/LFDS-User-License-Display-Limitations)
+- [From Workflows, retrieving email and manager info for LFDS Trustees](https://answers.laserfiche.com/questions/147922/From-Workflows-retrieving-email-and-manager-info-for-LFDS-Thrustees)
 
 ## Cautions
 
