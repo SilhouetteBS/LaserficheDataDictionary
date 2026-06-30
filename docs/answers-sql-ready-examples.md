@@ -13,6 +13,7 @@ This page summarizes the current `Ready for review` SQL-example queue from the p
 - Object-definition candidates needing extra review: 2 items.
 - Direct-write, destructive, and weak candidates were not promoted from the queue.
 - Forms active-task and Monitor-style items should remain consolidated into `reporting/forms/forms-active-task-monitor.sql` instead of being published as many overlapping snippets.
+- Additional public-safe pending items are now represented by supplemental Reporting guide scripts for Forms submission volume, LFDS directory account state, Repository page/search diagnostics, and Workflow wait/completion diagnostics.
 
 ## Forms
 
@@ -80,6 +81,13 @@ Workflow-ready items focus on search activity logs, completion tables, wait cond
 2. LFDS: create a read-only user/license inventory script using `directory_objects`, `user_licenses`, `user_logins`, and `container_limits`.
 3. Repository: create a metadata lookup/path reporting script using `toc`, `doc`, `vol`, `propdef`, `propset`, and `propval`.
 4. Workflow: create a queue-size and search-activity diagnostic script with row/date filters.
+
+## Published Supplemental Patterns
+
+- Forms: `reporting/forms/forms-submission-volume-summary.sql`
+- LFDS: `reporting/lfds/lfds-directory-account-state.sql`
+- Repository: `reporting/repository/repository-page-and-search-diagnostics.sql`
+- Workflow: `reporting/workflow/workflow-wait-completion-diagnostics.sql`
 
 ## General Cleanup Rules Applied
 

@@ -7,18 +7,34 @@ const reportingAssetLoaders = {
     import('../../reporting/forms/forms-field-value-instance-lookup.sql?raw').then((module) => module.default),
   'reporting/forms/forms-field-value-instance-lookup-evidence.md': () =>
     import('../../reporting/forms/forms-field-value-instance-lookup-evidence.md?raw').then((module) => module.default),
+  'reporting/forms/forms-submission-volume-summary.sql': () =>
+    import('../../reporting/forms/forms-submission-volume-summary.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-submission-volume-summary-evidence.md': () =>
+    import('../../reporting/forms/forms-submission-volume-summary-evidence.md?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory.sql': () =>
     import('../../reporting/lfds/lfds-user-license-inventory.sql?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory-evidence.md': () =>
     import('../../reporting/lfds/lfds-user-license-inventory-evidence.md?raw').then((module) => module.default),
+  'reporting/lfds/lfds-directory-account-state.sql': () =>
+    import('../../reporting/lfds/lfds-directory-account-state.sql?raw').then((module) => module.default),
+  'reporting/lfds/lfds-directory-account-state-evidence.md': () =>
+    import('../../reporting/lfds/lfds-directory-account-state-evidence.md?raw').then((module) => module.default),
   'reporting/repository/repository-path-metadata-lookup.sql': () =>
     import('../../reporting/repository/repository-path-metadata-lookup.sql?raw').then((module) => module.default),
   'reporting/repository/repository-path-metadata-lookup-evidence.md': () =>
     import('../../reporting/repository/repository-path-metadata-lookup-evidence.md?raw').then((module) => module.default),
+  'reporting/repository/repository-page-and-search-diagnostics.sql': () =>
+    import('../../reporting/repository/repository-page-and-search-diagnostics.sql?raw').then((module) => module.default),
+  'reporting/repository/repository-page-and-search-diagnostics-evidence.md': () =>
+    import('../../reporting/repository/repository-page-and-search-diagnostics-evidence.md?raw').then((module) => module.default),
   'reporting/workflow/workflow-queue-search-diagnostics.sql': () =>
     import('../../reporting/workflow/workflow-queue-search-diagnostics.sql?raw').then((module) => module.default),
   'reporting/workflow/workflow-queue-search-diagnostics-evidence.md': () =>
     import('../../reporting/workflow/workflow-queue-search-diagnostics-evidence.md?raw').then((module) => module.default),
+  'reporting/workflow/workflow-wait-completion-diagnostics.sql': () =>
+    import('../../reporting/workflow/workflow-wait-completion-diagnostics.sql?raw').then((module) => module.default),
+  'reporting/workflow/workflow-wait-completion-diagnostics-evidence.md': () =>
+    import('../../reporting/workflow/workflow-wait-completion-diagnostics-evidence.md?raw').then((module) => module.default),
 };
 
 export const productReportingPaths = {
@@ -170,6 +186,26 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'Forms submission volume summary',
+      summary:
+        'Creates reporting-database objects for submission and instance counts by process, status, and date range.',
+      scriptPath: 'reporting/forms/forms-submission-volume-summary.sql',
+      evidencePath: 'reporting/forms/forms-submission-volume-summary-evidence.md',
+      sourceCount: 2,
+      tables: ['dbo.cf_bp_main_instances', 'dbo.cf_business_processes', 'dbo.cf_submissions'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Top 10 Forms Submissions',
+          url: 'https://answers.laserfiche.com/questions/237177/Top-10-Forms-Submissions--An-Experience-Using-AI-To-Write-A-SQL-Query',
+        },
+        {
+          title: 'Report to use for Active Forms',
+          url: 'https://answers.laserfiche.com/questions/216937/Report-to-use-for-Active-Forms',
+        },
+      ],
+    },
   ],
   lfds: [
     {
@@ -211,6 +247,26 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'LFDS directory account state',
+      summary:
+        'Creates read-only account-state and group-membership views for directory objects, login failures, and identity providers.',
+      scriptPath: 'reporting/lfds/lfds-directory-account-state.sql',
+      evidencePath: 'reporting/lfds/lfds-directory-account-state-evidence.md',
+      sourceCount: 2,
+      tables: ['dbo.directory_objects', 'dbo.identity_providers', 'dbo.user_logins', 'dbo.group_membership'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Any ways to get Laserfiche Directory account lock status in batch?',
+          url: 'https://answers.laserfiche.com/questions/206318/Any-ways-to-get-Laserfiche-Directory-account-lock-status-in-batch',
+        },
+        {
+          title: 'How to query User with organization in LFDS Database?',
+          url: 'https://answers.laserfiche.com/questions/187013/How-to-query-User-with-organization-in-LFDS-Database-',
+        },
+      ],
+    },
   ],
   repository: [
     {
@@ -245,6 +301,34 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'Repository page and search diagnostics',
+      summary:
+        'Creates read-only diagnostics for page counts, likely color pages, image/text sizes, active documents, and search-related troubleshooting context.',
+      scriptPath: 'reporting/repository/repository-page-and-search-diagnostics.sql',
+      evidencePath: 'reporting/repository/repository-page-and-search-diagnostics-evidence.md',
+      sourceCount: 4,
+      tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.active_doc'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Query to see how many pages in repository are in color and black & white?',
+          url: 'https://answers.laserfiche.com/questions/168368/Query-to-see-how-many-pages-in-repository-are-in-color-and-black--white',
+        },
+        {
+          title: 'Unknown SQL have a performance impact on Laseriche',
+          url: 'https://answers.laserfiche.com/questions/66306/Unknown-SQL-have-a-performance-impact-on-Laseriche',
+        },
+        {
+          title: 'General database error 9008 during search',
+          url: 'https://answers.laserfiche.com/questions/221495/While-we-search-within-repository-we-got-error--Error-executing-SQL-command-General-database-error-9008',
+        },
+        {
+          title: 'ORA-32033 unsupported column aliasing',
+          url: 'https://answers.laserfiche.com/questions/78110/sql-statement-returns-ORA32033-unsupported-column-aliasing',
+        },
+      ],
+    },
   ],
   workflow: [
     {
@@ -276,6 +360,26 @@ export const communityReportingPatterns = {
         {
           title: 'workflow_task_queue_data table size very large',
           url: 'https://answers.laserfiche.com/questions/128584/workflowTaskQueuedata-table-size-very-large--Using-SQL-Express-database',
+        },
+      ],
+    },
+    {
+      title: 'Workflow wait and completion diagnostics',
+      summary:
+        'Creates read-only views for wait conditions and completion retry state while exposing payload sizes instead of payload contents.',
+      scriptPath: 'reporting/workflow/workflow-wait-completion-diagnostics.sql',
+      evidencePath: 'reporting/workflow/workflow-wait-completion-diagnostics-evidence.md',
+      sourceCount: 2,
+      tables: ['dbo.wait_condition', 'dbo.instance_completion'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Connection pool timeout',
+          url: 'https://answers.laserfiche.com/questions/105585/Timeout-expired--The-timeout-period-elapsed-prior-to-obtaining-a-connection-from-the-pool--This-may-have-occurred-because-all-pooled-connections-were-in-use-and-max-pool-size-was-reached',
+        },
+        {
+          title: 'Transport-level semaphore timeout',
+          url: 'https://answers.laserfiche.com/questions/105587/A-transportlevel-error-has-occurred-when-receiving-results-from-the-server-provider-TCP-Provider-error-0--The-semaphore-timeout-period-has-expired',
         },
       ],
     },
