@@ -19,6 +19,52 @@ const referenceItems = [
   { key: 'cautions', label: 'Caution notes' },
 ];
 
+const notepadPlusSqlTheme = {
+  name: 'fichebait-notepad-plus-sql',
+  type: 'light',
+  colors: {
+    'editor.background': '#ffffff',
+    'editor.foreground': '#000000',
+  },
+  tokenColors: [
+    {
+      scope: [
+        'keyword',
+        'keyword.control',
+        'keyword.operator',
+        'storage',
+        'support.type',
+        'constant.language',
+      ],
+      settings: { foreground: '#0000ff', fontStyle: 'bold' },
+    },
+    {
+      scope: ['comment', 'punctuation.definition.comment'],
+      settings: { foreground: '#008000' },
+    },
+    {
+      scope: ['string', 'constant.character'],
+      settings: { foreground: '#808080' },
+    },
+    {
+      scope: ['constant.numeric'],
+      settings: { foreground: '#ff0000' },
+    },
+    {
+      scope: ['entity.name.function', 'support.function'],
+      settings: { foreground: '#8000ff' },
+    },
+    {
+      scope: ['entity.name.type', 'entity.name.class', 'variable.other.member'],
+      settings: { foreground: '#0080c0' },
+    },
+    {
+      scope: ['punctuation', 'meta.brace'],
+      settings: { foreground: '#000000' },
+    },
+  ],
+};
+
 let sqlHighlighterPromise;
 
 function getSqlHighlighter() {
@@ -27,11 +73,10 @@ function getSqlHighlighter() {
       import('shiki/core'),
       import('shiki/engine/javascript'),
       import('@shikijs/langs/sql'),
-      import('@shikijs/themes/github-light'),
-    ]).then(([{ createHighlighterCore }, { createJavaScriptRegexEngine }, sqlLanguage, githubLightTheme]) =>
+    ]).then(([{ createHighlighterCore }, { createJavaScriptRegexEngine }, sqlLanguage]) =>
       createHighlighterCore({
         langs: [sqlLanguage.default],
-        themes: [githubLightTheme.default],
+        themes: [notepadPlusSqlTheme],
         engine: createJavaScriptRegexEngine(),
       }),
     );
@@ -42,6 +87,23 @@ function getSqlHighlighter() {
 
 function getScriptKey(pattern) {
   return `script:${pattern.scriptPath}`;
+}
+
+function copyTextWithFallback(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.setAttribute('readonly', '');
+  textArea.style.position = 'fixed';
+  textArea.style.top = '-9999px';
+  textArea.style.left = '-9999px';
+  document.body.appendChild(textArea);
+  textArea.select();
+  const copied = document.execCommand('copy');
+  document.body.removeChild(textArea);
+
+  if (!copied) {
+    throw new Error('Unable to copy text');
+  }
 }
 
 function NavButton({ item, selectedView, onSelect, meta, stackedMeta = false }) {
@@ -103,7 +165,7 @@ function SqlViewer({ sql }) {
     setHighlightedSql({ source: sql, status: 'loading', html: '' });
 
     getSqlHighlighter()
-      .then((highlighter) => highlighter.codeToHtml(sql, { lang: 'sql', theme: 'github-light' }))
+      .then((highlighter) => highlighter.codeToHtml(sql, { lang: 'sql', theme: notepadPlusSqlTheme.name }))
       .then((html) => {
         if (!canceled) {
           setHighlightedSql({ source: sql, status: 'ready', html });
@@ -162,17 +224,17 @@ export function ReportingGuide({ version, onSelectTable }) {
       return undefined;
     }
 
-    const contentUrl = scriptTab === 'sql' ? selectedScript.scriptAssetUrl : selectedScript.evidenceAssetUrl;
+    const contentLoader = scriptTab === 'sql' ? selectedScript.scriptLoader : selectedScript.evidenceLoader;
     const contentKey = `${selectedScript.scriptPath}:${scriptTab}`;
     let canceled = false;
     setScriptContent({ key: contentKey, status: 'loading', text: '' });
 
-    fetch(contentUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Unable to load ${contentUrl}`);
+    Promise.resolve()
+      .then(() => {
+        if (!contentLoader) {
+          throw new Error(`Unable to load ${scriptTab === 'sql' ? selectedScript.scriptPath : selectedScript.evidencePath}`);
         }
-        return response.text();
+        return contentLoader();
       })
       .then((text) => {
         if (!canceled) {
@@ -207,12 +269,22 @@ export function ReportingGuide({ version, onSelectTable }) {
     }
 
     try {
-      await navigator.clipboard.writeText(scriptContent.text);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(scriptContent.text);
+      } else {
+        copyTextWithFallback(scriptContent.text);
+      }
       setCopyStatus('copied');
       window.setTimeout(() => setCopyStatus('idle'), 1800);
     } catch {
-      setCopyStatus('error');
-      window.setTimeout(() => setCopyStatus('idle'), 2400);
+      try {
+        copyTextWithFallback(scriptContent.text);
+        setCopyStatus('copied');
+        window.setTimeout(() => setCopyStatus('idle'), 1800);
+      } catch {
+        setCopyStatus('error');
+        window.setTimeout(() => setCopyStatus('idle'), 2400);
+      }
     }
   }
 

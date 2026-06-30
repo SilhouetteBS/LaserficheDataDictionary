@@ -1,44 +1,24 @@
-const reportingAssetUrls = {
-  'reporting/forms/forms-active-task-monitor.sql': new URL(
-    '../../reporting/forms/forms-active-task-monitor.sql',
-    import.meta.url,
-  ).href,
-  'reporting/forms/forms-active-task-monitor-evidence.md': new URL(
-    '../../reporting/forms/forms-active-task-monitor-evidence.md',
-    import.meta.url,
-  ).href,
-  'reporting/forms/forms-field-value-instance-lookup.sql': new URL(
-    '../../reporting/forms/forms-field-value-instance-lookup.sql',
-    import.meta.url,
-  ).href,
-  'reporting/forms/forms-field-value-instance-lookup-evidence.md': new URL(
-    '../../reporting/forms/forms-field-value-instance-lookup-evidence.md',
-    import.meta.url,
-  ).href,
-  'reporting/lfds/lfds-user-license-inventory.sql': new URL(
-    '../../reporting/lfds/lfds-user-license-inventory.sql',
-    import.meta.url,
-  ).href,
-  'reporting/lfds/lfds-user-license-inventory-evidence.md': new URL(
-    '../../reporting/lfds/lfds-user-license-inventory-evidence.md',
-    import.meta.url,
-  ).href,
-  'reporting/repository/repository-path-metadata-lookup.sql': new URL(
-    '../../reporting/repository/repository-path-metadata-lookup.sql',
-    import.meta.url,
-  ).href,
-  'reporting/repository/repository-path-metadata-lookup-evidence.md': new URL(
-    '../../reporting/repository/repository-path-metadata-lookup-evidence.md',
-    import.meta.url,
-  ).href,
-  'reporting/workflow/workflow-queue-search-diagnostics.sql': new URL(
-    '../../reporting/workflow/workflow-queue-search-diagnostics.sql',
-    import.meta.url,
-  ).href,
-  'reporting/workflow/workflow-queue-search-diagnostics-evidence.md': new URL(
-    '../../reporting/workflow/workflow-queue-search-diagnostics-evidence.md',
-    import.meta.url,
-  ).href,
+const reportingAssetLoaders = {
+  'reporting/forms/forms-active-task-monitor.sql': () =>
+    import('../../reporting/forms/forms-active-task-monitor.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-active-task-monitor-evidence.md': () =>
+    import('../../reporting/forms/forms-active-task-monitor-evidence.md?raw').then((module) => module.default),
+  'reporting/forms/forms-field-value-instance-lookup.sql': () =>
+    import('../../reporting/forms/forms-field-value-instance-lookup.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-field-value-instance-lookup-evidence.md': () =>
+    import('../../reporting/forms/forms-field-value-instance-lookup-evidence.md?raw').then((module) => module.default),
+  'reporting/lfds/lfds-user-license-inventory.sql': () =>
+    import('../../reporting/lfds/lfds-user-license-inventory.sql?raw').then((module) => module.default),
+  'reporting/lfds/lfds-user-license-inventory-evidence.md': () =>
+    import('../../reporting/lfds/lfds-user-license-inventory-evidence.md?raw').then((module) => module.default),
+  'reporting/repository/repository-path-metadata-lookup.sql': () =>
+    import('../../reporting/repository/repository-path-metadata-lookup.sql?raw').then((module) => module.default),
+  'reporting/repository/repository-path-metadata-lookup-evidence.md': () =>
+    import('../../reporting/repository/repository-path-metadata-lookup-evidence.md?raw').then((module) => module.default),
+  'reporting/workflow/workflow-queue-search-diagnostics.sql': () =>
+    import('../../reporting/workflow/workflow-queue-search-diagnostics.sql?raw').then((module) => module.default),
+  'reporting/workflow/workflow-queue-search-diagnostics-evidence.md': () =>
+    import('../../reporting/workflow/workflow-queue-search-diagnostics-evidence.md?raw').then((module) => module.default),
 };
 
 export const productReportingPaths = {
@@ -205,8 +185,8 @@ export function getCommunityReportingPatterns(productKey) {
     ...pattern,
     scriptUrl: `${repoBlobBaseUrl}/${pattern.scriptPath}`,
     evidenceUrl: `${repoBlobBaseUrl}/${pattern.evidencePath}`,
-    scriptAssetUrl: reportingAssetUrls[pattern.scriptPath],
-    evidenceAssetUrl: reportingAssetUrls[pattern.evidencePath],
+    scriptLoader: reportingAssetLoaders[pattern.scriptPath],
+    evidenceLoader: reportingAssetLoaders[pattern.evidencePath],
   }));
 }
 
