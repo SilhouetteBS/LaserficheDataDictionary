@@ -151,8 +151,10 @@ function ScriptStatusTags({ tags }) {
   const tagClasses = {
     'Community sourced': 'community-tag-source',
     'Schema matched': 'community-tag-matched',
+    'Schema neutral': 'community-tag-neutral',
     'Not live tested': 'community-tag-untested',
     'Read-only': 'community-tag-readonly',
+    'Context only': 'community-tag-context',
   };
 
   return (

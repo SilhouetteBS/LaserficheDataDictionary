@@ -11,6 +11,14 @@ const reportingAssetLoaders = {
     import('../../reporting/forms/forms-submission-volume-summary.sql?raw').then((module) => module.default),
   'reporting/forms/forms-submission-volume-summary-evidence.md': () =>
     import('../../reporting/forms/forms-submission-volume-summary-evidence.md?raw').then((module) => module.default),
+  'reporting/forms/forms-user-group-inventory.sql': () =>
+    import('../../reporting/forms/forms-user-group-inventory.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-user-group-inventory-evidence.md': () =>
+    import('../../reporting/forms/forms-user-group-inventory-evidence.md?raw').then((module) => module.default),
+  'reporting/forms/forms-external-lookup-guidance.sql': () =>
+    import('../../reporting/forms/forms-external-lookup-guidance.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-external-lookup-guidance-evidence.md': () =>
+    import('../../reporting/forms/forms-external-lookup-guidance-evidence.md?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory.sql': () =>
     import('../../reporting/lfds/lfds-user-license-inventory.sql?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory-evidence.md': () =>
@@ -27,6 +35,10 @@ const reportingAssetLoaders = {
     import('../../reporting/repository/repository-page-and-search-diagnostics.sql?raw').then((module) => module.default),
   'reporting/repository/repository-page-and-search-diagnostics-evidence.md': () =>
     import('../../reporting/repository/repository-page-and-search-diagnostics-evidence.md?raw').then((module) => module.default),
+  'reporting/repository/repository-query-compatibility-helpers.sql': () =>
+    import('../../reporting/repository/repository-query-compatibility-helpers.sql?raw').then((module) => module.default),
+  'reporting/repository/repository-query-compatibility-helpers-evidence.md': () =>
+    import('../../reporting/repository/repository-query-compatibility-helpers-evidence.md?raw').then((module) => module.default),
   'reporting/workflow/workflow-queue-search-diagnostics.sql': () =>
     import('../../reporting/workflow/workflow-queue-search-diagnostics.sql?raw').then((module) => module.default),
   'reporting/workflow/workflow-queue-search-diagnostics-evidence.md': () =>
@@ -35,6 +47,10 @@ const reportingAssetLoaders = {
     import('../../reporting/workflow/workflow-wait-completion-diagnostics.sql?raw').then((module) => module.default),
   'reporting/workflow/workflow-wait-completion-diagnostics-evidence.md': () =>
     import('../../reporting/workflow/workflow-wait-completion-diagnostics-evidence.md?raw').then((module) => module.default),
+  'reporting/workflow/workflow-external-data-source-guidance.sql': () =>
+    import('../../reporting/workflow/workflow-external-data-source-guidance.sql?raw').then((module) => module.default),
+  'reporting/workflow/workflow-external-data-source-guidance-evidence.md': () =>
+    import('../../reporting/workflow/workflow-external-data-source-guidance-evidence.md?raw').then((module) => module.default),
 };
 
 export const productReportingPaths = {
@@ -206,6 +222,62 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'Forms user and group inventory',
+      summary:
+        'Creates read-only reporting objects for Forms users, user types, administrator flags, activation, login timestamps, and group membership.',
+      scriptPath: 'reporting/forms/forms-user-group-inventory.sql',
+      evidencePath: 'reporting/forms/forms-user-group-inventory-evidence.md',
+      sourceCount: 2,
+      tables: ['dbo.cf_users', 'dbo.cf_usergroups_users_mapping', 'dbo.cf_usergroups'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Named users list',
+          url: 'https://answers.laserfiche.com/questions/122499/Named-users-list',
+        },
+        {
+          title: 'Get group name in Forms',
+          url: 'https://answers.laserfiche.com/questions/149043/Get-group-name-in-Forms',
+        },
+      ],
+    },
+    {
+      title: 'Forms external lookup guidance',
+      summary:
+        'Provides schema-neutral customer-owned lookup table and stored procedure patterns for Forms lookup rules and external SQL data sources.',
+      scriptPath: 'reporting/forms/forms-external-lookup-guidance.sql',
+      evidencePath: 'reporting/forms/forms-external-lookup-guidance-evidence.md',
+      sourceCount: 6,
+      tables: [],
+      tags: ['Community sourced', 'Schema neutral', 'Not live tested', 'Context only'],
+      answersLinks: [
+        {
+          title: 'Forms SQL Function Lookup',
+          url: 'https://answers.laserfiche.com/questions/61668/Forms-SQL-Funcion-Lookup',
+        },
+        {
+          title: 'Form Lookup',
+          url: 'https://answers.laserfiche.com/questions/173089/Form-Lookup',
+        },
+        {
+          title: 'Set drop-down field default when populating with database query',
+          url: 'https://answers.laserfiche.com/questions/68625/Set-dropdown-field-default-when-populating-with-database-query',
+        },
+        {
+          title: 'Lookup rule not working on public form',
+          url: 'https://answers.laserfiche.com/questions/165147/Lookup-rule-not-working-on-public-form',
+        },
+        {
+          title: 'LF Forms and Workflow query linked SQL or MySQL Server',
+          url: 'https://answers.laserfiche.com/questions/66314/LF-Forms-and-Workflow-query-Linked-SQL-or-MySQL-Server-possible-at-all-',
+        },
+        {
+          title: 'How to create a workflow to auto generate a report',
+          url: 'https://answers.laserfiche.com/questions/226520/How-to-create-a-workflow-to-auto-generate-a-report',
+        },
+      ],
+    },
   ],
   lfds: [
     {
@@ -329,6 +401,42 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'Repository query compatibility helpers',
+      summary:
+        'Creates read-only helper objects for repository schema-version checks, Workflow Custom Query token conflicts, and binary-to-hex conversion.',
+      scriptPath: 'reporting/repository/repository-query-compatibility-helpers.sql',
+      evidencePath: 'reporting/repository/repository-query-compatibility-helpers-evidence.md',
+      sourceCount: 6,
+      tables: ['dbo.dboptions', 'dbo.toc', 'dbo.propval', 'dbo.propdef'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'LF Repository - SQL table details with table schema and dictionary',
+          url: 'https://answers.laserfiche.com/questions/223444/LF-Repository--SQL-table-details-with-table-schema-and-dictionary',
+        },
+        {
+          title: 'Azure DBs for repositories',
+          url: 'https://answers.laserfiche.com/questions/218919/Azure-DBs-for-repositories',
+        },
+        {
+          title: 'LFQL Through Workflow',
+          url: 'https://answers.laserfiche.com/questions/50622/LFQL-Through-Workflow',
+        },
+        {
+          title: 'SQL Database looking for LF Server version 8.6.1',
+          url: 'https://answers.laserfiche.com/questions/89879/SQL-Database-looking-for-LF-Server-version-861',
+        },
+        {
+          title: 'Token not found error in Custom Query',
+          url: 'https://answers.laserfiche.com/questions/132492/Token-not-found-error-in-Custom-Query',
+        },
+        {
+          title: 'Store binary hex value from SQL Query',
+          url: 'https://answers.laserfiche.com/questions/48378/How-can-I-store-the-binary-hex-value-from-a-SQL-Query-without-Workflow-conveting-it-to-a-series-of-decimal-numbers',
+        },
+      ],
+    },
   ],
   workflow: [
     {
@@ -380,6 +488,42 @@ export const communityReportingPatterns = {
         {
           title: 'Transport-level semaphore timeout',
           url: 'https://answers.laserfiche.com/questions/105587/A-transportlevel-error-has-occurred-when-receiving-results-from-the-server-provider-TCP-Provider-error-0--The-semaphore-timeout-period-has-expired',
+        },
+      ],
+    },
+    {
+      title: 'Workflow external data source guidance',
+      summary:
+        'Provides schema-neutral staging table and lookup procedure patterns for Workflow Query Data and Custom Query activities.',
+      scriptPath: 'reporting/workflow/workflow-external-data-source-guidance.sql',
+      evidencePath: 'reporting/workflow/workflow-external-data-source-guidance-evidence.md',
+      sourceCount: 6,
+      tables: [],
+      tags: ['Community sourced', 'Schema neutral', 'Not live tested', 'Context only'],
+      answersLinks: [
+        {
+          title: 'LF Forms and Workflow query linked SQL or MySQL Server',
+          url: 'https://answers.laserfiche.com/questions/66314/LF-Forms-and-Workflow-query-Linked-SQL-or-MySQL-Server-possible-at-all-',
+        },
+        {
+          title: 'Connecting SQL Database to Laserfiche Cloud Workflows',
+          url: 'https://answers.laserfiche.com/questions/230095/Connecting-SQL-Database-to-Laserfiche-Cloud-Workflows',
+        },
+        {
+          title: 'Creating Dynamic Nested Fields in Laserfiche by avoiding SQL',
+          url: 'https://answers.laserfiche.com/questions/115077/Creating-Dynamic-Nested-Fields-in-Laserfiche-by-avoiding-SQL',
+        },
+        {
+          title: 'Workflow Database Activities query time out',
+          url: 'https://answers.laserfiche.com/questions/47242/Workflow-Database-Activities-query-time-out',
+        },
+        {
+          title: 'Track token iterations',
+          url: 'https://answers.laserfiche.com/questions/83672/Track-token-iterations',
+        },
+        {
+          title: 'Stop schedule for workflow',
+          url: 'https://answers.laserfiche.com/questions/196997/Stop-schedule-for-workflow',
         },
       ],
     },

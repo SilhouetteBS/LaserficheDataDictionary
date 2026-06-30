@@ -89,6 +89,22 @@ Workflow-ready items focus on search activity logs, completion tables, wait cond
 - Repository: `reporting/repository/repository-page-and-search-diagnostics.sql`
 - Workflow: `reporting/workflow/workflow-wait-completion-diagnostics.sql`
 
+## Future Candidate Processing
+
+The 22 `Needs schema verification` candidates were processed after the initial queue promotion.
+
+- Promoted as schema-matched public patterns:
+  - Forms: `reporting/forms/forms-user-group-inventory.sql`
+  - Repository: `reporting/repository/repository-query-compatibility-helpers.sql`
+- Promoted as schema-neutral public guidance:
+  - Forms: `reporting/forms/forms-external-lookup-guidance.sql`
+  - Workflow: `reporting/workflow/workflow-external-data-source-guidance.sql`
+- Covered by existing patterns instead of new standalone scripts:
+  - LFDS account-state, group, named-user, and login context are covered by the LFDS user/license and directory account-state patterns.
+  - Repository metadata/table dictionary and LFQL-style metadata lookup context are covered by the Repository path/metadata and query compatibility patterns.
+- Kept as reference-only rather than executable product-database scripts:
+  - SQL Server setup, Azure SQL supportability, Workflow Cloud connection setup, timeout design, dynamic field design, and schedule-control discussions.
+
 ## General Cleanup Rules Applied
 
 - Do not rely on a database name; use parameters, SQLCMD variables, synonyms, or deployment-time configuration.

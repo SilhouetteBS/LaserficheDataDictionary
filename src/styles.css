@@ -5433,6 +5433,12 @@ button {
   background: var(--change-added-bg);
 }
 
+.community-pattern-tags .community-tag-neutral {
+  color: #44515c;
+  border-color: #d4dee4;
+  background: #f3f6f8;
+}
+
 .community-pattern-tags .community-tag-untested {
   color: var(--change-changed);
   border-color: var(--change-changed-line);
@@ -5443,6 +5449,12 @@ button {
   color: #153e75;
   border-color: #b7d2ff;
   background: #edf4ff;
+}
+
+.community-pattern-tags .community-tag-context {
+  color: #5f4b00;
+  border-color: #ead17a;
+  background: #fff8dc;
 }
 
 .community-pattern-actions {
