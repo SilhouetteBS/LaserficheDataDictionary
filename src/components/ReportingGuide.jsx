@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { exportCompatibilityNotes, glossaryTerms } from '../data/glossary.js';
 import {
   buildGeneratedReportingExamples,
@@ -8,11 +8,27 @@ import {
 } from '../data/reporting.js';
 
 export function ReportingGuide({ version, onSelectTable }) {
+  const [scriptModal, setScriptModal] = useState(null);
   const knownTables = new Set(version.tables.map((table) => table.id));
   const reportingPaths = getReportingPaths(version.source.productKey);
   const reportingQuestions = getReportingQuestions(version.source.productKey);
   const communityPatterns = getCommunityReportingPatterns(version.source.productKey);
   const generatedExamples = useMemo(() => buildGeneratedReportingExamples(version), [version]);
+
+  useEffect(() => {
+    if (!scriptModal) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setScriptModal(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [scriptModal]);
 
   return (
     <section className="detail-surface">
@@ -137,12 +153,32 @@ export function ReportingGuide({ version, onSelectTable }) {
                     )}
                   </div>
                   <div className="community-pattern-actions">
-                    <a href={pattern.scriptUrl} target="_blank" rel="noreferrer">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setScriptModal({
+                          title: `${pattern.title} SQL`,
+                          subtitle: pattern.scriptPath,
+                          content: pattern.sql,
+                          type: 'sql',
+                        })
+                      }
+                    >
                       Open SQL
-                    </a>
-                    <a href={pattern.evidenceUrl} target="_blank" rel="noreferrer">
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setScriptModal({
+                          title: `${pattern.title} review notes`,
+                          subtitle: pattern.evidencePath,
+                          content: pattern.evidence,
+                          type: 'notes',
+                        })
+                      }
+                    >
                       Review notes
-                    </a>
+                    </button>
                   </div>
                 </article>
               ))}
@@ -175,6 +211,33 @@ export function ReportingGuide({ version, onSelectTable }) {
           </ul>
         </section>
       </div>
+      {scriptModal ? (
+        <div className="script-modal-backdrop" role="presentation" onMouseDown={() => setScriptModal(null)}>
+          <div
+            className="script-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={scriptModal.title}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="script-modal-heading">
+              <div>
+                <h3>{scriptModal.title}</h3>
+                <p>{scriptModal.subtitle}</p>
+              </div>
+              <button type="button" onClick={() => setScriptModal(null)} aria-label="Close script preview">
+                X
+              </button>
+            </div>
+            <div className="script-modal-warning">
+              Read-only reporting aid. This script is tagged as not live tested unless the review notes state otherwise.
+            </div>
+            <pre className={scriptModal.type === 'sql' ? 'script-modal-content sql' : 'script-modal-content notes'}>
+              {scriptModal.content}
+            </pre>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

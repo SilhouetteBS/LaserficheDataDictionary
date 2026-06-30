@@ -4996,7 +4996,7 @@ button {
   margin-top: 12px;
 }
 
-.community-pattern-actions a {
+.community-pattern-actions button {
   border: 1px solid #cbdce3;
   border-radius: 6px;
   padding: 7px 10px;
@@ -5005,6 +5005,110 @@ button {
   font-size: 13px;
   font-weight: 850;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.community-pattern-actions button:hover,
+.community-pattern-actions button:focus-visible {
+  border-color: var(--brand-blue);
+  background: #eef6ff;
+}
+
+.script-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(14, 30, 43, 0.48);
+}
+
+.script-modal {
+  width: min(1040px, calc(100vw - 48px));
+  max-height: min(820px, calc(100vh - 48px));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  border: 1px solid #c9d9df;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 50px rgba(14, 30, 43, 0.24);
+}
+
+.script-modal-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  border-bottom: 1px solid #dce7ea;
+  padding: 14px 16px;
+}
+
+.script-modal-heading h3 {
+  margin: 0;
+  color: #172938;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.script-modal-heading p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.script-modal-heading button {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #cbdce3;
+  border-radius: 999px;
+  color: #284554;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.script-modal-heading button:hover,
+.script-modal-heading button:focus-visible {
+  border-color: var(--brand-blue);
+  background: #eef6ff;
+}
+
+.script-modal-warning {
+  border-bottom: 1px solid #dce7ea;
+  padding: 10px 16px;
+  color: #6b4708;
+  background: #fff7df;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.script-modal-content {
+  min-height: 0;
+  overflow: auto;
+  margin: 0;
+  padding: 16px;
+  color: #172938;
+  background: #f8fbfc;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.script-modal-content.sql {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.script-modal-content.notes {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 .glossary-list {
