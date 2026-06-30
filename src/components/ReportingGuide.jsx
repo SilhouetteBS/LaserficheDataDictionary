@@ -19,6 +19,27 @@ const referenceItems = [
   { key: 'cautions', label: 'Caution notes' },
 ];
 
+let sqlHighlighterPromise;
+
+function getSqlHighlighter() {
+  if (!sqlHighlighterPromise) {
+    sqlHighlighterPromise = Promise.all([
+      import('shiki/core'),
+      import('shiki/engine/javascript'),
+      import('@shikijs/langs/sql'),
+      import('@shikijs/themes/github-light'),
+    ]).then(([{ createHighlighterCore }, { createJavaScriptRegexEngine }, sqlLanguage, githubLightTheme]) =>
+      createHighlighterCore({
+        langs: [sqlLanguage.default],
+        themes: [githubLightTheme.default],
+        engine: createJavaScriptRegexEngine(),
+      }),
+    );
+  }
+
+  return sqlHighlighterPromise;
+}
+
 function getScriptKey(pattern) {
   return `script:${pattern.scriptPath}`;
 }
@@ -74,18 +95,38 @@ function ScriptStatusTags({ tags }) {
   );
 }
 
-function SqlLineNumberView({ sql }) {
-  const lines = sql.split(/\r?\n/);
+function SqlViewer({ sql }) {
+  const [highlightedSql, setHighlightedSql] = useState({ source: '', status: 'loading', html: '' });
+
+  useEffect(() => {
+    let canceled = false;
+    setHighlightedSql({ source: sql, status: 'loading', html: '' });
+
+    getSqlHighlighter()
+      .then((highlighter) => highlighter.codeToHtml(sql, { lang: 'sql', theme: 'github-light' }))
+      .then((html) => {
+        if (!canceled) {
+          setHighlightedSql({ source: sql, status: 'ready', html });
+        }
+      })
+      .catch(() => {
+        if (!canceled) {
+          setHighlightedSql({ source: sql, status: 'error', html: '' });
+        }
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [sql]);
 
   return (
-    <div className="reporting-script-content sql reporting-sql-line-view" role="region" aria-label="SQL with line numbers">
-      <ol>
-        {lines.map((line, index) => (
-          <li key={`${index}-${line}`}>
-            <code>{line || ' '}</code>
-          </li>
-        ))}
-      </ol>
+    <div className="reporting-sql-viewer" role="region" aria-label="SQL viewer">
+      {highlightedSql.status === 'ready' && highlightedSql.source === sql ? (
+        <div className="reporting-sql-highlight" dangerouslySetInnerHTML={{ __html: highlightedSql.html }} />
+      ) : (
+        <pre className="reporting-script-content sql reporting-sql-fallback">{sql}</pre>
+      )}
     </div>
   );
 }
@@ -331,7 +372,7 @@ export function ReportingGuide({ version, onSelectTable }) {
         </div>
         {scriptContent.status === 'ready' ? (
           scriptTab === 'sql' ? (
-            <SqlLineNumberView sql={scriptContent.text} />
+            <SqlViewer sql={scriptContent.text} />
           ) : (
             <pre className="reporting-script-content notes">{scriptContent.text}</pre>
           )
