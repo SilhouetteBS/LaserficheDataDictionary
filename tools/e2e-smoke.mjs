@@ -138,7 +138,17 @@ assert.match(await page.locator('.dependency-report-note').innerText(), /SQL Ser
 await page.getByRole('button', { name: 'Reporting', exact: true }).click();
 await page.waitForTimeout(100);
 assert.equal(await page.locator('.detail-surface h2').textContent(), 'Reporting guide');
+assert.equal(await page.locator('.reporting-workspace').count(), 1);
+assert.match(await page.locator('.reporting-detail-pane').innerText(), /Reporting overview/i);
+await page.getByRole('button', { name: 'Generated examples', exact: true }).click();
+await page.waitForTimeout(100);
 assert.equal(await page.locator('.query-example').count(), 4);
+await page.getByRole('button', { name: 'Forms active task and Monitor reporting Not live tested', exact: true }).click();
+await page.waitForTimeout(100);
+assert.match(await page.locator('.reporting-detail-pane').innerText(), /Forms active task and Monitor reporting/i);
+await page.getByRole('tab', { name: 'SQL', exact: true }).click();
+await page.waitForTimeout(250);
+assert.match(await page.locator('.reporting-script-content.sql').innerText(), /CREATE OR ALTER VIEW rpt\.vw_FormsActiveTasks/i);
 
 await page.getByRole('button', { name: 'Tables', exact: true }).click();
 await page.evaluate(() => {
