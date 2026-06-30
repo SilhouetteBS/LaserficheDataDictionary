@@ -105,6 +105,14 @@ The 22 `Needs schema verification` candidates were processed after the initial q
 - Kept as reference-only rather than executable product-database scripts:
   - SQL Server setup, Azure SQL supportability, Workflow Cloud connection setup, timeout design, dynamic field design, and schedule-control discussions.
 
+## Non-Promoted Queue Processing
+
+The remaining 146 queue rows were processed as public-safe exclusions/reference rows in `docs/answers-sql-processed-exclusions.md`.
+
+- 77 rows were excluded from runnable scripts because they were unsafe, write-oriented, destructive, environment setup, or support-directed.
+- 23 rows were not promoted because they required manual extraction and supportability review.
+- 46 rows were kept as reference only because they had insufficient SQL or schema signal.
+
 ## General Cleanup Rules Applied
 
 - Do not rely on a database name; use parameters, SQLCMD variables, synonyms, or deployment-time configuration.

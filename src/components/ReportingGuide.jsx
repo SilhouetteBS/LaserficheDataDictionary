@@ -17,6 +17,7 @@ const referenceItems = [
   { key: 'glossary', label: 'Glossary' },
   { key: 'compatibility', label: 'Export compatibility' },
   { key: 'cautions', label: 'Caution notes' },
+  { key: 'processed-queue', label: 'Processed queue' },
 ];
 
 const notepadPlusSqlTheme = {
@@ -560,6 +561,59 @@ export function ReportingGuide({
     );
   }
 
+  function renderProcessedQueue() {
+    return (
+      <section className="reporting-section reporting-section-full">
+        <ReportingSectionHeader title="Processed non-promoted queue" count={146} />
+        <div className="reporting-overview-grid reporting-queue-summary-grid">
+          <article>
+            <strong>77</strong>
+            <span>Do not publish</span>
+            <p>Unsafe, write-oriented, destructive, environment setup, or support-directed content.</p>
+          </article>
+          <article>
+            <strong>23</strong>
+            <span>Manual extraction</span>
+            <p>Not promoted because the source needed manual extraction and supportability review.</p>
+          </article>
+          <article>
+            <strong>46</strong>
+            <span>Weak candidates</span>
+            <p>Reference only because the row had insufficient SQL or schema signal.</p>
+          </article>
+          <article>
+            <strong>146</strong>
+            <span>Processed rows</span>
+            <p>All remaining non-promoted Answers queue rows are documented without copying raw forum SQL.</p>
+          </article>
+        </div>
+        <div className="reporting-caution-list">
+          <article>
+            <h4>Detailed processed queue</h4>
+            <p>
+              The full public-safe title, source link, status, risk, and disposition list is stored in{' '}
+              <a
+                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-exclusions.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                docs/answers-sql-processed-exclusions.md
+              </a>
+              .
+            </p>
+          </article>
+          <article>
+            <h4>Why these are not scripts</h4>
+            <p>
+              These rows were processed as caution or reference material because publishing them as runnable SQL would
+              either be unsafe, unsupported, too environment-specific, or too weakly tied to imported schema.
+            </p>
+          </article>
+        </div>
+      </section>
+    );
+  }
+
   function renderSelectedView() {
     if (selectedView === 'overview') {
       return renderOverview();
@@ -581,6 +635,9 @@ export function ReportingGuide({
     }
     if (selectedView === 'cautions') {
       return renderCautions();
+    }
+    if (selectedView === 'processed-queue') {
+      return renderProcessedQueue();
     }
     return renderScriptDetail(selectedScript);
   }
