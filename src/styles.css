@@ -5162,12 +5162,20 @@ button {
   font-weight: 850;
 }
 
-.reporting-script-tabs {
+.reporting-script-toolbar {
   display: flex;
+  align-items: flex-end;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
   border-bottom: 1px solid #dce7ea;
+}
+
+.reporting-script-tabs {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .reporting-script-tabs button {
@@ -5190,6 +5198,33 @@ button {
   background: #ffffff;
 }
 
+.reporting-copy-sql-button {
+  align-self: center;
+  min-height: 34px;
+  border: 1px solid #c8d8df;
+  border-radius: 7px;
+  padding: 7px 11px;
+  color: #123349;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.reporting-copy-sql-button:hover,
+.reporting-copy-sql-button:focus-visible {
+  border-color: var(--brand-blue);
+  color: #0b4fb1;
+  box-shadow: 0 0 0 3px rgba(28, 115, 254, 0.12);
+}
+
+.reporting-copy-sql-button:disabled {
+  color: #7a8b97;
+  background: #f3f7f9;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .empty-note {
   margin: 0;
   color: var(--text-muted);
@@ -5210,6 +5245,49 @@ button {
   font-size: 12px;
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+.reporting-sql-line-view {
+  padding: 0;
+  white-space: normal;
+}
+
+.reporting-sql-line-view ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: sql-line;
+}
+
+.reporting-sql-line-view li {
+  display: grid;
+  grid-template-columns: minmax(44px, max-content) minmax(0, 1fr);
+  min-height: 20px;
+  counter-increment: sql-line;
+}
+
+.reporting-sql-line-view li::before {
+  content: counter(sql-line);
+  border-right: 1px solid #dce7ea;
+  padding: 2px 10px 2px 12px;
+  color: #6c7d88;
+  background: #edf4f7;
+  text-align: right;
+  user-select: none;
+}
+
+.reporting-sql-line-view code {
+  min-width: 0;
+  padding: 2px 12px;
+  color: inherit;
+  background: transparent;
+  font-family: inherit;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.reporting-sql-line-view li:nth-child(even) code {
+  background: #f3f8fa;
 }
 
 .reporting-script-content-state {

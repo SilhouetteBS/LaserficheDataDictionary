@@ -74,10 +74,27 @@ function ScriptStatusTags({ tags }) {
   );
 }
 
+function SqlLineNumberView({ sql }) {
+  const lines = sql.split(/\r?\n/);
+
+  return (
+    <div className="reporting-script-content sql reporting-sql-line-view" role="region" aria-label="SQL with line numbers">
+      <ol>
+        {lines.map((line, index) => (
+          <li key={`${index}-${line}`}>
+            <code>{line || ' '}</code>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 export function ReportingGuide({ version, onSelectTable }) {
   const [selectedView, setSelectedView] = useState('overview');
   const [scriptTab, setScriptTab] = useState('sql');
   const [scriptContent, setScriptContent] = useState({ key: '', status: 'idle', text: '' });
+  const [copyStatus, setCopyStatus] = useState('idle');
   const knownTables = useMemo(() => new Set(version.tables.map((table) => table.id)), [version.tables]);
   const reportingPaths = useMemo(() => getReportingPaths(version.source.productKey), [version.source.productKey]);
   const reportingQuestions = useMemo(
@@ -95,6 +112,7 @@ export function ReportingGuide({ version, onSelectTable }) {
     setSelectedView('overview');
     setScriptTab('sql');
     setScriptContent({ key: '', status: 'idle', text: '' });
+    setCopyStatus('idle');
   }, [version.source.productKey, version.version]);
 
   useEffect(() => {
@@ -133,11 +151,27 @@ export function ReportingGuide({ version, onSelectTable }) {
 
   function selectReportingView(key) {
     setSelectedView(key);
+    setCopyStatus('idle');
     if (key.startsWith('script:')) {
       setScriptTab('sql');
     } else {
       setScriptTab('sql');
       setScriptContent({ key: '', status: 'idle', text: '' });
+    }
+  }
+
+  async function copySqlToClipboard() {
+    if (scriptTab !== 'sql' || scriptContent.status !== 'ready' || !scriptContent.text) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(scriptContent.text);
+      setCopyStatus('copied');
+      window.setTimeout(() => setCopyStatus('idle'), 1800);
+    } catch {
+      setCopyStatus('error');
+      window.setTimeout(() => setCopyStatus('idle'), 2400);
     }
   }
 
@@ -266,24 +300,41 @@ export function ReportingGuide({ version, onSelectTable }) {
         </div>
         <ScriptStatusTags tags={pattern.tags} />
         <TableLinks tables={pattern.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
-        <div className="reporting-script-tabs" role="tablist" aria-label={`${pattern.title} content`}>
-          {['sql', 'notes'].map((tab) => (
+        <div className="reporting-script-toolbar">
+          <div className="reporting-script-tabs" role="tablist" aria-label={`${pattern.title} content`}>
+            {['sql', 'notes'].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={scriptTab === tab}
+                className={scriptTab === tab ? 'selected' : ''}
+                onClick={() => {
+                  setScriptTab(tab);
+                  setCopyStatus('idle');
+                }}
+              >
+                {tab === 'sql' ? 'SQL' : 'Review notes'}
+              </button>
+            ))}
+          </div>
+          {scriptTab === 'sql' ? (
             <button
-              key={tab}
               type="button"
-              role="tab"
-              aria-selected={scriptTab === tab}
-              className={scriptTab === tab ? 'selected' : ''}
-              onClick={() => setScriptTab(tab)}
+              className="reporting-copy-sql-button"
+              onClick={copySqlToClipboard}
+              disabled={scriptContent.status !== 'ready' || !scriptContent.text}
             >
-              {tab === 'sql' ? 'SQL' : 'Review notes'}
+              {copyStatus === 'copied' ? 'Copied' : copyStatus === 'error' ? 'Copy failed' : 'Copy SQL'}
             </button>
-          ))}
+          ) : null}
         </div>
         {scriptContent.status === 'ready' ? (
-          <pre className={scriptTab === 'sql' ? 'reporting-script-content sql' : 'reporting-script-content notes'}>
-            {scriptContent.text}
-          </pre>
+          scriptTab === 'sql' ? (
+            <SqlLineNumberView sql={scriptContent.text} />
+          ) : (
+            <pre className="reporting-script-content notes">{scriptContent.text}</pre>
+          )
         ) : (
           <div className={`reporting-script-content-state ${scriptContent.status}`}>
             {scriptContent.status === 'error' ? scriptContent.text : 'Loading content...'}
