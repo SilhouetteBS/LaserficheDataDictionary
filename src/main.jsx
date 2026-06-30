@@ -1282,7 +1282,7 @@ function App() {
             <p>
               This community research aid is for read-only reporting, troubleshooting, and education.
               It is not affiliated with or endorsed by Laserfiche. Manually modifying Laserfiche
-              databases is unsupported and may violate your support plan; validate changes in a test
+              databases is unsupported and violates your support plan; validate changes in a test
               environment.
               {' '}
               <a
