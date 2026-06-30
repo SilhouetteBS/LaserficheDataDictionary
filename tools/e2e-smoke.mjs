@@ -157,6 +157,12 @@ assert.equal(
   await page.locator('.reporting-script-detail-heading h3').innerText(),
   'Forms active task and Monitor reporting',
 );
+await page.getByRole('tab', { name: 'Review notes', exact: true }).click();
+await page.locator('.reporting-script-content.notes').waitFor();
+assert.match(await page.locator('.reporting-script-content.notes').innerText(), /Forms Active Task/i);
+await page.getByRole('tab', { name: 'Answers links', exact: true }).click();
+await page.locator('.reporting-answers-links').waitFor();
+assert.match(await page.locator('.reporting-answers-links').innerText(), /Forms Instance Monitoring/i);
 
 await page.getByRole('button', { name: 'Tables', exact: true }).click();
 await page.evaluate(() => {

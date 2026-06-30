@@ -115,6 +115,40 @@ export const communityReportingPatterns = {
         'dbo.cf_bp_data',
       ],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Forms Instance Monitoring',
+          url: 'https://answers.laserfiche.com/questions/102452/Forms-Instance-Monitoring',
+        },
+        {
+          title: 'Troubleshoot Forms SQL Blockers',
+          url: 'https://answers.laserfiche.com/questions/233803/Troubleshoot-Forms-SQL-Blockers',
+        },
+        {
+          title: 'Forms report with start time and end time for each User Task',
+          url: 'https://answers.laserfiche.com/questions/212282/Forms-report-with--start-time-and-end-time-for-each-User-Task-in-Forms-process',
+        },
+        {
+          title: 'Report to use for Active Forms',
+          url: 'https://answers.laserfiche.com/questions/216937/Report-to-use-for-Active-Forms',
+        },
+        {
+          title: 'Forms Report to Dynamically show all tasks started by you',
+          url: 'https://answers.laserfiche.com/questions/184820/Forms-Report-to-Dynamically-show-all-tasks-started-by-you',
+        },
+        {
+          title: 'Generating Report on Unassigned Tasks',
+          url: 'https://answers.laserfiche.com/questions/208760/Generating-Report-on-Unassigned-Tasks',
+        },
+        {
+          title: 'delete outstanding forms from a deleted account',
+          url: 'https://answers.laserfiche.com/questions/233682/delete-outstanding-forms-from-a-deleted-account',
+        },
+        {
+          title: 'Current step information from Monitor page',
+          url: 'https://answers.laserfiche.com/questions/215801/How-can-I-retrieve-the-current-step-information-from-an-SQL-table-which-is-displayed-on-the-Monitor-page',
+        },
+      ],
     },
     {
       title: 'Forms field-value to instance lookup',
@@ -125,6 +159,16 @@ export const communityReportingPatterns = {
       sourceCount: 5,
       tables: ['dbo.cf_bp_data', 'dbo.cf_submissions', 'dbo.cf_bp_main_instances', 'dbo.cf_fields'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'How do I find a specific form submission on my Forms database?',
+          url: 'https://answers.laserfiche.com/questions/153974/How-do-I-find-a-specific-form-submission-on-my-Forms-database',
+        },
+        {
+          title: 'Query Forms SQL database to Find Instance based on Field Value',
+          url: 'https://answers.laserfiche.com/questions/201522/Query-Forms-SQL-database-to-Find-Instance-based-on-Field-Value',
+        },
+      ],
     },
   ],
   lfds: [
@@ -144,6 +188,28 @@ export const communityReportingPatterns = {
         'dbo.saml_lf_sid_mappings',
       ],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Any ways to get Laserfiche Directory account lock status in batch?',
+          url: 'https://answers.laserfiche.com/questions/206318/Any-ways-to-get-Laserfiche-Directory-account-lock-status-in-batch',
+        },
+        {
+          title: 'Querying LFDS database for user last log in in Forms',
+          url: 'https://answers.laserfiche.com/questions/151526/Querying-LFDS-database-for-user-last-log-in-in-Forms',
+        },
+        {
+          title: 'Directory Server Database query help',
+          url: 'https://answers.laserfiche.com/questions/204411/Directory-Server-Database-query-help',
+        },
+        {
+          title: 'Number of licenses we own',
+          url: 'https://answers.laserfiche.com/questions/184000/Number-of-licenses-we-ownin-the-database',
+        },
+        {
+          title: 'Linking multiple SAML identity providers through common username',
+          url: 'https://answers.laserfiche.com/questions/213876/Linking-multiple-SAML-identity-providers-through-common-username',
+        },
+      ],
     },
   ],
   repository: [
@@ -156,6 +222,28 @@ export const communityReportingPatterns = {
       sourceCount: 11,
       tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.propset', 'dbo.propdef', 'dbo.propval'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'How to mimic a repository search using a SQL query?',
+          url: 'https://answers.laserfiche.com/questions/156668/How-to-mimic-a-repository-search-using-a-SQL-query',
+        },
+        {
+          title: 'Feature Request: Ability to use Lookup Rules in Forms to query metadata in repository',
+          url: 'https://answers.laserfiche.com/questions/207941/Feature-Request--Ability-to-use-Lookup-Rules-in-Forms-to-query-metadata-in-repository',
+        },
+        {
+          title: 'Query to see how many pages in repository are in color and black & white?',
+          url: 'https://answers.laserfiche.com/questions/168368/Query-to-see-how-many-pages-in-repository-are-in-color-and-black--white',
+        },
+        {
+          title: 'SQL query on LF Server tables for specific metadata',
+          url: 'https://answers.laserfiche.com/questions/201363/SQL-query-on-LF-Server-tables-for-specific-metadata',
+        },
+        {
+          title: 'What table in SQL is the document path located?',
+          url: 'https://answers.laserfiche.com/questions/67002/What-table-in-SQL-is-the-document-path-located',
+        },
+      ],
     },
   ],
   workflow: [
@@ -176,6 +264,20 @@ export const communityReportingPatterns = {
         'dbo.instance_completion',
       ],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Workflow activity search SQL error ambiguous column name',
+          url: 'https://answers.laserfiche.com/questions/62128/Workflow-activity-search-SQL-error-ambiguous-column-name',
+        },
+        {
+          title: 'A transport-level error has occurred when receiving results from the server',
+          url: 'https://answers.laserfiche.com/questions/105587/A-transportlevel-error-has-occurred-when-receiving-results-from-the-server-provider-TCP-Provider-error-0--The-semaphore-timeout-period-has-expired',
+        },
+        {
+          title: 'workflow_task_queue_data table size very large',
+          url: 'https://answers.laserfiche.com/questions/128584/workflowTaskQueuedata-table-size-very-large--Using-SQL-Express-database',
+        },
+      ],
     },
   ],
 };

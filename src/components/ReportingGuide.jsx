@@ -193,6 +193,29 @@ function SqlViewer({ sql }) {
   );
 }
 
+function ScriptAnswersLinks({ links = [] }) {
+  if (links.length === 0) {
+    return (
+      <div className="reporting-answers-links">
+        <p className="empty-note">No public Answers links are documented for this script yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="reporting-answers-links">
+      {links.map((link) => (
+        <article key={link.url}>
+          <a href={link.url} target="_blank" rel="noreferrer">
+            {link.title}
+          </a>
+          <span>{link.url}</span>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export function ReportingGuide({
   version,
   onSelectTable,
@@ -235,7 +258,7 @@ export function ReportingGuide({
   }, [communityPatterns, onSelectedViewChange, selectedView]);
 
   useEffect(() => {
-    if (!selectedScript) {
+    if (!selectedScript || scriptTab === 'answers') {
       setScriptContent({ key: '', status: 'idle', text: '' });
       return undefined;
     }
@@ -431,7 +454,7 @@ export function ReportingGuide({
         <TableLinks tables={pattern.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
         <div className="reporting-script-toolbar">
           <div className="reporting-script-tabs" role="tablist" aria-label={`${pattern.title} content`}>
-            {['sql', 'notes'].map((tab) => (
+            {['sql', 'notes', 'answers'].map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -443,7 +466,7 @@ export function ReportingGuide({
                   setCopyStatus('idle');
                 }}
               >
-                {tab === 'sql' ? 'SQL' : 'Review notes'}
+                {tab === 'sql' ? 'SQL' : tab === 'notes' ? 'Review notes' : 'Answers links'}
               </button>
             ))}
           </div>
@@ -458,7 +481,9 @@ export function ReportingGuide({
             </button>
           ) : null}
         </div>
-        {scriptContent.status === 'ready' ? (
+        {scriptTab === 'answers' ? (
+          <ScriptAnswersLinks links={pattern.answersLinks} />
+        ) : scriptContent.status === 'ready' ? (
           scriptTab === 'sql' ? (
             <SqlViewer sql={scriptContent.text} />
           ) : (

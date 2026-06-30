@@ -5264,8 +5264,8 @@ button {
   background: #ffffff !important;
   color: #000000 !important;
   font-family: Consolas, 'Courier New', ui-monospace, monospace;
-  font-size: 13px;
-  line-height: 1;
+  font-size: 12px;
+  line-height: 0.95;
   tab-size: 2;
 }
 
@@ -5278,7 +5278,7 @@ button {
 .reporting-sql-highlight .line {
   position: relative;
   display: block;
-  min-height: 13px;
+  min-height: 12px;
   padding: 0 12px 0 66px;
   counter-increment: sql-line;
 }
@@ -5305,6 +5305,36 @@ button {
 
 .reporting-sql-fallback {
   margin-top: 0;
+}
+
+.reporting-answers-links {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.reporting-answers-links article {
+  border: 1px solid #dce7ea;
+  border-radius: 7px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+.reporting-answers-links a {
+  color: #004b68;
+  font-size: 13px;
+  font-weight: 850;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.reporting-answers-links span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .reporting-script-content-state {
