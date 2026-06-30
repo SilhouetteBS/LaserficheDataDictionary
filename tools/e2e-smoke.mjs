@@ -148,7 +148,8 @@ await page.waitForTimeout(100);
 assert.match(await page.locator('.reporting-detail-pane').innerText(), /Forms active task and Monitor reporting/i);
 await page.getByRole('tab', { name: 'SQL', exact: true }).click();
 await page.waitForTimeout(250);
-assert.match(await page.locator('.reporting-script-content.sql').innerText(), /CREATE OR ALTER VIEW rpt\.vw_FormsActiveTasks/i);
+await page.locator('.reporting-sql-highlight').waitFor();
+assert.match(await page.locator('.reporting-sql-viewer').innerText(), /CREATE OR ALTER VIEW rpt\.vw_FormsActiveTasks/i);
 
 await page.getByRole('button', { name: 'Tables', exact: true }).click();
 await page.evaluate(() => {
