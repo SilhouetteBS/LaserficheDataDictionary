@@ -148,10 +148,19 @@ function ReportingSectionHeader({ title, count }) {
 }
 
 function ScriptStatusTags({ tags }) {
+  const tagClasses = {
+    'Community sourced': 'community-tag-source',
+    'Schema matched': 'community-tag-matched',
+    'Not live tested': 'community-tag-untested',
+    'Read-only': 'community-tag-readonly',
+  };
+
   return (
     <div className="community-pattern-tags">
       {tags.map((tag) => (
-        <span key={tag}>{tag}</span>
+        <span key={tag} className={tagClasses[tag] ?? ''}>
+          {tag}
+        </span>
       ))}
     </div>
   );
@@ -197,7 +206,7 @@ function ScriptAnswersLinks({ links = [] }) {
   if (links.length === 0) {
     return (
       <div className="reporting-answers-links">
-        <p className="empty-note">No public Answers links are documented for this script yet.</p>
+        <p className="empty-note">No public resource links are documented for this script yet.</p>
       </div>
     );
   }
@@ -466,7 +475,7 @@ export function ReportingGuide({
                   setCopyStatus('idle');
                 }}
               >
-                {tab === 'sql' ? 'SQL' : tab === 'notes' ? 'Review notes' : 'Answers links'}
+                {tab === 'sql' ? 'SQL' : tab === 'notes' ? 'Review notes' : 'Links to Resources'}
               </button>
             ))}
           </div>

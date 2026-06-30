@@ -160,7 +160,7 @@ assert.equal(
 await page.getByRole('tab', { name: 'Review notes', exact: true }).click();
 await page.locator('.reporting-script-content.notes').waitFor();
 assert.match(await page.locator('.reporting-script-content.notes').innerText(), /Forms Active Task/i);
-await page.getByRole('tab', { name: 'Answers links', exact: true }).click();
+await page.getByRole('tab', { name: 'Links to Resources', exact: true }).click();
 await page.locator('.reporting-answers-links').waitFor();
 assert.match(await page.locator('.reporting-answers-links').innerText(), /Forms Instance Monitoring/i);
 
