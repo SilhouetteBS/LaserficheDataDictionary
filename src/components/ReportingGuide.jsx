@@ -193,8 +193,12 @@ function SqlViewer({ sql }) {
   );
 }
 
-export function ReportingGuide({ version, onSelectTable }) {
-  const [selectedView, setSelectedView] = useState('overview');
+export function ReportingGuide({
+  version,
+  onSelectTable,
+  selectedView = 'overview',
+  onSelectedViewChange = () => {},
+}) {
   const [scriptTab, setScriptTab] = useState('sql');
   const [scriptContent, setScriptContent] = useState({ key: '', status: 'idle', text: '' });
   const [copyStatus, setCopyStatus] = useState('idle');
@@ -212,11 +216,23 @@ export function ReportingGuide({ version, onSelectTable }) {
   const selectedScript = communityPatterns.find((pattern) => getScriptKey(pattern) === selectedView);
 
   useEffect(() => {
-    setSelectedView('overview');
     setScriptTab('sql');
     setScriptContent({ key: '', status: 'idle', text: '' });
     setCopyStatus('idle');
   }, [version.source.productKey, version.version]);
+
+  useEffect(() => {
+    const validViews = new Set([
+      'overview',
+      ...guidanceItems.map((item) => item.key),
+      ...referenceItems.map((item) => item.key),
+      ...communityPatterns.map((pattern) => getScriptKey(pattern)),
+    ]);
+
+    if (!validViews.has(selectedView)) {
+      onSelectedViewChange('overview');
+    }
+  }, [communityPatterns, onSelectedViewChange, selectedView]);
 
   useEffect(() => {
     if (!selectedScript) {
@@ -253,7 +269,7 @@ export function ReportingGuide({ version, onSelectTable }) {
   }, [scriptTab, selectedScript]);
 
   function selectReportingView(key) {
-    setSelectedView(key);
+    onSelectedViewChange(key);
     setCopyStatus('idle');
     if (key.startsWith('script:')) {
       setScriptTab('sql');

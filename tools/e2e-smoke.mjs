@@ -150,6 +150,13 @@ await page.getByRole('tab', { name: 'SQL', exact: true }).click();
 await page.waitForTimeout(250);
 await page.locator('.reporting-sql-highlight').waitFor();
 assert.match(await page.locator('.reporting-sql-viewer').innerText(), /CREATE OR ALTER VIEW rpt\.vw_FormsActiveTasks/i);
+assert.match(page.url(), /reporting=script%3Areporting%2Fforms%2Fforms-active-task-monitor\.sql/);
+await page.reload({ waitUntil: 'networkidle' });
+await page.locator('.reporting-sql-highlight').waitFor();
+assert.equal(
+  await page.locator('.reporting-script-detail-heading h3').innerText(),
+  'Forms active task and Monitor reporting',
+);
 
 await page.getByRole('button', { name: 'Tables', exact: true }).click();
 await page.evaluate(() => {

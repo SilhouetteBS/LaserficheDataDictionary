@@ -655,6 +655,9 @@ function App() {
   const [diagramConnectedOnly, setDiagramConnectedOnly] = useState(() =>
     getInitialBooleanToggle(initialUrlState.diagramConnectedOnly || initialPreferences.diagramConnectedOnly),
   );
+  const [selectedReportingView, setSelectedReportingView] = useState(
+    initialUrlState.reporting || initialPreferences.reporting || 'overview',
+  );
   const [selectedChangedTableKey, setSelectedChangedTableKey] = useState('');
   const [columnUsageQuery, setColumnUsageQuery] = useState(initialUrlState.objectQuery);
   const [localNotes, setLocalNotes] = useState(readLocalNotes);
@@ -812,6 +815,7 @@ function App() {
       diagramTypes: serializeDiagramObjectTypes(diagramObjectTypeFilters),
       diagramSecondHop: showDiagramSecondHopEdges ? '' : 'hidden',
       diagramConnectedOnly: diagramConnectedOnly ? 'true' : '',
+      reporting: selectedReportingView === 'overview' ? '' : selectedReportingView,
     });
     writeUiPreferences({
       product: selectedProductKey,
@@ -830,6 +834,7 @@ function App() {
       diagramTypes: serializeDiagramObjectTypes(diagramObjectTypeFilters),
       diagramSecondHop: showDiagramSecondHopEdges ? '' : 'hidden',
       diagramConnectedOnly: diagramConnectedOnly ? 'true' : '',
+      reporting: selectedReportingView,
     });
   }, [
     activeView,
@@ -848,6 +853,7 @@ function App() {
     product,
     query,
     selectedProductKey,
+    selectedReportingView,
     selectedTableId,
     selectedVersion,
     showDiagramSecondHopEdges,
@@ -1458,7 +1464,12 @@ function App() {
               </Suspense>
             ) : null
           ) : activeView === 'reporting' ? (
-            <ReportingGuide version={version} onSelectTable={navigateToTable} />
+            <ReportingGuide
+              version={version}
+              onSelectTable={navigateToTable}
+              selectedView={selectedReportingView}
+              onSelectedViewChange={setSelectedReportingView}
+            />
           ) : (
             <TableWorkspace
               documentationCoverage={documentationCoverage}

@@ -19,6 +19,7 @@ const keys = [
   'diagramTypes',
   'diagramSecondHop',
   'diagramConnectedOnly',
+  'reporting',
 ];
 
 export function readUrlState(search = window.location.search) {
