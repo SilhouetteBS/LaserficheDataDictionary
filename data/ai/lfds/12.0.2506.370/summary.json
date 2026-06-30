@@ -18,7 +18,35 @@
     "notedTables": 111,
     "notedColumns": 587
   },
-  "reportingPaths": [],
+  "reportingPaths": [
+    {
+      "title": "Directory identities and providers",
+      "summary": "Start with directory objects, then add provider context and login details.",
+      "tables": [
+        "dbo.directory_objects",
+        "dbo.identity_providers",
+        "dbo.user_logins"
+      ]
+    },
+    {
+      "title": "User licenses",
+      "summary": "Use directory object SIDs to connect identity records to license assignments.",
+      "tables": [
+        "dbo.directory_objects",
+        "dbo.user_licenses",
+        "dbo.container_limits"
+      ]
+    },
+    {
+      "title": "SAML to Laserfiche SID mapping",
+      "summary": "Use SID mapping tables when reconciling federated users to Laserfiche identities.",
+      "tables": [
+        "dbo.saml_lf_sid_mappings",
+        "dbo.directory_objects",
+        "dbo.identity_providers"
+      ]
+    }
+  ],
   "reportingQuestions": [
     {
       "question": "Which identities, providers, and groups are configured?",

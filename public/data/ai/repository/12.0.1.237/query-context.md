@@ -54,7 +54,23 @@ This documentation is for read-only reporting, troubleshooting, and education. M
 
 ## Common reporting paths
 
-No product-specific reporting paths are documented yet.
+### Repository entry inventory
+
+Start from TOC entries, then add parent, volume, and template context.
+
+Tables: dbo.toc, dbo.vol, dbo.propset
+
+### Field metadata and values
+
+Use field definitions with property values to report entry metadata.
+
+Tables: dbo.propdef, dbo.propval, dbo.toc
+
+### Document pages and electronic documents
+
+Use entry and page tables to review page counts, image sizes, and text inventory.
+
+Tables: dbo.toc, dbo.doc, dbo.vol
 
 ## Common questions
 

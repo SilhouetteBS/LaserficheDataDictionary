@@ -113,6 +113,22 @@ The remaining 146 queue rows were processed as public-safe exclusions/reference 
 - 23 rows were not promoted because they required manual extraction and supportability review.
 - 46 rows were kept as reference only because they had insufficient SQL or schema signal.
 
+## Additional 200-Post Search Batch
+
+On 2026-06-30, another 50 Answers posts per product were reviewed for Forms, LFDS, Repository, and Workflow.
+
+- Reviewed: 200 additional Answers posts.
+- Promoted into consolidated Reporting guide patterns: 39 ready/read-only rows represented by 4 reusable scripts.
+- Non-promoted/reference rows documented: 161 rows in `docs/answers-sql-processed-additional-batch-2026-06-30.md`.
+- Workflow had no directly ready schema-matched product-database script in this batch; Workflow rows remain reference-only or need schema verification/manual review.
+
+New published patterns:
+
+- Forms: `reporting/forms/forms-design-lookup-inventory.sql`
+- Forms: `reporting/forms/forms-attachment-error-draft-diagnostics.sql`
+- LFDS: `reporting/lfds/lfds-claims-group-license-inventory.sql`
+- Repository: `reporting/repository/repository-storage-security-diagnostics.sql`
+
 ## General Cleanup Rules Applied
 
 - Do not rely on a database name; use parameters, SQLCMD variables, synonyms, or deployment-time configuration.

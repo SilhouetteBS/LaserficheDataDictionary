@@ -19,6 +19,14 @@ const reportingAssetLoaders = {
     import('../../reporting/forms/forms-external-lookup-guidance.sql?raw').then((module) => module.default),
   'reporting/forms/forms-external-lookup-guidance-evidence.md': () =>
     import('../../reporting/forms/forms-external-lookup-guidance-evidence.md?raw').then((module) => module.default),
+  'reporting/forms/forms-design-lookup-inventory.sql': () =>
+    import('../../reporting/forms/forms-design-lookup-inventory.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-design-lookup-inventory-evidence.md': () =>
+    import('../../reporting/forms/forms-design-lookup-inventory-evidence.md?raw').then((module) => module.default),
+  'reporting/forms/forms-attachment-error-draft-diagnostics.sql': () =>
+    import('../../reporting/forms/forms-attachment-error-draft-diagnostics.sql?raw').then((module) => module.default),
+  'reporting/forms/forms-attachment-error-draft-diagnostics-evidence.md': () =>
+    import('../../reporting/forms/forms-attachment-error-draft-diagnostics-evidence.md?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory.sql': () =>
     import('../../reporting/lfds/lfds-user-license-inventory.sql?raw').then((module) => module.default),
   'reporting/lfds/lfds-user-license-inventory-evidence.md': () =>
@@ -27,6 +35,10 @@ const reportingAssetLoaders = {
     import('../../reporting/lfds/lfds-directory-account-state.sql?raw').then((module) => module.default),
   'reporting/lfds/lfds-directory-account-state-evidence.md': () =>
     import('../../reporting/lfds/lfds-directory-account-state-evidence.md?raw').then((module) => module.default),
+  'reporting/lfds/lfds-claims-group-license-inventory.sql': () =>
+    import('../../reporting/lfds/lfds-claims-group-license-inventory.sql?raw').then((module) => module.default),
+  'reporting/lfds/lfds-claims-group-license-inventory-evidence.md': () =>
+    import('../../reporting/lfds/lfds-claims-group-license-inventory-evidence.md?raw').then((module) => module.default),
   'reporting/repository/repository-path-metadata-lookup.sql': () =>
     import('../../reporting/repository/repository-path-metadata-lookup.sql?raw').then((module) => module.default),
   'reporting/repository/repository-path-metadata-lookup-evidence.md': () =>
@@ -39,6 +51,12 @@ const reportingAssetLoaders = {
     import('../../reporting/repository/repository-query-compatibility-helpers.sql?raw').then((module) => module.default),
   'reporting/repository/repository-query-compatibility-helpers-evidence.md': () =>
     import('../../reporting/repository/repository-query-compatibility-helpers-evidence.md?raw').then((module) => module.default),
+  'reporting/repository/repository-storage-security-diagnostics.sql': () =>
+    import('../../reporting/repository/repository-storage-security-diagnostics.sql?raw').then((module) => module.default),
+  'reporting/repository/repository-storage-security-diagnostics-evidence.md': () =>
+    import('../../reporting/repository/repository-storage-security-diagnostics-evidence.md?raw').then(
+      (module) => module.default,
+    ),
   'reporting/workflow/workflow-queue-search-diagnostics.sql': () =>
     import('../../reporting/workflow/workflow-queue-search-diagnostics.sql?raw').then((module) => module.default),
   'reporting/workflow/workflow-queue-search-diagnostics-evidence.md': () =>
@@ -278,6 +296,93 @@ export const communityReportingPatterns = {
         },
       ],
     },
+    {
+      title: 'Forms design and lookup inventory',
+      summary:
+        'Creates read-only reporting objects for Forms, fields, variables, process references, external lookup sources, and lookup mappings.',
+      scriptPath: 'reporting/forms/forms-design-lookup-inventory.sql',
+      evidencePath: 'reporting/forms/forms-design-lookup-inventory-evidence.md',
+      sourceCount: 7,
+      tables: [
+        'dbo.cf_forms',
+        'dbo.cf_fields',
+        'dbo.cf_bp_dataset',
+        'dbo.cf_external_databases',
+        'dbo.cf_field_column_mapping',
+      ],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'SQL query for Form lookups',
+          url: 'https://answers.laserfiche.com/questions/225408/SQL-query-for-Form-lookups',
+        },
+        {
+          title: 'Lookup tables in Forms, where used?',
+          url: 'https://answers.laserfiche.com/questions/227968/Lookup-tables-in-Forms-where-used',
+        },
+        {
+          title: 'Query forms database for Forms, Fields and variables per business process',
+          url: 'https://answers.laserfiche.com/questions/166490/query-forms-database-for-Forms-Fields-and-variables-per-business-process',
+        },
+        {
+          title: 'Show variable names with field location on form',
+          url: 'https://answers.laserfiche.com/questions/226145/Show-variable-names-with-field-location-on-form',
+        },
+        {
+          title: 'Last Person to Edit Forms',
+          url: 'https://answers.laserfiche.com/questions/116789/Last-Person-to-Edit-Forms',
+        },
+        {
+          title: 'Forms - How to find a reference to a form in the process',
+          url: 'https://answers.laserfiche.com/questions/184061/Forms--How-to-find-a-reference-to-a-form-in-the-process',
+        },
+        {
+          title: 'Forms Database Tables Documentation',
+          url: 'https://answers.laserfiche.com/questions/120310/Forms-Database-Tables-Documentation',
+        },
+      ],
+    },
+    {
+      title: 'Forms attachment, error, and draft diagnostics',
+      summary:
+        'Creates read-only diagnostics for attachment metadata, instance errors, and saved draft submissions without exposing attachment binary content.',
+      scriptPath: 'reporting/forms/forms-attachment-error-draft-diagnostics.sql',
+      evidencePath: 'reporting/forms/forms-attachment-error-draft-diagnostics-evidence.md',
+      sourceCount: 6,
+      tables: [
+        'dbo.cf_bp_attachment_data',
+        'dbo.cf_bp_data_attachment_mapping',
+        'dbo.bp_instance_errors',
+        'dbo.cf_form_submissions',
+      ],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Validate PDF headers for Forms attachments',
+          url: 'https://answers.laserfiche.com/questions/131478/Validate-PDF-headers-for-Forms-attachments',
+        },
+        {
+          title: 'Custom Field in Report',
+          url: 'https://answers.laserfiche.com/questions/188200/Custom-Field-in-Report',
+        },
+        {
+          title: 'Resubmitting Previously Submitted Form Data',
+          url: 'https://answers.laserfiche.com/questions/165126/Resubmitting-Previously-Submitted-Form-Data',
+        },
+        {
+          title: 'Delete Completed/Cancelled Forms from SQL (Forms 10.2)',
+          url: 'https://answers.laserfiche.com/questions/137948/Delete-CompletedCancelled-Forms-from-SQL-Forms-102',
+        },
+        {
+          title: 'Forms Logs in Web Interface',
+          url: 'https://answers.laserfiche.com/questions/172983/Forms-Logs-in-Web-Interface',
+        },
+        {
+          title: 'View all saved Drafts as an Admin',
+          url: 'https://answers.laserfiche.com/questions/163792/View-all-saved-Drafts-as-an-Admin',
+        },
+      ],
+    },
   ],
   lfds: [
     {
@@ -336,6 +441,52 @@ export const communityReportingPatterns = {
         {
           title: 'How to query User with organization in LFDS Database?',
           url: 'https://answers.laserfiche.com/questions/187013/How-to-query-User-with-organization-in-LFDS-Database-',
+        },
+      ],
+    },
+    {
+      title: 'LFDS claims, group, and license inventory',
+      summary:
+        'Creates read-only reporting objects for directory objects, additional claims, group membership, license rows, and login context.',
+      scriptPath: 'reporting/lfds/lfds-claims-group-license-inventory.sql',
+      evidencePath: 'reporting/lfds/lfds-claims-group-license-inventory-evidence.md',
+      sourceCount: 7,
+      tables: [
+        'dbo.directory_objects',
+        'dbo.additional_claims',
+        'dbo.group_membership',
+        'dbo.user_licenses',
+        'dbo.user_logins',
+      ],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'In Progress Forms Tasks',
+          url: 'https://answers.laserfiche.com/questions/211569/In-Progress-Forms-Tasks',
+        },
+        {
+          title: 'SQL Query to retrieve the email, username, display name and the License Type',
+          url: 'https://answers.laserfiche.com/questions/131649/SQL-Query-to-retrieve-the-email-username-display-name-and-the-License-Type',
+        },
+        {
+          title: 'Export all LFDS groups and respective users',
+          url: 'https://answers.laserfiche.com/questions/205004/How-can-one-export-a-list-of-all-the-groups-and-respective-users-in-LF-directory-server',
+        },
+        {
+          title: 'Add LFDS Groups to SQL Query',
+          url: 'https://answers.laserfiche.com/questions/217062/Add-LFDS-Groups-to-SQL-Query',
+        },
+        {
+          title: 'Adjust a form based on the group the user is in',
+          url: 'https://answers.laserfiche.com/questions/194574/How-to-adjust-a-forms-functionality-based-on-the-group-the-user-is-in',
+        },
+        {
+          title: 'Query for Forms',
+          url: 'https://answers.laserfiche.com/questions/199344/Query-for-Forms',
+        },
+        {
+          title: 'LFDS User License Display Limitations',
+          url: 'https://answers.laserfiche.com/questions/172516/LFDS-User-License-Display-Limitations',
         },
       ],
     },
@@ -434,6 +585,54 @@ export const communityReportingPatterns = {
         {
           title: 'Store binary hex value from SQL Query',
           url: 'https://answers.laserfiche.com/questions/48378/How-can-I-store-the-binary-hex-value-from-a-SQL-Query-without-Workflow-conveting-it-to-a-series-of-decimal-numbers',
+        },
+      ],
+    },
+    {
+      title: 'Repository storage and security diagnostics',
+      summary:
+        'Creates read-only diagnostics for recycle bin entries, volume storage, account cache, trustee, trusted group, and trusted login context.',
+      scriptPath: 'reporting/repository/repository-storage-security-diagnostics.sql',
+      evidencePath: 'reporting/repository/repository-storage-security-diagnostics-evidence.md',
+      sourceCount: 7,
+      tables: [
+        'dbo.recycle_bin',
+        'dbo.toc',
+        'dbo.vol',
+        'dbo.account_cache',
+        'dbo.trustee',
+        'dbo.trusted_group',
+        'dbo.trusted_login',
+      ],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Is there a way to find out the recycle bin size of a repository?',
+          url: 'https://answers.laserfiche.com/questions/56763/Is-there-a-way-to-find-out-the-recycle-bin-size-of-a-repository',
+        },
+        {
+          title: 'General database error while searching with one user but not with admin account',
+          url: 'https://answers.laserfiche.com/questions/203436/General-database-error-while-searching-with-one-user-but-not-with-admin-account',
+        },
+        {
+          title: 'SQL Server temp database size',
+          url: 'https://answers.laserfiche.com/questions/103672/SQL-Server-temp-database-size',
+        },
+        {
+          title: 'SQL Table for finding electronic file location',
+          url: 'https://answers.laserfiche.com/questions/77337/SQL-Table-for-finding-electronic-file-location',
+        },
+        {
+          title: 'Error executing SQL command',
+          url: 'https://answers.laserfiche.com/questions/68697/Error-executing-SQL-command',
+        },
+        {
+          title: 'Where are Windows Account details stored in SQL',
+          url: 'https://answers.laserfiche.com/questions/63116/Where-are-Windows-Account-details-stored-in-SQL',
+        },
+        {
+          title: 'lookup a repository folder',
+          url: 'https://answers.laserfiche.com/questions/157902/lookup-a-repository-folder',
         },
       ],
     },

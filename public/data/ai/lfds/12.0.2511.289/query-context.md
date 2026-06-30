@@ -54,7 +54,23 @@ This documentation is for read-only reporting, troubleshooting, and education. M
 
 ## Common reporting paths
 
-No product-specific reporting paths are documented yet.
+### Directory identities and providers
+
+Start with directory objects, then add provider context and login details.
+
+Tables: dbo.directory_objects, dbo.identity_providers, dbo.user_logins
+
+### User licenses
+
+Use directory object SIDs to connect identity records to license assignments.
+
+Tables: dbo.directory_objects, dbo.user_licenses, dbo.container_limits
+
+### SAML to Laserfiche SID mapping
+
+Use SID mapping tables when reconciling federated users to Laserfiche identities.
+
+Tables: dbo.saml_lf_sid_mappings, dbo.directory_objects, dbo.identity_providers
 
 ## Common questions
 

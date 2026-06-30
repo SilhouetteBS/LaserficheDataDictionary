@@ -54,7 +54,23 @@ This documentation is for read-only reporting, troubleshooting, and education. M
 
 ## Common reporting paths
 
-No product-specific reporting paths are documented yet.
+### Task queue diagnostics
+
+Use queue and queue data tables to review retry state, queued work, and task payload size.
+
+Tables: dbo.workflow_task_queue, dbo.workflow_task_queue_data
+
+### Search activity tracing
+
+Connect search instance records to search entry records for current and logged activity.
+
+Tables: dbo.search_instance, dbo.search_entry, dbo.search_instance_log, dbo.search_entry_log
+
+### Instance completion status
+
+Use completion records for workflow instance completion and retry diagnostics.
+
+Tables: dbo.instance_completion
 
 ## Common questions
 

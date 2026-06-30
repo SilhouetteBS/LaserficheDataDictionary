@@ -18,7 +18,35 @@
     "notedTables": 138,
     "notedColumns": 972
   },
-  "reportingPaths": [],
+  "reportingPaths": [
+    {
+      "title": "Repository entry inventory",
+      "summary": "Start from TOC entries, then add parent, volume, and template context.",
+      "tables": [
+        "dbo.toc",
+        "dbo.vol",
+        "dbo.propset"
+      ]
+    },
+    {
+      "title": "Field metadata and values",
+      "summary": "Use field definitions with property values to report entry metadata.",
+      "tables": [
+        "dbo.propdef",
+        "dbo.propval",
+        "dbo.toc"
+      ]
+    },
+    {
+      "title": "Document pages and electronic documents",
+      "summary": "Use entry and page tables to review page counts, image sizes, and text inventory.",
+      "tables": [
+        "dbo.toc",
+        "dbo.doc",
+        "dbo.vol"
+      ]
+    }
+  ],
   "reportingQuestions": [
     {
       "question": "Which templates, fields, and document metadata structures exist?",

@@ -18,7 +18,33 @@
     "notedTables": 70,
     "notedColumns": 397
   },
-  "reportingPaths": [],
+  "reportingPaths": [
+    {
+      "title": "Task queue diagnostics",
+      "summary": "Use queue and queue data tables to review retry state, queued work, and task payload size.",
+      "tables": [
+        "dbo.workflow_task_queue",
+        "dbo.workflow_task_queue_data"
+      ]
+    },
+    {
+      "title": "Search activity tracing",
+      "summary": "Connect search instance records to search entry records for current and logged activity.",
+      "tables": [
+        "dbo.search_instance",
+        "dbo.search_entry",
+        "dbo.search_instance_log",
+        "dbo.search_entry_log"
+      ]
+    },
+    {
+      "title": "Instance completion status",
+      "summary": "Use completion records for workflow instance completion and retry diagnostics.",
+      "tables": [
+        "dbo.instance_completion"
+      ]
+    }
+  ],
   "reportingQuestions": [
     {
       "question": "Which workflows, schedules, and runtime records exist?",
