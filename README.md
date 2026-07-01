@@ -60,6 +60,14 @@ Or run the bundled non-browser validation:
 npm run validate
 ```
 
+To regenerate schema-matched Reporting candidates from processed Laserfiche Answers rows:
+
+```powershell
+npm run verify:answers-schema
+```
+
+This updates `docs/answers-sql-schema-verification-2026-07-01.md` and the generated `src/data/generatedReportingCandidates.js` file. Do not edit generated candidate data by hand.
+
 For browser smoke testing, start the dev server first and then run:
 
 ```powershell
@@ -98,6 +106,8 @@ Public project pages:
 - `docs/data-privacy.md`: what the project collects and what must not be submitted.
 - `docs/privacy-review-checklist.md`: maintainer checklist before import or publication.
 - `docs/community-readiness-runbook.md`: issue triage, schema review, validation, public build, and maintenance guidance.
+- `docs/reporting-sql-review-workflow.md`: Answers SQL review, schema verification, generated candidates, and promotion workflow.
+- `docs/answers-sql-processed-index.md`: index of processed Answers SQL queue batch files.
 - `docs/changelog.md`: imported versions and public-facing changes.
 - `docs/feedback.md`: analytics-free feedback through GitHub Issues.
 

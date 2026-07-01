@@ -14,6 +14,7 @@
     "generate:ai-export": "node tools/generate-ai-export.mjs",
     "research:answers-sql": "node tools/answers-sql-research.mjs",
     "research:answers-sql:existing": "node tools/answers-sql-research.mjs --review-existing",
+    "verify:answers-schema": "node tools/verify-answers-schema-candidates.mjs",
     "lint": "eslint .",
     "test": "node tools/run-tests.mjs",
     "test:unit": "node tools/run-tests.mjs",

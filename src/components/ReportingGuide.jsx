@@ -254,6 +254,8 @@ export function ReportingGuide({
     () => [...curatedCommunityPatterns, ...generatedCommunityPatterns],
     [curatedCommunityPatterns, generatedCommunityPatterns],
   );
+  const curatedScriptCount = curatedCommunityPatterns.length;
+  const generatedCandidateCount = generatedCommunityPatterns.length;
   const generatedExamples = useMemo(() => buildGeneratedReportingExamples(version), [version]);
   const selectedScript = communityPatterns.find((pattern) => getScriptKey(pattern) === selectedView);
 
@@ -368,6 +370,24 @@ export function ReportingGuide({
   }
 
   function renderOverview() {
+    const scriptGroups = [
+      {
+        key: 'curated',
+        title: 'Curated scripts',
+        count: curatedScriptCount,
+        summary: 'Portable read-only scripts that have been consolidated into reusable reporting patterns.',
+        patterns: curatedCommunityPatterns,
+      },
+      {
+        key: 'candidates',
+        title: 'Schema-matched candidates',
+        count: generatedCandidateCount,
+        summary:
+          'Answers source candidates whose referenced objects exist in documented schema versions. These still need review before operational use.',
+        patterns: generatedCommunityPatterns,
+      },
+    ].filter((group) => group.count > 0);
+
     return (
       <section className="reporting-section reporting-section-full">
         <ReportingSectionHeader title="Reporting overview" />
@@ -390,22 +410,37 @@ export function ReportingGuide({
           <article>
             <strong>{communityPatterns.length}</strong>
             <span>Reporting scripts</span>
-            <p>Read-only SQL examples sourced from community review and schema matching.</p>
+            <p>{curatedScriptCount} curated and {generatedCandidateCount} schema-matched source candidates.</p>
           </article>
         </div>
-        {communityPatterns.length > 0 ? (
-          <div className="reporting-script-summary-list">
-            {communityPatterns.map((pattern) => (
-              <article key={pattern.scriptPath}>
-                <div>
-                  <h4>{pattern.title}</h4>
-                  <p>{pattern.summary}</p>
-                  <ScriptStatusTags tags={pattern.tags} />
+        <div className="reporting-schema-note">
+          <strong>Schema matched</strong>
+          <p>
+            Referenced object names exist in at least one documented schema version. It does not mean the SQL was
+            live-tested, optimized, or rewritten into a production-ready reporting script.
+          </p>
+        </div>
+        {scriptGroups.length > 0 ? (
+          <div className="reporting-script-groups">
+            {scriptGroups.map((group) => (
+              <section key={group.key} className="reporting-script-group">
+                <ReportingSectionHeader title={group.title} count={group.count} />
+                <p>{group.summary}</p>
+                <div className="reporting-script-summary-list">
+                  {group.patterns.map((pattern) => (
+                    <article key={pattern.scriptPath}>
+                      <div>
+                        <h4>{pattern.title}</h4>
+                        <p>{pattern.summary}</p>
+                        <ScriptStatusTags tags={pattern.tags} />
+                      </div>
+                      <button type="button" onClick={() => selectReportingView(getScriptKey(pattern))}>
+                        Open
+                      </button>
+                    </article>
+                  ))}
                 </div>
-                <button type="button" onClick={() => selectReportingView(getScriptKey(pattern))}>
-                  Open
-                </button>
-              </article>
+              </section>
             ))}
           </div>
         ) : (
@@ -490,6 +525,15 @@ export function ReportingGuide({
           </div>
           <span>{pattern.sourceCount} sources</span>
         </div>
+        {pattern.generated ? (
+          <div className="reporting-schema-note">
+            <strong>Schema-matched source candidate</strong>
+            <p>
+              This entry is not a finished script. It exists because the referenced objects were found in documented
+              schemas. Review the source, rewrite for your environment, and validate in a test environment before use.
+            </p>
+          </div>
+        ) : null}
         <ScriptStatusTags tags={pattern.tags} />
         <TableLinks tables={pattern.tables} knownTables={knownTables} onSelectTable={onSelectTable} />
         <div className="reporting-script-toolbar">
@@ -629,47 +673,30 @@ export function ReportingGuide({
           <article>
             <h4>Detailed processed queue</h4>
             <p>
-              The full public-safe title, source link, status, risk, and disposition list is stored in{' '}
+              The public-safe queue files are indexed in{' '}
               <a
-                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-exclusions.md"
+                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-index.md"
                 target="_blank"
                 rel="noreferrer"
               >
-                docs/answers-sql-processed-exclusions.md
+                docs/answers-sql-processed-index.md
               </a>
-              , with the second batch in{' '}
+              . The current schema-verification report is stored in{' '}
               <a
-                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-additional-batch-2026-06-30.md"
+                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-schema-verification-2026-07-01.md"
                 target="_blank"
                 rel="noreferrer"
               >
-                docs/answers-sql-processed-additional-batch-2026-06-30.md
-              </a>
-              , and the third batch in{' '}
-              <a
-                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-batch-2026-06-30-2.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                docs/answers-sql-processed-batch-2026-06-30-2.md
-              </a>
-              , and the expanded batch in{' '}
-              <a
-                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-batch-2026-06-30-3.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                docs/answers-sql-processed-batch-2026-06-30-3.md
-              </a>
-              , and the 2026-07-01 continuous run in{' '}
-              <a
-                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-batch-2026-07-01.md"
-                target="_blank"
-                rel="noreferrer"
-              >
-                docs/answers-sql-processed-batch-2026-07-01.md
+                docs/answers-sql-schema-verification-2026-07-01.md
               </a>
               .
+            </p>
+          </article>
+          <article>
+            <h4>No-reference candidates</h4>
+            <p>
+              Rows without captured product object names remain in the report only. They are not published as scripts
+              until a better extractor or manual review captures usable schema references.
             </p>
           </article>
           <article>
@@ -744,9 +771,12 @@ export function ReportingGuide({
             ))}
           </div>
           <div className="reporting-nav-group">
-            <strong>Scripts</strong>
-            {communityPatterns.length > 0 ? (
-              communityPatterns.map((pattern) => (
+            <strong>
+              <span>Curated scripts</span>
+              <em>{curatedScriptCount}</em>
+            </strong>
+            {curatedCommunityPatterns.length > 0 ? (
+              curatedCommunityPatterns.map((pattern) => (
                 <NavButton
                   key={pattern.scriptPath}
                   item={{ key: getScriptKey(pattern), label: pattern.title }}
@@ -757,7 +787,27 @@ export function ReportingGuide({
                 />
               ))
             ) : (
-              <p>No scripts yet.</p>
+              <p>No curated scripts yet.</p>
+            )}
+          </div>
+          <div className="reporting-nav-group">
+            <strong>
+              <span>Schema-matched candidates</span>
+              <em>{generatedCandidateCount}</em>
+            </strong>
+            {generatedCommunityPatterns.length > 0 ? (
+              generatedCommunityPatterns.map((pattern) => (
+                <NavButton
+                  key={pattern.scriptPath}
+                  item={{ key: getScriptKey(pattern), label: pattern.title }}
+                  selectedView={selectedView}
+                  onSelect={selectReportingView}
+                  meta="Needs review"
+                  stackedMeta
+                />
+              ))
+            ) : (
+              <p>No candidates yet.</p>
             )}
           </div>
           <div className="reporting-nav-group">
