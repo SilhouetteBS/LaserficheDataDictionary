@@ -83,6 +83,64 @@ LEFT JOIN [$(WorkflowDatabase)].dbo.search_entry_log AS sel
     ON sil.search_id = sel.search_id;
 GO
 
+CREATE OR ALTER VIEW rpt.vw_WorkflowSearchActivityDurations
+AS
+SELECT
+    N'current' AS source_table,
+    a.search_id,
+    a.activity_id,
+    a.activity_name,
+    a.context_id,
+    a.parent_context_id,
+    a.start_time,
+    a.end_time,
+    a.close_status,
+    a.work_time,
+    DATEDIFF(MINUTE, a.start_time, COALESCE(a.end_time, SYSUTCDATETIME())) AS elapsed_minutes,
+    SYSUTCDATETIME() AS reporting_read_utc
+FROM [$(WorkflowDatabase)].dbo.search_activity AS a
+UNION ALL
+SELECT
+    N'log' AS source_table,
+    al.search_id,
+    al.activity_id,
+    al.activity_name,
+    al.context_id,
+    al.parent_context_id,
+    al.start_time,
+    al.end_time,
+    al.close_status,
+    al.work_time,
+    DATEDIFF(MINUTE, al.start_time, COALESCE(al.end_time, SYSUTCDATETIME())) AS elapsed_minutes,
+    SYSUTCDATETIME() AS reporting_read_utc
+FROM [$(WorkflowDatabase)].dbo.search_activity_log AS al;
+GO
+
+CREATE OR ALTER VIEW rpt.vw_WorkflowSearchErrors
+AS
+SELECT
+    N'current' AS source_table,
+    e.search_id,
+    e.activity_name,
+    e.message,
+    DATALENGTH(e.additional_data) AS additional_data_bytes,
+    e.activity_message_type,
+    e.time,
+    SYSUTCDATETIME() AS reporting_read_utc
+FROM [$(WorkflowDatabase)].dbo.search_error AS e
+UNION ALL
+SELECT
+    N'log' AS source_table,
+    el.search_id,
+    el.activity_name,
+    el.message,
+    DATALENGTH(el.additional_data) AS additional_data_bytes,
+    el.activity_message_type,
+    el.time,
+    SYSUTCDATETIME() AS reporting_read_utc
+FROM [$(WorkflowDatabase)].dbo.search_error_log AS el;
+GO
+
 CREATE OR ALTER VIEW rpt.vw_WorkflowInstanceCompletion
 AS
 SELECT
@@ -130,5 +188,62 @@ BEGIN
         AND (@QueueName IS NULL OR queue_name = @QueueName)
         AND (@OnlyWithRetries = 0 OR ISNULL(retry_count, 0) > 0)
     ORDER BY COALESCE(status_time, start_time, next_try) DESC, task_id DESC;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE rpt.usp_WorkflowSearchErrors
+    @FromDate datetime = NULL,
+    @ActivityNameContains nvarchar(256) = NULL,
+    @MessageContains nvarchar(512) = NULL,
+    @Top int = 500
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @EffectiveTop int = CASE WHEN @Top BETWEEN 1 AND 10000 THEN @Top ELSE 500 END;
+
+    SELECT TOP (@EffectiveTop)
+        source_table,
+        search_id,
+        activity_name,
+        message,
+        additional_data_bytes,
+        activity_message_type,
+        time
+    FROM rpt.vw_WorkflowSearchErrors
+    WHERE
+        (@FromDate IS NULL OR time >= @FromDate)
+        AND (@ActivityNameContains IS NULL OR activity_name LIKE N'%' + @ActivityNameContains + N'%')
+        AND (@MessageContains IS NULL OR message LIKE N'%' + @MessageContains + N'%')
+    ORDER BY time DESC, search_id DESC;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE rpt.usp_WorkflowLongRunningSearchActivities
+    @MinimumMinutes int = 60,
+    @FromDate datetime = NULL,
+    @Top int = 500
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @EffectiveTop int = CASE WHEN @Top BETWEEN 1 AND 10000 THEN @Top ELSE 500 END;
+    DECLARE @EffectiveMinimumMinutes int = CASE WHEN @MinimumMinutes BETWEEN 1 AND 10080 THEN @MinimumMinutes ELSE 60 END;
+
+    SELECT TOP (@EffectiveTop)
+        source_table,
+        search_id,
+        activity_id,
+        activity_name,
+        context_id,
+        parent_context_id,
+        start_time,
+        end_time,
+        close_status,
+        work_time,
+        elapsed_minutes
+    FROM rpt.vw_WorkflowSearchActivityDurations
+    WHERE
+        elapsed_minutes >= @EffectiveMinimumMinutes
+        AND (@FromDate IS NULL OR start_time >= @FromDate)
+    ORDER BY elapsed_minutes DESC, start_time DESC;
 END;
 GO

@@ -67,6 +67,14 @@ const reportingAssetLoaders = {
     import('../../reporting/repository/repository-storage-security-diagnostics-evidence.md?raw').then(
       (module) => module.default,
     ),
+  'reporting/repository/repository-annotation-redaction-diagnostics.sql': () =>
+    import('../../reporting/repository/repository-annotation-redaction-diagnostics.sql?raw').then(
+      (module) => module.default,
+    ),
+  'reporting/repository/repository-annotation-redaction-diagnostics-evidence.md': () =>
+    import('../../reporting/repository/repository-annotation-redaction-diagnostics-evidence.md?raw').then(
+      (module) => module.default,
+    ),
   'reporting/workflow/workflow-queue-search-diagnostics.sql': () =>
     import('../../reporting/workflow/workflow-queue-search-diagnostics.sql?raw').then((module) => module.default),
   'reporting/workflow/workflow-queue-search-diagnostics-evidence.md': () =>
@@ -163,6 +171,71 @@ export const productReportingPaths = {
 
 const repoBlobBaseUrl = 'https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main';
 
+function buildGeneratedCandidateSql(pattern) {
+  const objectList = pattern.tables.length ? pattern.tables.map((table) => `--   ${table}`).join('\n') : '--   None captured';
+  const versionList = pattern.confirmedVersions?.length ? pattern.confirmedVersions.join(', ') : 'None';
+  const sourceLink = pattern.answersLinks?.[0]?.url ?? '';
+  const excerpt = String(pattern.capturedExcerpt ?? '').trim();
+
+  return [
+    '/*',
+    `  Schema-verified Answers candidate: ${pattern.title}`,
+    '',
+    '  This entry is a source candidate, not a finished reporting script.',
+    '  The referenced object names were found in the imported Data Dictionary schemas,',
+    '  but the SQL has not been live tested or rewritten into a portable reporting object.',
+    '',
+    `  Product: ${pattern.product ?? 'Unknown'}`,
+    `  Confirmed schema versions: ${versionList}`,
+    '  Referenced objects:',
+    objectList,
+    '',
+    `  Source: ${sourceLink}`,
+    '*/',
+    '',
+    excerpt
+      ? `/* Captured excerpt from the Answers post. Review and rewrite before use. */\n${excerpt}`
+      : `/* No SQL excerpt was captured. Use the source link for manual review. */`,
+  ].join('\n');
+}
+
+function buildGeneratedCandidateEvidence(pattern) {
+  const versionList = pattern.confirmedVersions?.length ? pattern.confirmedVersions.join(', ') : 'None';
+  const sourceLink = pattern.answersLinks?.[0]?.url ?? '';
+  const notes = pattern.reviewNotes?.length ? pattern.reviewNotes : ['Not live tested. Review before operational use.'];
+  const suggestions = pattern.improvementSuggestions?.length
+    ? pattern.improvementSuggestions
+    : ['Convert the candidate into a narrow read-only SELECT/view/procedure before promoting it as a finished script.'];
+
+  return [
+    `# ${pattern.title}`,
+    '',
+    '## Review status',
+    '',
+    '- Source type: Laserfiche Answers community post',
+    '- Site status: Schema-verified source candidate',
+    '- Live tested: No',
+    '- Support posture: Read-only research aid; validate changes in a test environment.',
+    `- Confirmed schema versions: ${versionList}`,
+    '',
+    '## Referenced objects',
+    '',
+    ...(pattern.tables.length ? pattern.tables.map((table) => `- \`${table}\``) : ['- None captured']),
+    '',
+    '## Review notes',
+    '',
+    ...notes.map((note) => `- ${note}`),
+    '',
+    '## Suggested next review',
+    '',
+    ...suggestions.map((suggestion) => `- ${suggestion}`),
+    '',
+    '## Source',
+    '',
+    `- [${pattern.title}](${sourceLink})`,
+  ].join('\n');
+}
+
 export const communityReportingPatterns = {
   forms: [
     {
@@ -171,12 +244,16 @@ export const communityReportingPatterns = {
         'Creates reporting-database views and procedures for active Forms tasks, worker instances, and Monitor-style task review.',
       scriptPath: 'reporting/forms/forms-active-task-monitor.sql',
       evidencePath: 'reporting/forms/forms-active-task-monitor-evidence.md',
-      sourceCount: 11,
+      sourceCount: 17,
       tables: [
         'dbo.cf_bp_main_instances',
         'dbo.cf_bp_worker_instances',
         'dbo.cf_bp_worker_instance_history',
         'dbo.cf_bp_data',
+        'dbo.cf_bp_worker_instnc_to_resume',
+        'dbo.cf_bp_instance_approvers',
+        'dbo.cf_user_snapshot',
+        'dbo.cf_bp_steps',
       ],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -223,6 +300,30 @@ export const communityReportingPatterns = {
         {
           title: 'Number of active Forms tasks for each user type',
           url: 'https://answers.laserfiche.com/questions/131323/Number-of-active-Forms-tasks-for-each-user-type',
+        },
+        {
+          title: 'Custom Reporting | Task Names',
+          url: 'https://answers.laserfiche.com/questions/223652/Custom-Reporting--Task-Names',
+        },
+        {
+          title: 'Report on Reassigned Tasks within a Forms Process',
+          url: 'https://answers.laserfiche.com/questions/160384/Report-on-Reassigned-Tasks-within-a-Forms-Process',
+        },
+        {
+          title: "Forms 10.4 task reassignment for users who don't have a license",
+          url: 'https://answers.laserfiche.com/questions/221322/Forms-104-task-reassignment-for-users-who-dont-have-a-license',
+        },
+        {
+          title: 'Determining Step ID/Name in Workflow When Started by a Forms Process',
+          url: 'https://answers.laserfiche.com/questions/146710/Determining-Step-IDName-in-Workflow-When-Started-by-a-Forms-Process',
+        },
+        {
+          title: 'Does Laserfiche Forms has an API',
+          url: 'https://answers.laserfiche.com/questions/203576/Does-Laserfiche-Forms-has-an-API',
+        },
+        {
+          title: 'Cannot send email notifications to a user',
+          url: 'https://answers.laserfiche.com/questions/207661/Cannot-send-email-notifications-to-a-user',
         },
       ],
     },
@@ -340,13 +441,16 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for Forms, fields, variables, process references, external lookup sources, and lookup mappings.',
       scriptPath: 'reporting/forms/forms-design-lookup-inventory.sql',
       evidencePath: 'reporting/forms/forms-design-lookup-inventory-evidence.md',
-      sourceCount: 7,
+      sourceCount: 14,
       tables: [
         'dbo.cf_forms',
         'dbo.cf_fields',
         'dbo.cf_bp_dataset',
         'dbo.cf_external_databases',
         'dbo.cf_field_column_mapping',
+        'dbo.cf_bp_processes',
+        'dbo.cf_business_processes',
+        'dbo.cf_form_process_mapping',
       ],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -378,6 +482,34 @@ export const communityReportingPatterns = {
           title: 'Forms Database Tables Documentation',
           url: 'https://answers.laserfiche.com/questions/120310/Forms-Database-Tables-Documentation',
         },
+        {
+          title: 'Is there a way to grab all form names and their respective url link?',
+          url: 'https://answers.laserfiche.com/questions/94941/Is-there-a-way-to-grab-all-form-names-and-their-respective-url-link',
+        },
+        {
+          title: 'Report of all forms created',
+          url: 'https://answers.laserfiche.com/questions/188296/Report-of-all-forms-created',
+        },
+        {
+          title: 'Forms: User drop down list',
+          url: 'https://answers.laserfiche.com/questions/77375/Forms-User-drop-down-list',
+        },
+        {
+          title: 'Populate Forms Drop Down List with Team Roles/Members',
+          url: 'https://answers.laserfiche.com/questions/119534/Populate-Forms-Drop-Down-List-with-Team-RolesMembers',
+        },
+        {
+          title: "Can you set a field's default value to the logged in user's role",
+          url: 'https://answers.laserfiche.com/questions/143857/Can-you-set-a-fields-default-value-to-the-logged-in-users-role',
+        },
+        {
+          title: 'Bug in Forms 9.2.0.908 - Noticeable on Publish Page',
+          url: 'https://answers.laserfiche.com/questions/72817/Bug-in-Forms-920908--Noticeable-on-Publish-Page',
+        },
+        {
+          title: 'Forms High Security Solution Feature Request: Have Forms Sync between both databases',
+          url: 'https://answers.laserfiche.com/questions/147827/Forms-High-Security-Solution-Feature-Request--Have-Forms-Sync-between-both-databases',
+        },
       ],
     },
     {
@@ -386,12 +518,15 @@ export const communityReportingPatterns = {
         'Creates read-only diagnostics for attachment metadata, instance errors, and saved draft submissions without exposing attachment binary content.',
       scriptPath: 'reporting/forms/forms-attachment-error-draft-diagnostics.sql',
       evidencePath: 'reporting/forms/forms-attachment-error-draft-diagnostics-evidence.md',
-      sourceCount: 6,
+      sourceCount: 11,
       tables: [
         'dbo.cf_bp_attachment_data',
         'dbo.cf_bp_data_attachment_mapping',
         'dbo.bp_instance_errors',
         'dbo.cf_form_submissions',
+        'dbo.cf_submissions',
+        'dbo.cf_bp_processes',
+        'dbo.cf_business_processes',
       ],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -418,6 +553,26 @@ export const communityReportingPatterns = {
         {
           title: 'View all saved Drafts as an Admin',
           url: 'https://answers.laserfiche.com/questions/163792/View-all-saved-Drafts-as-an-Admin',
+        },
+        {
+          title: 'How do I create a report on drafts in Forms?',
+          url: 'https://answers.laserfiche.com/questions/236187/How-do-I-create-a-report-on-drafts-in-Forms',
+        },
+        {
+          title: 'Retrieve draft in forms',
+          url: 'https://answers.laserfiche.com/questions/105714/Retrieve-draft-in-forms',
+        },
+        {
+          title: 'Where Are Saved Forms Kept in the Database?',
+          url: 'https://answers.laserfiche.com/questions/53695/Where-Are-Saved-Forms-Kept-in-the-Database',
+        },
+        {
+          title: 'Easiest way to determine which collection or table has an invalid number of rows?',
+          url: 'https://answers.laserfiche.com/questions/218970/Easiest-way-to-determine-which-collection-or-table-has-an-invalid-number-of-rows',
+        },
+        {
+          title: 'Form Deleted - Are Transactions Stored?',
+          url: 'https://answers.laserfiche.com/questions/87939/Form-Deleted--Are-Transactions-Stored',
         },
       ],
     },
@@ -512,7 +667,7 @@ export const communityReportingPatterns = {
         'Creates read-only account-state and group-membership views for directory objects, login failures, and identity providers.',
       scriptPath: 'reporting/lfds/lfds-directory-account-state.sql',
       evidencePath: 'reporting/lfds/lfds-directory-account-state-evidence.md',
-      sourceCount: 2,
+      sourceCount: 3,
       tables: ['dbo.directory_objects', 'dbo.identity_providers', 'dbo.user_logins', 'dbo.group_membership'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -523,6 +678,10 @@ export const communityReportingPatterns = {
         {
           title: 'How to query User with organization in LFDS Database?',
           url: 'https://answers.laserfiche.com/questions/187013/How-to-query-User-with-organization-in-LFDS-Database-',
+        },
+        {
+          title: 'LFDS User filter',
+          url: 'https://answers.laserfiche.com/questions/165621/LFDS-User-filter',
         },
       ],
     },
@@ -579,12 +738,32 @@ export const communityReportingPatterns = {
   ],
   repository: [
     {
+      title: 'Repository annotation and redaction diagnostics',
+      summary:
+        'Creates read-only diagnostics for annotation rectangles, redaction candidates, page context, and entries that may need review.',
+      scriptPath: 'reporting/repository/repository-annotation-redaction-diagnostics.sql',
+      evidencePath: 'reporting/repository/repository-annotation-redaction-diagnostics-evidence.md',
+      sourceCount: 2,
+      tables: ['dbo.ann', 'dbo.annrect', 'dbo.doc', 'dbo.toc'],
+      tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
+      answersLinks: [
+        {
+          title: 'Redactions without Text',
+          url: 'https://answers.laserfiche.com/questions/77035/Redactions-without-Text',
+        },
+        {
+          title: 'Retrieve Physical File Path of TIFFs and E-Docs Using Entry ID in Laserfiche',
+          url: 'https://answers.laserfiche.com/questions/227206/Retrieve-Physical-File-Path-of-TIFFs-and-EDocs-Using-Entry-ID-in-Laserfiche',
+        },
+      ],
+    },
+    {
       title: 'Repository path and metadata lookup',
       summary:
         'Creates read-only reporting views and a lookup procedure for entries, parent folders, volumes, pages, templates, and field values.',
       scriptPath: 'reporting/repository/repository-path-metadata-lookup.sql',
       evidencePath: 'reporting/repository/repository-path-metadata-lookup-evidence.md',
-      sourceCount: 12,
+      sourceCount: 18,
       tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.propset', 'dbo.propdef', 'dbo.propval'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -612,6 +791,30 @@ export const communityReportingPatterns = {
           title: 'Audit trail on Number of Records in Each Folder',
           url: 'https://answers.laserfiche.com/questions/154758/Audit-trail-on-Number-of-Records-in-Each-Folder',
         },
+        {
+          title: 'Folder name in dbo.toc different to repository',
+          url: 'https://answers.laserfiche.com/questions/207423/Folder-name-in-dbotoc-different-to-repository',
+        },
+        {
+          title: 'Checking A Field Value from the Form to see if it exists in Repository',
+          url: 'https://answers.laserfiche.com/questions/173171/Checking-A-Field-Value-from-the-Form-to-see-if-it-exists-in-Repository',
+        },
+        {
+          title: 'Restore after Metadata Field Type change',
+          url: 'https://answers.laserfiche.com/questions/164669/Restore-after-Metadata-Field-Type-change',
+        },
+        {
+          title: 'Retrieving values from an index list item',
+          url: 'https://answers.laserfiche.com/questions/224419/Retrieving-values-from-an-index-list-item',
+        },
+        {
+          title: 'Count the number of documents a template is assigned to per day',
+          url: 'https://answers.laserfiche.com/questions/105169/Count-the-number-of-documents-a-template-is-assigned-to-per-day',
+        },
+        {
+          title: 'wait condition sticky note',
+          url: 'https://answers.laserfiche.com/questions/117562/wait-condition-sticky-note',
+        },
       ],
     },
     {
@@ -620,7 +823,7 @@ export const communityReportingPatterns = {
         'Creates read-only diagnostics for page counts, likely color pages, image/text sizes, active documents, and search-related troubleshooting context.',
       scriptPath: 'reporting/repository/repository-page-and-search-diagnostics.sql',
       evidencePath: 'reporting/repository/repository-page-and-search-diagnostics-evidence.md',
-      sourceCount: 7,
+      sourceCount: 10,
       tables: ['dbo.toc', 'dbo.doc', 'dbo.vol', 'dbo.active_doc'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -640,6 +843,18 @@ export const communityReportingPatterns = {
           title: 'ORA-32033 unsupported column aliasing',
           url: 'https://answers.laserfiche.com/questions/78110/sql-statement-returns-ORA32033-unsupported-column-aliasing',
         },
+        {
+          title: 'search performance',
+          url: 'https://answers.laserfiche.com/questions/56636/search-performance',
+        },
+        {
+          title: 'SQL - Missing Indexes',
+          url: 'https://answers.laserfiche.com/questions/82284/SQL--Missing-Indexes',
+        },
+        {
+          title: 'Disconnect User Sessions Using Script',
+          url: 'https://answers.laserfiche.com/questions/193285/Disconnect-User-Sessions-Using-Script',
+        },
       ],
     },
     {
@@ -648,7 +863,7 @@ export const communityReportingPatterns = {
         'Creates read-only helper objects for repository schema-version checks, Workflow Custom Query token conflicts, and binary-to-hex conversion.',
       scriptPath: 'reporting/repository/repository-query-compatibility-helpers.sql',
       evidencePath: 'reporting/repository/repository-query-compatibility-helpers-evidence.md',
-      sourceCount: 7,
+      sourceCount: 8,
       tables: ['dbo.dboptions', 'dbo.toc', 'dbo.propval', 'dbo.propdef'],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
       answersLinks: [
@@ -680,6 +895,10 @@ export const communityReportingPatterns = {
           title: 'SQL database schema does not match error 9110',
           url: 'https://answers.laserfiche.com/questions/52173/SQL-database-schema-does-not-match-error-9110',
         },
+        {
+          title: 'Laserfiche Server version for a Database with a schema of 7.2.1',
+          url: 'https://answers.laserfiche.com/questions/193436/Laserfiche-Server-version-for-a-Database-with-a-schema-of-721',
+        },
       ],
     },
     {
@@ -688,7 +907,7 @@ export const communityReportingPatterns = {
         'Creates read-only diagnostics for recycle bin entries, volume storage, account cache, trustee, trusted group, and trusted login context.',
       scriptPath: 'reporting/repository/repository-storage-security-diagnostics.sql',
       evidencePath: 'reporting/repository/repository-storage-security-diagnostics-evidence.md',
-      sourceCount: 8,
+      sourceCount: 10,
       tables: [
         'dbo.recycle_bin',
         'dbo.toc',
@@ -732,6 +951,14 @@ export const communityReportingPatterns = {
           title: 'Getting the Created By field',
           url: 'https://answers.laserfiche.com/questions/160770/Getting-the-Created-By-field',
         },
+        {
+          title: 'Moving user settings',
+          url: 'https://answers.laserfiche.com/questions/74962/Moving-user-settings',
+        },
+        {
+          title: 'Windows Accounts under Users and Groups',
+          url: 'https://answers.laserfiche.com/questions/130988/Windows-Accounts-under-Users-and-Groups',
+        },
       ],
     },
   ],
@@ -742,7 +969,7 @@ export const communityReportingPatterns = {
         'Creates read-only reporting objects for workflow task queues, queue payload sizes, search activity, and completion status.',
       scriptPath: 'reporting/workflow/workflow-queue-search-diagnostics.sql',
       evidencePath: 'reporting/workflow/workflow-queue-search-diagnostics-evidence.md',
-      sourceCount: 4,
+      sourceCount: 9,
       tables: [
         'dbo.workflow_task_queue',
         'dbo.workflow_task_queue_data',
@@ -750,6 +977,10 @@ export const communityReportingPatterns = {
         'dbo.search_entry',
         'dbo.search_instance_log',
         'dbo.search_entry_log',
+        'dbo.search_activity',
+        'dbo.search_activity_log',
+        'dbo.search_error',
+        'dbo.search_error_log',
         'dbo.instance_completion',
       ],
       tags: ['Community sourced', 'Schema matched', 'Not live tested', 'Read-only'],
@@ -777,6 +1008,26 @@ export const communityReportingPatterns = {
         {
           title: 'Feature Request: List all rules invoking a given workflow rule',
           url: 'https://answers.laserfiche.com/questions/181460/Feature-Request-List-all-rules-invoking-a-given-separate-workflow-rule',
+        },
+        {
+          title: 'Daily Workflow Report of Instances Running Longer than X Amount of Time',
+          url: 'https://answers.laserfiche.com/questions/91303/Daily-Workflow-Report-of-Instances-Running-Longer-than-X-Amount-of-Time',
+        },
+        {
+          title: 'Workflow Warning/Error locations',
+          url: 'https://answers.laserfiche.com/questions/148987/Workflow-WarningError-locations',
+        },
+        {
+          title: 'Workflow database question',
+          url: 'https://answers.laserfiche.com/questions/97863/Workflow-database-question',
+        },
+        {
+          title: 'Awesome Workflow SQL Database Size despite Single Day Log Files Lifetime',
+          url: 'https://answers.laserfiche.com/questions/81029/Awesome-Workflow-SQL-Database-Size-despite-Single-Day-Log-Files-Lifetime',
+        },
+        {
+          title: 'Feature Request: Display Scheduled WF Rules on a Calendar',
+          url: 'https://answers.laserfiche.com/questions/174675/Feature-Request-Display-Scheduled-WF-Rules-on-a-Calendar',
         },
       ],
     },
@@ -858,11 +1109,32 @@ export const communityReportingPatterns = {
 export function getCommunityReportingPatterns(productKey) {
   return (communityReportingPatterns[productKey] ?? []).map((pattern) => ({
     ...pattern,
-    scriptUrl: `${repoBlobBaseUrl}/${pattern.scriptPath}`,
-    evidenceUrl: `${repoBlobBaseUrl}/${pattern.evidencePath}`,
-    scriptLoader: reportingAssetLoaders[pattern.scriptPath],
-    evidenceLoader: reportingAssetLoaders[pattern.evidencePath],
+    scriptUrl: pattern.scriptUrl ?? `${repoBlobBaseUrl}/${pattern.scriptPath}`,
+    evidenceUrl: pattern.evidenceUrl ?? `${repoBlobBaseUrl}/${pattern.evidencePath}`,
+    scriptLoader: pattern.scriptLoader ?? reportingAssetLoaders[pattern.scriptPath],
+    evidenceLoader: pattern.evidenceLoader ?? reportingAssetLoaders[pattern.evidencePath],
   }));
+}
+
+export async function loadGeneratedCommunityReportingPatterns(productKey) {
+  const { generatedReportingCandidates } = await import('./generatedReportingCandidates.js');
+
+  return (generatedReportingCandidates[productKey] ?? []).map((pattern) => ({
+    ...pattern,
+    product: productKey,
+    scriptUrl: null,
+    evidenceUrl: null,
+    scriptLoader: () => Promise.resolve(buildGeneratedCandidateSql({ ...pattern, product: productKey })),
+    evidenceLoader: () => Promise.resolve(buildGeneratedCandidateEvidence(pattern)),
+  }));
+}
+
+export function getReportingScriptsForTable(productKey, tableKey) {
+  const normalizedTableKey = tableKey.toLowerCase();
+
+  return getCommunityReportingPatterns(productKey).filter((pattern) =>
+    pattern.tables.some((table) => table.toLowerCase() === normalizedTableKey),
+  );
 }
 
 export function getReportingPaths(productKey) {

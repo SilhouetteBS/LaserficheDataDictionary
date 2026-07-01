@@ -5,6 +5,7 @@ import {
   getCommunityReportingPatterns,
   getReportingPaths,
   getReportingQuestions,
+  loadGeneratedCommunityReportingPatterns,
 } from '../data/reporting.js';
 
 const guidanceItems = [
@@ -154,6 +155,7 @@ function ScriptStatusTags({ tags }) {
     'Schema matched': 'community-tag-matched',
     'Schema neutral': 'community-tag-neutral',
     'Not live tested': 'community-tag-untested',
+    'Needs review': 'community-tag-review',
     'Read-only': 'community-tag-readonly',
     'Context only': 'community-tag-context',
   };
@@ -237,15 +239,20 @@ export function ReportingGuide({
   const [scriptTab, setScriptTab] = useState('sql');
   const [scriptContent, setScriptContent] = useState({ key: '', status: 'idle', text: '' });
   const [copyStatus, setCopyStatus] = useState('idle');
+  const [generatedCommunityPatterns, setGeneratedCommunityPatterns] = useState([]);
   const knownTables = useMemo(() => new Set(version.tables.map((table) => table.id)), [version.tables]);
   const reportingPaths = useMemo(() => getReportingPaths(version.source.productKey), [version.source.productKey]);
   const reportingQuestions = useMemo(
     () => getReportingQuestions(version.source.productKey),
     [version.source.productKey],
   );
-  const communityPatterns = useMemo(
+  const curatedCommunityPatterns = useMemo(
     () => getCommunityReportingPatterns(version.source.productKey),
     [version.source.productKey],
+  );
+  const communityPatterns = useMemo(
+    () => [...curatedCommunityPatterns, ...generatedCommunityPatterns],
+    [curatedCommunityPatterns, generatedCommunityPatterns],
   );
   const generatedExamples = useMemo(() => buildGeneratedReportingExamples(version), [version]);
   const selectedScript = communityPatterns.find((pattern) => getScriptKey(pattern) === selectedView);
@@ -255,6 +262,27 @@ export function ReportingGuide({
     setScriptContent({ key: '', status: 'idle', text: '' });
     setCopyStatus('idle');
   }, [version.source.productKey, version.version]);
+
+  useEffect(() => {
+    let canceled = false;
+    setGeneratedCommunityPatterns([]);
+
+    loadGeneratedCommunityReportingPatterns(version.source.productKey)
+      .then((patterns) => {
+        if (!canceled) {
+          setGeneratedCommunityPatterns(patterns);
+        }
+      })
+      .catch(() => {
+        if (!canceled) {
+          setGeneratedCommunityPatterns([]);
+        }
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [version.source.productKey]);
 
   useEffect(() => {
     const validViews = new Set([

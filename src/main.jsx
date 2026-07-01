@@ -1524,6 +1524,10 @@ function App() {
               onSetTableConfidenceFilter={setTableConfidenceFilter}
               onSetTableNotesFilter={setTableNotesFilter}
               onToggleFavoriteObject={toggleFavoriteObject}
+              onOpenReportingScript={(script) => {
+                setSelectedReportingView(`script:${script.scriptPath}`);
+                setActiveView('reporting');
+              }}
               visibleRelationships={visibleRelationships}
               relationshipFilter={relationshipFilter}
               setRelationshipFilter={setRelationshipFilter}

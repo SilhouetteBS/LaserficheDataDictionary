@@ -7,6 +7,7 @@ const sourceDir = path.join(root, 'data', 'sources');
 const reviewedPostsPath = path.join(sourceDir, 'answers-sql-reviewed-posts.json');
 const seedPath = path.join(root, '.tmp', 'answers-sql-research', 'candidates.json');
 const reviewExisting = process.argv.includes('--review-existing');
+const forceSeeds = process.argv.includes('--force-seeds');
 const limitArg = process.argv.find((arg) => arg.startsWith('--limit='));
 const batchLimit = Math.max(1, Math.min(250, Number(limitArg?.split('=')[1] ?? 50) || 50));
 
@@ -159,7 +160,7 @@ function extractQuestionLinks(html, product, foundBy) {
 async function collectCandidates(product, seeds, reviewedPosts) {
   const map = new Map(
     (seeds ?? [])
-      .filter((item) => !hasReviewedUrl(reviewedPosts, item.url))
+      .filter((item) => forceSeeds || !hasReviewedUrl(reviewedPosts, item.url))
       .map((item) => [normalizeQuestionUrl(item.url), { ...item, url: normalizeQuestionUrl(item.url), foundBy: [...new Set(item.foundBy ?? [])] }]),
   );
   for (const term of productSearchTerms[product]) {

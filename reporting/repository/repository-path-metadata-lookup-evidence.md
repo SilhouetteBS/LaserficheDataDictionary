@@ -23,6 +23,12 @@ Provide read-only entry, volume, page, template, and field metadata lookup objec
 - [SQL query on LF Server tables for specific metadata](https://answers.laserfiche.com/questions/201363/SQL-query-on-LF-Server-tables-for-specific-metadata)
 - [What table in SQL is the document path located?](https://answers.laserfiche.com/questions/67002/What-table-in-SQL-is-the-document-path-located)
 - [Audit trail on Number of Records in Each Folder](https://answers.laserfiche.com/questions/154758/Audit-trail-on-Number-of-Records-in-Each-Folder)
+- [Folder name in dbo.toc different to repository](https://answers.laserfiche.com/questions/207423/Folder-name-in-dbotoc-different-to-repository)
+- [Checking A Field Value from the Form to see if it exists in Repository](https://answers.laserfiche.com/questions/173171/Checking-A-Field-Value-from-the-Form-to-see-if-it-exists-in-Repository)
+- [Restore after Metadata Field Type change](https://answers.laserfiche.com/questions/164669/Restore-after-Metadata-Field-Type-change)
+- [Retrieving values from an index list item](https://answers.laserfiche.com/questions/224419/Retrieving-values-from-an-index-list-item)
+- [Count the number of documents a template is assigned to per day](https://answers.laserfiche.com/questions/105169/Count-the-number-of-documents-a-template-is-assigned-to-per-day)
+- [wait condition sticky note](https://answers.laserfiche.com/questions/117562/wait-condition-sticky-note)
 
 ## Cautions
 

@@ -15,7 +15,7 @@ import {
   getTableStability,
   getTableVersionTrend,
 } from '../data/projectInsights.js';
-import { buildTableReportingExamples } from '../data/reporting.js';
+import { getReportingScriptsForTable } from '../data/reporting.js';
 import { ConfidenceBadge } from './ConfidenceBadge.jsx';
 
 const ManualNotesEditor = appConfig.editingEnabled
@@ -63,6 +63,7 @@ export function TableWorkspace({
   onSetTableConfidenceFilter,
   onSetTableNotesFilter,
   onToggleFavoriteObject,
+  onOpenReportingScript,
   visibleRelationships,
   relationshipFilter,
   setRelationshipFilter,
@@ -76,8 +77,8 @@ export function TableWorkspace({
   const relatedObjects = useMemo(() => getRelatedObjectItems(version, selectedTable.id), [selectedTable.id, version]);
   const tableStability = useMemo(() => getTableStability(version, selectedTable.id), [selectedTable.id, version]);
   const tableVersionTrend = useMemo(() => getTableVersionTrend(version, selectedTable.id), [selectedTable.id, version]);
-  const tableReportingExamples = useMemo(
-    () => buildTableReportingExamples(version, selectedTable.id),
+  const tableReportingScripts = useMemo(
+    () => getReportingScriptsForTable(version.source.productKey, selectedTable.id),
     [selectedTable.id, version],
   );
   const columnLifecycleItems = useMemo(
@@ -118,6 +119,7 @@ export function TableWorkspace({
     keys: selectedTable.keys.length,
     indexes: selectedTable.indexes.length,
     relationships: visibleRelationships.length,
+    scripts: tableReportingScripts.length,
     notes: selectedTable.hasManualNotes || editingEnabled ? 1 : 0,
   };
 
@@ -291,7 +293,6 @@ export function TableWorkspace({
           <TableContextBar
             activePanel={activeContextPanel}
             columnLifecycleItems={columnLifecycleItems}
-            examples={tableReportingExamples}
             relatedObjects={relatedObjects}
             tableStability={tableStability}
             tableVersionTrend={tableVersionTrend}
@@ -306,6 +307,7 @@ export function TableWorkspace({
             ['keys', 'Keys'],
             ['indexes', 'Indexes'],
             ['relationships', 'Relationships'],
+            ['scripts', 'Scripts'],
             ['notes', 'Notes'],
           ].map(([value, label]) => (
             <button
@@ -437,6 +439,16 @@ export function TableWorkspace({
           </section>
         )}
 
+        {activeTableTab === 'scripts' && (
+          <section className="metadata-list table-scripts-tab">
+            <div className="section-title-row">
+              <h3>Related scripts</h3>
+              <span>{tableReportingScripts.length}</span>
+            </div>
+            <TableScriptsDetails scripts={tableReportingScripts} onOpenReportingScript={onOpenReportingScript} />
+          </section>
+        )}
+
         {activeTableTab === 'columns' && (
           <section className="columns-section">
             <div className="section-title-row">
@@ -519,7 +531,6 @@ export function TableWorkspace({
 function TableContextBar({
   activePanel,
   columnLifecycleItems,
-  examples,
   relatedObjects,
   tableStability,
   tableVersionTrend,
@@ -540,7 +551,6 @@ function TableContextBar({
     ['stability', 'Stability', stabilitySummary],
     ['related', 'Related', relatedSummary],
     ['trend', 'Trend', `${changedColumns} changed cols`],
-    ['examples', 'Examples', `${examples.length} generated`],
   ];
   const activePanelTitle = panelItems.find(([key]) => key === activePanel)?.[1] ?? '';
 
@@ -581,26 +591,36 @@ function TableContextBar({
               tableVersionTrend={tableVersionTrend}
             />
           )}
-          {activePanel === 'examples' && <TableExamplesDetails examples={examples} />}
         </section>
       )}
     </>
   );
 }
 
-function TableExamplesDetails({ examples }) {
+function TableScriptsDetails({ scripts, onOpenReportingScript }) {
   return (
     <>
-      {examples.length === 0 ? (
-        <p className="empty-state">No table-specific examples could be generated for this table.</p>
+      {scripts.length === 0 ? (
+        <p className="empty-state">No Reporting Guide scripts currently reference this table.</p>
       ) : (
-        <div className="table-example-list">
-          {examples.map((example) => (
-            <details key={example.title}>
-              <summary>{example.title}</summary>
-              <pre>{example.sql}</pre>
-              <p>{example.note}</p>
-            </details>
+        <div className="table-script-list">
+          {scripts.map((script) => (
+            <article key={script.scriptPath}>
+              <div>
+                <h4>{script.title}</h4>
+                <p>{script.summary}</p>
+              </div>
+              <div className="table-script-tags">
+                {script.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+              <div className="table-script-actions">
+                <button type="button" onClick={() => onOpenReportingScript(script)}>
+                  Open in Reporting
+                </button>
+              </div>
+            </article>
           ))}
         </div>
       )}

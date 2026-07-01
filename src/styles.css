@@ -1422,8 +1422,12 @@ button {
 
 .table-context-bar {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
+}
+
+.table-scripts-tab {
+  margin-top: 12px;
 }
 
 .table-context-bar button {
@@ -1480,34 +1484,79 @@ button {
   line-height: 1.45;
 }
 
-.table-example-list {
+.table-script-list {
   display: grid;
   gap: 8px;
 }
 
-.table-example-list details {
+.table-script-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
   border: 1px solid #dce7ea;
   border-radius: 7px;
   padding: 8px;
   background: #ffffff;
 }
 
-.table-example-list summary {
+.table-script-list h4 {
+  margin: 0;
   color: #203342;
   font-size: 13px;
   font-weight: 900;
+}
+
+.table-script-list p {
+  margin: 4px 0 0;
+  color: #52636f;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.table-script-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 5px;
+}
+
+.table-script-tags span {
+  border: 1px solid #dce7ea;
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: #f8fbfc;
+  color: #405564;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.table-script-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.table-script-actions button,
+.table-script-actions a {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 6px 9px;
+  color: #0b5fb8;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
   cursor: pointer;
 }
 
-.table-example-list pre {
-  max-height: 220px;
-  overflow: auto;
-  margin: 8px 0;
-  border: 1px solid #e0e8eb;
-  border-radius: 7px;
-  padding: 10px;
-  background: #f8fbfc;
-  font-size: 12px;
+.table-script-actions button:hover,
+.table-script-actions button:focus-visible,
+.table-script-actions a:hover,
+.table-script-actions a:focus-visible {
+  border-color: var(--brand-blue);
+  background: #f1f7ff;
 }
 
 .table-version-trend,
@@ -5443,6 +5492,12 @@ button {
   color: var(--change-changed);
   border-color: var(--change-changed-line);
   background: var(--change-changed-bg);
+}
+
+.community-pattern-tags .community-tag-review {
+  color: #5f4b00;
+  border-color: #ead17a;
+  background: #fff8dc;
 }
 
 .community-pattern-tags .community-tag-readonly {

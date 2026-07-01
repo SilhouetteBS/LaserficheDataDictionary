@@ -36,6 +36,12 @@ Provide a reporting-database object that returns active Forms task rows with pro
 - [Forms SQL query for all instances at a gateway step](https://answers.laserfiche.com/questions/197726/Forms-SQL-query-for-all-instances-at-a-gateway-step)
 - [Forms Inbox Email Reminder](https://answers.laserfiche.com/questions/76772/Forms-Inbox-Email-Reminder)
 - [Number of active Forms tasks for each user type](https://answers.laserfiche.com/questions/131323/Number-of-active-Forms-tasks-for-each-user-type)
+- [Custom Reporting | Task Names](https://answers.laserfiche.com/questions/223652/Custom-Reporting--Task-Names)
+- [Report on Reassigned Tasks within a Forms Process](https://answers.laserfiche.com/questions/160384/Report-on-Reassigned-Tasks-within-a-Forms-Process)
+- [Forms 10.4 task reassignment for users who don't have a license](https://answers.laserfiche.com/questions/221322/Forms-104-task-reassignment-for-users-who-dont-have-a-license)
+- [Determining Step ID/Name in Workflow When Started by a Forms Process](https://answers.laserfiche.com/questions/146710/Determining-Step-IDName-in-Workflow-When-Started-by-a-Forms-Process)
+- [Does Laserfiche Forms has an API](https://answers.laserfiche.com/questions/203576/Does-Laserfiche-Forms-has-an-API)
+- [Cannot send email notifications to a user](https://answers.laserfiche.com/questions/207661/Cannot-send-email-notifications-to-a-user)
 
 ## Cautions
 
