@@ -164,6 +164,25 @@ New or updated published patterns:
 - LFDS: user/license inventory source links updated
 - Repository: path/metadata, query compatibility, and storage/security source links updated
 
+## Continuous 2026-07-01 Search Run
+
+On 2026-07-01, repeated paged Answers searches were run until the current search terms returned no new candidates before 8:00 AM Mountain Time.
+
+- Completed batches: 5.
+- Reviewed unique rows: 1,569.
+- Product rows reviewed: Forms 456, LFDS 289, Repository 398, Workflow 426.
+- Non-promoted/reference rows documented: 1,569 rows in `docs/answers-sql-processed-batch-2026-07-01.md`.
+- The final exhaustion pass returned 0 new candidates for all products under the current search terms.
+- No runnable scripts were promoted automatically from this run; ready rows remain documented for later curation into reusable read-only reporting patterns.
+
+Queue status counts:
+
+- Do not publish without explicit warning: 600.
+- Needs manual SQL extraction: 137.
+- Needs schema verification: 137.
+- Ready for review: 44.
+- Weak candidate: 651.
+
 ## General Cleanup Rules Applied
 
 - Do not rely on a database name; use parameters, SQLCMD variables, synonyms, or deployment-time configuration.

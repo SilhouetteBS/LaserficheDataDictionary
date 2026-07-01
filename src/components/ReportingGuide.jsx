@@ -564,35 +564,35 @@ export function ReportingGuide({
   function renderProcessedQueue() {
     return (
       <section className="reporting-section reporting-section-full">
-        <ReportingSectionHeader title="Processed non-promoted queue" count={974} />
+        <ReportingSectionHeader title="Processed non-promoted queue" count={2543} />
         <div className="reporting-overview-grid reporting-queue-summary-grid">
           <article>
-            <strong>446</strong>
+            <strong>1046</strong>
             <span>Do not publish</span>
             <p>Unsafe, write-oriented, destructive, environment setup, or support-directed content.</p>
           </article>
           <article>
-            <strong>147</strong>
+            <strong>284</strong>
             <span>Manual extraction</span>
             <p>Not promoted because the source needed manual extraction and supportability review.</p>
           </article>
           <article>
-            <strong>280</strong>
+            <strong>931</strong>
             <span>Weak candidates</span>
             <p>Reference only because the row had insufficient SQL or schema signal.</p>
           </article>
           <article>
-            <strong>99</strong>
+            <strong>236</strong>
             <span>Schema verification</span>
             <p>Reference rows that need additional schema or version confirmation before promotion.</p>
           </article>
           <article>
-            <strong>2</strong>
+            <strong>46</strong>
             <span>Ready reference</span>
             <p>Ready but not promoted because it was not a portable read-only reporting script.</p>
           </article>
           <article>
-            <strong>974</strong>
+            <strong>2543</strong>
             <span>Processed rows</span>
             <p>All remaining non-promoted Answers queue rows are documented without copying raw forum SQL.</p>
           </article>
@@ -632,6 +632,14 @@ export function ReportingGuide({
                 rel="noreferrer"
               >
                 docs/answers-sql-processed-batch-2026-06-30-3.md
+              </a>
+              , and the 2026-07-01 continuous run in{' '}
+              <a
+                href="https://github.com/SilhouetteBS/LaserficheDataDictionary/blob/main/docs/answers-sql-processed-batch-2026-07-01.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                docs/answers-sql-processed-batch-2026-07-01.md
               </a>
               .
             </p>
